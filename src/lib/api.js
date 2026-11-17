@@ -1,6 +1,12 @@
 // Locally the Vite proxy forwards /api to the API. On Vercel set VITE_API_URL
-// to the deployed API root, e.g. https://daily-check-api.onrender.com/api
-const BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '')
+// to the deployed API host, e.g. https://daily-check-be.onrender.com — the
+// /api suffix is added here so a bare host still works.
+const configuredBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
+const BASE = configuredBase
+  ? configuredBase.endsWith('/api')
+    ? configuredBase
+    : `${configuredBase}/api`
+  : '/api'
 const TOKEN_KEY = 'dailycheck.token'
 
 const hasStorage = () => typeof window !== 'undefined' && window.sessionStorage
