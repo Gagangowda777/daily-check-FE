@@ -7,10 +7,20 @@ import KpiCards from '../../components/KpiCards.jsx'
 // reads as one screen instead of a scroll through every module.
 export default function AdminOverview({ date, grade, section, reload, onChanged }) {
   const [state, setState] = useState({ key: '', kpi: null })
-  const [outbox, setOutbox] = useState({ key: '', account: null, total: 0, rows: [] })
+  const [outbox, setOutbox] = useState({ key: '', account: null, total: 0, limited: true, rows: [] })
   const [outboxError, setOutboxError] = useState('')
+  const [titleQuery, setTitleQuery] = useState('')
+  const [debouncedTitle, setDebouncedTitle] = useState('')
+  const [dayFilter, setDayFilter] = useState('')
+  const [sortOrder, setSortOrder] = useState('newest')
   const key = `${date}|${grade}|${section}|${reload}`
-  const outboxKey = String(reload)
+  const lookingUp = Boolean(debouncedTitle || dayFilter || sortOrder === 'oldest')
+  const outboxKey = `${reload}|${debouncedTitle}|${dayFilter}|${sortOrder}`
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedTitle(titleQuery.trim()), 250)
+    return () => window.clearTimeout(timer)
+  }, [titleQuery])
 
   useEffect(() => {
     let alive = true
@@ -30,10 +40,20 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
   useEffect(() => {
     let alive = true
     api
-      .sentMessages()
+      .sentMessages({
+        q: debouncedTitle,
+        date: dayFilter,
+        sort: sortOrder,
+      })
       .then((payload) => {
         if (alive) {
-          setOutbox({ key: outboxKey, account: payload.account, total: payload.total, rows: payload.messages })
+          setOutbox({
+            key: outboxKey,
+            account: payload.account,
+            total: payload.total,
+            limited: Boolean(payload.limited),
+            rows: payload.messages,
+          })
           setOutboxError('')
         }
       })
@@ -43,10 +63,18 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
     return () => {
       alive = false
     }
-  }, [outboxKey])
+  }, [outboxKey, debouncedTitle, dayFilter, sortOrder])
 
   const loading = state.key !== key
   const outboxLoading = outbox.key !== outboxKey
+  const hasFilters = Boolean(debouncedTitle || dayFilter)
+
+  const clearLookup = () => {
+    setTitleQuery('')
+    setDebouncedTitle('')
+    setDayFilter('')
+    setSortOrder('newest')
+  }
 
   return (
     <div className="content">
@@ -61,13 +89,59 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
           <div>
             <h2>Sent messages</h2>
             <p>
-              Broadcasts sent from{' '}
+              {lookingUp ? 'Messages from ' : 'Last five from '}
               <strong>{outbox.account || 'this admin account'}</strong>
+              {hasFilters ? ', filtered by title or day' : sortOrder === 'oldest' ? ', oldest first' : ''}
             </p>
           </div>
           <span className="sent-count">
-            {outboxLoading ? 'Loading…' : `${outbox.total} sent`}
+            {outboxLoading
+              ? 'Loading…'
+              : hasFilters
+                ? `${outbox.total} match${outbox.total === 1 ? '' : 'es'}`
+                : `${outbox.total} sent`}
           </span>
+        </div>
+
+        <div className="sent-toolbar">
+          <label className="sent-field">
+            <span>Search title</span>
+            <input
+              className="search-input"
+              type="search"
+              value={titleQuery}
+              onChange={(event) => setTitleQuery(event.target.value)}
+              placeholder="Find a message by title"
+            />
+          </label>
+
+          <label className="sent-field">
+            <span>Day</span>
+            <input
+              className="date-input"
+              type="date"
+              value={dayFilter}
+              onChange={(event) => setDayFilter(event.target.value)}
+            />
+          </label>
+
+          <label className="sent-field">
+            <span>Sort by date</span>
+            <select
+              className="section-select"
+              value={sortOrder}
+              onChange={(event) => setSortOrder(event.target.value)}
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </label>
+
+          {hasFilters || sortOrder !== 'newest' || titleQuery ? (
+            <button type="button" className="ghost-button sent-clear" onClick={clearLookup}>
+              Show last five
+            </button>
+          ) : null}
         </div>
 
         {outboxError ? <div className="banner">{outboxError}</div> : null}
@@ -76,7 +150,9 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
           <p className="sent-empty">Loading sent messages…</p>
         ) : outbox.rows.length === 0 ? (
           <p className="sent-empty">
-            No messages sent from this account yet. Use “Send message” above.
+            {hasFilters
+              ? 'No messages match that title or day.'
+              : 'No messages sent from this account yet. Use “Send message” above.'}
           </p>
         ) : (
           <ul className="sent-list">
@@ -112,10 +188,10 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
           </ul>
         )}
 
-        {!outboxLoading && outbox.total > outbox.rows.length ? (
+        {!outboxLoading && outbox.limited && outbox.total > outbox.rows.length ? (
           <p className="sent-more">
-            Showing the latest {outbox.rows.length} of {outbox.total}. Older messages are
-            available in the audit log.
+            Showing the last {outbox.rows.length} of {outbox.total}. Search by title or pick a
+            day to find an older message.
           </p>
         ) : null}
       </section>

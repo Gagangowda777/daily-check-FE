@@ -91,7 +91,7 @@ export const api = {
   addEntryRestriction: (payload) => post('/restrictions/entry', payload),
   bulkEntryRestrictions: (payload) => post('/restrictions/entry/bulk', payload),
   sendMessage: (payload) => post('/messages', payload),
-  sentMessages: () => get('/messages/sent'),
+  sentMessages: (params = {}) => get(`/messages/sent?${query(params)}`),
 
   handovers: (params) => get(`/handovers?${query(params)}`),
   handoverOutcome: (rollNo, payload) =>
