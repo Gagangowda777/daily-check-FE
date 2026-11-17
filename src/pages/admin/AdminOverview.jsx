@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../../lib/api.js'
 import ActionBar from '../../components/ActionBar.jsx'
 import KpiCards from '../../components/KpiCards.jsx'
+import MessageInbox from '../../components/MessageInbox.jsx'
 
 // Overview keeps only the live counters and the quick actions, so the page
 // reads as one screen instead of a scroll through every module.
@@ -84,6 +85,11 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
 
       <KpiCards kpi={loading ? null : state.kpi} />
 
+      <MessageInbox
+        title="Inbox"
+        emptyText="No direct messages from teachers, leaders or other desks today."
+      />
+
       <section className="sent-card">
         <div className="sent-head">
           <div>
@@ -162,7 +168,7 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
                   <strong>{message.title}</strong>
                   <span className="sent-type">{message.typeLabel}</span>
                   <span className="sent-when">
-                    {message.date} · {message.sentAt}
+                    {message.date} · {message.sentAtIst || message.sentAt} IST
                   </span>
                 </div>
 

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api.js'
+import { pageFor, routeHref } from '../lib/router.js'
 import Shell from '../components/Shell.jsx'
+import TransportInbox from './transport/TransportInbox.jsx'
 import '../transport.css'
 
 const FILTERS = [
@@ -21,7 +23,19 @@ const nowClock = () => {
   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
 }
 
-export default function TransportDashboard({ session, onSignOut }) {
+const NAV = [
+  { id: 'routes', label: 'Bus routes', href: routeHref('transport/routes') },
+  { id: 'inbox', label: 'Inbox', href: routeHref('transport/inbox') },
+]
+
+const PAGE_META = {
+  routes: { title: 'Bus routes', subtitle: 'mark arrivals and keep the route status honest' },
+  inbox: { title: 'Inbox', subtitle: 'messages from the admin and the rest of the school' },
+}
+
+export default function TransportDashboard({ session, route, onSignOut }) {
+  const page = pageFor(route, 'transport', 'routes')
+  const meta = PAGE_META[page] || PAGE_META.routes
   const [version, setVersion] = useState(0)
   const [state, setState] = useState({ key: '', data: null })
   const [filter, setFilter] = useState('all')
@@ -88,18 +102,24 @@ export default function TransportDashboard({ session, onSignOut }) {
   return (
     <Shell
       user={{ name: 'Transport In-charge', role: session.email }}
-      nav={[{ id: 'routes', label: 'Bus routes' }]}
-      activeNav="routes"
+      nav={NAV}
+      activeNav={page}
       crumb="Transport"
-      title="Bus routes"
+      title={meta.title}
       subtitle={
-        data
-          ? `${data.date} · ${data.routes.length} routes · late cut-off ${data.cutoffs.default}`
-          : 'Loading routes…'
+        page === 'inbox'
+          ? meta.subtitle
+          : data
+            ? `${data.date} · ${data.routes.length} routes · late cut-off ${data.cutoffs.default}`
+            : 'Loading routes…'
       }
       onSignOut={onSignOut}
     >
       <div className="tr-body">
+        {page === 'inbox' ? (
+          <TransportInbox />
+        ) : (
+          <>
         {error ? (
           <div className="banner" role="alert">
             {error}
@@ -364,6 +384,8 @@ export default function TransportDashboard({ session, onSignOut }) {
             </article>
           )
         })}
+          </>
+        )}
       </div>
     </Shell>
   )

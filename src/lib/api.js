@@ -92,6 +92,8 @@ export const api = {
   bulkEntryRestrictions: (payload) => post('/restrictions/entry/bulk', payload),
   sendMessage: (payload) => post('/messages', payload),
   sentMessages: (params = {}) => get(`/messages/sent?${query(params)}`),
+  inboxMessages: (params = {}) => get(`/messages/inbox?${query(params)}`),
+  sendInboxMessage: (payload) => post('/messages/inbox', payload),
 
   handovers: (params) => get(`/handovers?${query(params)}`),
   handoverOutcome: (rollNo, payload) =>

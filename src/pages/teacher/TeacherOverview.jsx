@@ -6,7 +6,7 @@ const CHECKS = [
   { id: 'exit', label: 'Exit restrictions', href: routeHref('teacher/exit') },
   { id: 'entry', label: 'Entry checks', href: routeHref('teacher/entry') },
   { id: 'nc', label: 'NC tracker', href: routeHref('teacher/nc') },
-  { id: 'message', label: 'Class leader message', href: routeHref('teacher/message') },
+  { id: 'inbox', label: 'Inbox', href: routeHref('teacher/inbox') },
 ]
 
 const NOTE_KIND = {
@@ -206,7 +206,7 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
               <article key={notice.id} className={`note${notice.readAt ? ' is-read' : ''}`}>
                 <div className="note-head">
                   <span className="note-kind kind-admin">{notice.typeLabel}</span>
-                  <span className="note-time">{notice.sentAt}</span>
+                  <span className="note-time">{notice.sentAtIst || notice.sentAt} IST</span>
                 </div>
                 <strong className="notice-title">{notice.title}</strong>
                 <p className="note-body">{notice.body}</p>
@@ -249,7 +249,7 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
               <article key={note.id} className={`note${note.readAt ? ' is-read' : ''}`}>
                 <div className="note-head">
                   <span className={`note-kind kind-${note.kind}`}>{NOTE_KIND[note.kind] || 'Note'}</span>
-                  <span className="note-time">{note.sentAt}</span>
+                  <span className="note-time">{note.sentAtIst || note.sentAt} IST</span>
                 </div>
                 <p className="note-body">{note.body}</p>
                 <div className="note-foot">

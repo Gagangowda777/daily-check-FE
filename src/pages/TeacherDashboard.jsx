@@ -5,7 +5,7 @@ import Shell from '../components/Shell.jsx'
 import TeacherBuses from './teacher/TeacherBuses.jsx'
 import TeacherEntry from './teacher/TeacherEntry.jsx'
 import TeacherExit from './teacher/TeacherExit.jsx'
-import TeacherMessage from './teacher/TeacherMessage.jsx'
+import TeacherInbox from './teacher/TeacherInbox.jsx'
 import TeacherNc from './teacher/TeacherNc.jsx'
 import TeacherOverview from './teacher/TeacherOverview.jsx'
 import '../teacher.css'
@@ -16,7 +16,7 @@ const TEACHER_NAV = [
   { id: 'exit', label: 'Exit restrictions', href: routeHref('teacher/exit') },
   { id: 'entry', label: 'Entry restrictions', href: routeHref('teacher/entry') },
   { id: 'nc', label: 'NC tracker', href: routeHref('teacher/nc') },
-  { id: 'message', label: 'Class leader message', href: routeHref('teacher/message') },
+  { id: 'inbox', label: 'Inbox', href: routeHref('teacher/inbox') },
 ]
 
 const PAGE_META = {
@@ -25,7 +25,7 @@ const PAGE_META = {
   exit: { title: 'Exit restrictions', subtitle: 'acknowledge, excuse or resolve each student' },
   entry: { title: 'Entry restrictions', subtitle: 'clear the subjects still pending today' },
   nc: { title: 'NC tracker', subtitle: 'daily NC count and NE update' },
-  message: { title: 'Class leader message', subtitle: 'send today’s message to the class leader' },
+  inbox: { title: 'Inbox', subtitle: 'receive messages and write to the leader, admin or every dashboard' },
 }
 
 export default function TeacherDashboard({ session, route, onSignOut }) {
@@ -146,8 +146,8 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
           <TeacherEntry data={data} grade={grade} section={section} busy={busy} run={run} />
         ) : page === 'nc' ? (
           <TeacherNc data={data} grade={grade} section={section} busy={busy} run={run} />
-        ) : page === 'message' ? (
-          <TeacherMessage data={data} grade={grade} section={section} busy={busy} run={run} />
+        ) : page === 'inbox' || page === 'message' ? (
+          <TeacherInbox grade={grade} section={section} onSent={refresh} />
         ) : (
           <TeacherOverview
             data={data}

@@ -257,7 +257,7 @@ export default function KpiCards({ kpi }) {
                             : 'awaiting'}
                       </span>
                       <span className="modal-date">
-                        sent {message.sentAt} ·{' '}
+                        sent {message.sentAtIst || message.sentAt} IST ·{' '}
                         {message.acknowledgedAt ? `ack ${message.acknowledgedAt}` : 'no ack'}
                       </span>
                     </li>

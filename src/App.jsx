@@ -86,7 +86,7 @@ export default function App() {
   }
 
   if (session.role === 'transport') {
-    return <TransportDashboard session={session} onSignOut={signOut} />
+    return <TransportDashboard session={session} route={route} onSignOut={signOut} />
   }
 
   if (session.role === 'leader') {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../lib/api.js'
+import '../../components/inbox.css'
 
 const TYPE_LABEL = {
   update: 'Update',
@@ -27,6 +28,10 @@ export default function LeaderInbox({ grade, section, onChanged }) {
   const [state, setState] = useState({ key: '', data: null })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState('')
+  const [compose, setCompose] = useState({ title: '', body: '' })
+  const [composeBusy, setComposeBusy] = useState(false)
+  const [composeNotice, setComposeNotice] = useState('')
+  const [composeError, setComposeError] = useState('')
 
   const key = `${grade}:${section}:${date}:${version}`
   const data = state.data
@@ -65,8 +70,81 @@ export default function LeaderInbox({ grade, section, onChanged }) {
     }
   }
 
+  const sendMessage = async (event) => {
+    event.preventDefault()
+    if (compose.body.trim().length < 3) {
+      setComposeError('Write the message you want to send.')
+      return
+    }
+
+    setComposeBusy(true)
+    setComposeError('')
+    setComposeNotice('')
+    try {
+      await api.sendInboxMessage({
+        to: 'TEACHER',
+        title: compose.title.trim(),
+        body: compose.body.trim(),
+        date: today,
+        grade,
+        section,
+      })
+      setCompose({ title: '', body: '' })
+      setComposeNotice('Message sent to the class teacher.')
+      setVersion((value) => value + 1)
+      onChanged?.()
+    } catch (err) {
+      setComposeError(err.message)
+    } finally {
+      setComposeBusy(false)
+    }
+  }
+
   return (
     <div className="inbox-body">
+      <section className="msg-card">
+        <div className="msg-head">
+          <h2>Message the class teacher</h2>
+          <span className="msg-count">times shown in IST</span>
+        </div>
+        <div className="msg-body">
+          <form className="msg-compose" onSubmit={sendMessage}>
+            <label>
+              <span className="msg-label">Subject</span>
+              <input
+                className="msg-input"
+                maxLength={120}
+                placeholder="Optional subject"
+                value={compose.title}
+                onChange={(event) =>
+                  setCompose({ ...compose, title: event.target.value })
+                }
+              />
+            </label>
+            <label>
+              <span className="msg-label">Message</span>
+              <textarea
+                className="msg-input"
+                rows="3"
+                maxLength={1000}
+                placeholder="Write a note for your class teacher."
+                value={compose.body}
+                onChange={(event) =>
+                  setCompose({ ...compose, body: event.target.value })
+                }
+              />
+            </label>
+            {composeError ? <p className="msg-error">{composeError}</p> : null}
+            {composeNotice ? <p className="msg-note">{composeNotice}</p> : null}
+            <div className="msg-actions">
+              <button type="submit" className="msg-send" disabled={composeBusy}>
+                {composeBusy ? 'Sending…' : 'Send to class teacher'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
       <div className="inbox-dateline">
         <span className="inbox-date">{prettyDate(date)}</span>
         <input
@@ -121,7 +199,9 @@ export default function LeaderInbox({ grade, section, onChanged }) {
             <span className={`type-badge type-${message.type}`}>
               {TYPE_LABEL[message.type] || message.type}
             </span>
-            <span className="inbox-msg-time">{message.sentAt}</span>
+            <span className="inbox-msg-time">
+              {message.sentAtIst || message.sentAt} IST
+            </span>
           </div>
 
           {message.title !== TYPE_LABEL[message.type] ? (

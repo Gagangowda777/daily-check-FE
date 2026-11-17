@@ -7,6 +7,7 @@ import GatePasses from './gate/GatePasses.jsx'
 import GateWatchlist from './gate/GateWatchlist.jsx'
 import GateLogs from './gate/GateLogs.jsx'
 import GateBuses from './gate/GateBuses.jsx'
+import GateInbox from './gate/GateInbox.jsx'
 import '../gate.css'
 
 const GATE_NAV = [
@@ -15,6 +16,7 @@ const GATE_NAV = [
   { id: 'watchlist', label: 'Blocked watchlist', href: routeHref('gate/watchlist') },
   { id: 'logs', label: 'Movement log', href: routeHref('gate/logs') },
   { id: 'buses', label: 'Bus arrivals', href: routeHref('gate/buses') },
+  { id: 'inbox', label: 'Inbox', href: routeHref('gate/inbox') },
 ]
 
 const PAGE_META = {
@@ -37,6 +39,10 @@ const PAGE_META = {
   buses: {
     title: 'Bus arrival monitor',
     subtitle: 'status of morning bus arrivals entering campus through the main gate',
+  },
+  inbox: {
+    title: 'Inbox',
+    subtitle: 'messages from the admin and the rest of the school',
   },
 }
 
@@ -196,6 +202,8 @@ export default function GateDashboard({ session, route, onSignOut }) {
         {page === 'logs' && <GateLogs logs={data?.logs || []} />}
 
         {page === 'buses' && <GateBuses buses={data?.buses || []} />}
+
+        {page === 'inbox' && <GateInbox />}
       </div>
     </Shell>
   )

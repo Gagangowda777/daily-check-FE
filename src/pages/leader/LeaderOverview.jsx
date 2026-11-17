@@ -193,7 +193,7 @@ export default function LeaderOverview({ data, grade, section, onChanged }) {
                       <span className={`note-kind kind-${note.kind}`}>
                         {KIND_LABEL[note.kind] || 'Note'}
                       </span>
-                      <span className="note-time">{note.sentAt}</span>
+                      <span className="note-time">{note.sentAtIst || note.sentAt} IST</span>
                     </div>
                     <p className="note-body">{note.body}</p>
                     <div className="note-foot">
