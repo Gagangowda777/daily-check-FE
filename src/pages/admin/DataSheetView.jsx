@@ -47,7 +47,7 @@ export default function DataSheetView({ date, onChanged }) {
   // Notes state
   const [notesData, setNotesData] = useState({ notes: [], summary: {} })
   const [noteFilter, setNoteFilter] = useState('ALL')
-  const [noteStatusFilter, setNoteStatusFilter] = useState('ALL')
+  const [noteStatusFilter] = useState('ALL')
   const [noteSearch, setNoteSearch] = useState('')
   const [quickNote, setQuickNote] = useState({
     rollNo: '',
@@ -78,29 +78,32 @@ export default function DataSheetView({ date, onChanged }) {
 
   // Auto-match student as user types roll number in spreadsheet rows
   const handleRollChange = async (index, rawRoll) => {
-    const updated = [...rows]
     const norm = rawRoll.trim().toUpperCase()
-    updated[index].rollNo = rawRoll
-
-    setRows(updated)
+    setRows((current) =>
+      current.map((row, i) => (i === index ? { ...row, rollNo: rawRoll } : row))
+    )
 
     if (norm.length >= 4) {
       try {
         const res = await api.student(norm)
-        if (res?.student) {
-          updated[index].student = {
-            name: res.student.name,
-            classLabel: `${res.student.grade === 'PU1' ? '11' : '12'}${res.student.section}`,
-          }
-          setRows([...updated])
-        }
+        const student = res?.student
+          ? {
+              name: res.student.name,
+              classLabel: `${res.student.grade === 'PU1' ? '11' : '12'}${res.student.section}`,
+            }
+          : null
+        setRows((current) =>
+          current.map((row, i) => (i === index ? { ...row, student } : row))
+        )
       } catch {
-        updated[index].student = null
-        setRows([...updated])
+        setRows((current) =>
+          current.map((row, i) => (i === index ? { ...row, student: null } : row))
+        )
       }
     } else {
-      updated[index].student = null
-      setRows([...updated])
+      setRows((current) =>
+        current.map((row, i) => (i === index ? { ...row, student: null } : row))
+      )
     }
   }
 
