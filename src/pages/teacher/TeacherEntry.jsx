@@ -12,13 +12,17 @@ export default function TeacherEntry({ data, grade, section, busy, run }) {
     setNote('')
   }
 
-  const sendHandover = (row) => {
-    run(
+  const sendHandover = async (row) => {
+    const ok = await run(
       `entry-${row.rollNo}`,
       () => api.teacherEntry(row.rollNo, 'handover', { grade, section, note }),
       `${row.name} sent to the admin queue.`
     )
-    setHandoverFor(null)
+    // Keep the note on screen if the hand-over failed.
+    if (ok) {
+      setHandoverFor(null)
+      setNote('')
+    }
   }
 
   return (
@@ -64,6 +68,7 @@ export default function TeacherEntry({ data, grade, section, busy, run }) {
                   </button>
                 ))}
               </div>
+              {row.note ? <span className="t-row-sub">Note: {row.note}</span> : null}
               <span className="t-row-sub">Tap a subject to clear it, or submit all at once.</span>
 
               <div className="t-actions">

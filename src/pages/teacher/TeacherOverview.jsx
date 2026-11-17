@@ -65,12 +65,14 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
   const markRead = async (note) => {
     setNoteError('')
     try {
-      await api.teacherNoteRead(note.id, { grade, section })
+      const result = await api.teacherNoteRead(note.id, { grade, section })
       setNotes((current) => ({
         ...current,
         unread: Math.max(0, current.unread - 1),
         rows: current.rows.map((row) =>
-          row.id === note.id ? { ...row, readAt: 'now', readBy: data.teacher } : row
+          row.id === note.id
+            ? { ...row, readAt: result.readAt || row.readAt, readBy: result.readBy || data.teacher }
+            : row
         ),
       }))
     } catch (err) {
@@ -81,12 +83,14 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
   const markNoticeRead = async (notice) => {
     setNoticeError('')
     try {
-      await api.teacherNoticeRead(notice.id, { grade, section })
+      const result = await api.teacherNoticeRead(notice.id, { grade, section })
       setNotices((current) => ({
         ...current,
         unread: Math.max(0, current.unread - 1),
         rows: current.rows.map((row) =>
-          row.id === notice.id ? { ...row, readAt: 'now', readBy: data.teacher } : row
+          row.id === notice.id
+            ? { ...row, readAt: result.readAt || row.readAt, readBy: result.readBy || data.teacher }
+            : row
         ),
       }))
     } catch (err) {

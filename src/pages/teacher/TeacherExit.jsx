@@ -23,24 +23,19 @@ export default function TeacherExit({ data, grade, section, busy, run }) {
     setValue('')
   }
 
-  const submit = (rollNo, mode) => {
+  const submit = async (rollNo, mode) => {
     const id = `exit-${rollNo}-${mode}`
-    if (mode === 'absent') {
-      run(id, () => api.teacherExit(rollNo, 'absent', { grade, section, reason: value }), 'Marked absent.')
-    } else if (mode === 'excuse') {
-      run(
-        id,
-        () => api.teacherExit(rollNo, 'excuse', { grade, section, approver: value }),
-        'Excused.'
-      )
-    } else {
-      run(
-        id,
-        () => api.teacherExit(rollNo, 'resolve', { grade, section, note: value }),
-        'Restriction resolved.'
-      )
-    }
-    closeForm()
+    const call =
+      mode === 'absent'
+        ? () => api.teacherExit(rollNo, 'absent', { grade, section, reason: value })
+        : mode === 'excuse'
+          ? () => api.teacherExit(rollNo, 'excuse', { grade, section, approver: value })
+          : () => api.teacherExit(rollNo, 'resolve', { grade, section, note: value })
+    const notice =
+      mode === 'absent' ? 'Marked absent.' : mode === 'excuse' ? 'Excused.' : 'Restriction resolved.'
+    const ok = await run(id, call, notice)
+    // Keep the form (and what was typed) when the server rejects the change.
+    if (ok) closeForm()
   }
 
   const exitPending = data.exit.filter((row) => ['pending', 'acknowledged'].includes(row.status))
@@ -57,82 +52,100 @@ export default function TeacherExit({ data, grade, section, busy, run }) {
         {data.exit.length === 0 ? (
           <p className="muted">Nobody restricted from exiting today.</p>
         ) : (
-          data.exit.map((row) => (
-            <div key={row.rollNo} className="t-row">
-              <div className="t-row-main">
-                <strong>{row.name}</strong>
-                <span className="t-row-sub">{row.rollNo}</span>
-                <span className={`badge ${EXIT_TONE[row.status]}`}>{row.status}</span>
-                {row.repeatResolutions >= 2 ? (
-                  <span className="repeat-badge">{row.repeatResolutions}× repeat</span>
-                ) : null}
-              </div>
-              <span className="t-row-sub">
-                {row.reason} · {row.untilResolved ? 'until resolved' : row.endDate || 'no end date'}
-                {row.acknowledgedBy ? ` · acked by ${row.acknowledgedBy} ${row.acknowledgedAt}` : ''}
-              </span>
+          data.exit.map((row) => {
+            const rowBusy = busy.startsWith(`exit-${row.rollNo}`)
+            const resolved = row.status === 'resolved'
 
-              <div className="t-actions">
-                <button
-                  type="button"
-                  className="tap"
-                  disabled={busy === `exit-${row.rollNo}` || row.status === 'resolved'}
-                  onClick={() =>
-                    run(
-                      `exit-${row.rollNo}`,
-                      () => api.teacherExit(row.rollNo, 'acknowledge', { grade, section }),
-                      'Acknowledged.'
-                    )
-                  }
-                >
-                  Acknowledge
-                </button>
-                <button type="button" className="tap is-quiet" onClick={() => openForm(row.rollNo, 'absent')}>
-                  Absent
-                </button>
-                <button type="button" className="tap is-quiet" onClick={() => openForm(row.rollNo, 'excuse')}>
-                  Excused
-                </button>
-                <button
-                  type="button"
-                  className="tap is-good"
-                  disabled={row.status !== 'acknowledged'}
-                  title={row.status !== 'acknowledged' ? 'Acknowledge before resolving' : 'Resolve with a note'}
-                  onClick={() => openForm(row.rollNo, 'resolve')}
-                >
-                  Resolved
-                </button>
-              </div>
+            return (
+              <div key={row.rollNo} className="t-row">
+                <div className="t-row-main">
+                  <strong>{row.name}</strong>
+                  <span className="t-row-sub">{row.rollNo}</span>
+                  <span className={`badge ${EXIT_TONE[row.status]}`}>{row.status}</span>
+                  {row.repeatResolutions >= 2 ? (
+                    <span className="repeat-badge">{row.repeatResolutions}× repeat</span>
+                  ) : null}
+                </div>
+                <span className="t-row-sub">
+                  {row.reason} · {row.untilResolved ? 'until resolved' : row.endDate || 'no end date'}
+                  {row.approver ? ` · approved by ${row.approver}` : ''}
+                  {row.acknowledgedBy ? ` · acked by ${row.acknowledgedBy} ${row.acknowledgedAt}` : ''}
+                </span>
+                {row.note ? <span className="t-row-sub">Note: {row.note}</span> : null}
 
-              {form?.rollNo === row.rollNo ? (
-                <div className="t-inline">
-                  <input
-                    className="form-input"
-                    value={value}
-                    placeholder={
-                      form.mode === 'absent'
-                        ? 'Reason for absence'
-                        : form.mode === 'excuse'
-                          ? 'Approved by'
-                          : 'Short resolution note'
-                    }
-                    onChange={(event) => setValue(event.target.value)}
-                  />
+                <div className="t-actions">
                   <button
                     type="button"
                     className="tap"
-                    disabled={busy.startsWith(`exit-${row.rollNo}`)}
-                    onClick={() => submit(row.rollNo, form.mode)}
+                    disabled={rowBusy || row.status !== 'pending'}
+                    title={row.status !== 'pending' ? 'Already acknowledged' : 'Acknowledge this restriction'}
+                    onClick={() =>
+                      run(
+                        `exit-${row.rollNo}-acknowledge`,
+                        () => api.teacherExit(row.rollNo, 'acknowledge', { grade, section }),
+                        'Acknowledged.'
+                      )
+                    }
                   >
-                    Save
+                    Acknowledge
                   </button>
-                  <button type="button" className="tap is-quiet" onClick={closeForm}>
-                    Cancel
+                  <button
+                    type="button"
+                    className="tap is-quiet"
+                    disabled={rowBusy || resolved}
+                    onClick={() => openForm(row.rollNo, 'absent')}
+                  >
+                    Absent
+                  </button>
+                  <button
+                    type="button"
+                    className="tap is-quiet"
+                    disabled={rowBusy || resolved}
+                    onClick={() => openForm(row.rollNo, 'excuse')}
+                  >
+                    Excused
+                  </button>
+                  <button
+                    type="button"
+                    className="tap is-good"
+                    disabled={row.status !== 'acknowledged'}
+                    title={row.status !== 'acknowledged' ? 'Acknowledge before resolving' : 'Resolve with a note'}
+                    onClick={() => openForm(row.rollNo, 'resolve')}
+                  >
+                    Resolved
                   </button>
                 </div>
-              ) : null}
-            </div>
-          ))
+
+                {form?.rollNo === row.rollNo ? (
+                  <div className="t-inline">
+                    <input
+                      className="form-input"
+                      value={value}
+                      placeholder={
+                        form.mode === 'absent'
+                          ? 'Reason for absence'
+                          : form.mode === 'excuse'
+                            ? 'Approved by'
+                            : 'Short resolution note'
+                      }
+                      onChange={(event) => setValue(event.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="tap"
+                      disabled={busy.startsWith(`exit-${row.rollNo}`)}
+                      onClick={() => submit(row.rollNo, form.mode)}
+                    >
+                      Save
+                    </button>
+                    <button type="button" className="tap is-quiet" onClick={closeForm}>
+                      Cancel
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            )
+          })
         )}
       </div>
     </section>

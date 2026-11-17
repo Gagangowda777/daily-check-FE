@@ -64,6 +64,8 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
     setVersion((value) => value + 1)
   }
 
+  // Resolves true when the action succeeded, so inline forms can stay open
+  // (and keep what was typed) when the API rejects the change.
   const run = async (id, action, message) => {
     setBusy(id)
     setError('')
@@ -71,8 +73,10 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
     try {
       await action()
       refresh(message)
+      return true
     } catch (err) {
       setError(err.message)
+      return false
     } finally {
       setBusy('')
     }
@@ -97,7 +101,16 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
         onSignOut={onSignOut}
       >
         <div className="teacher-body">
-          {error ? <div className="banner">{error}</div> : <p className="empty">Loading today’s check…</p>}
+          {error ? (
+            <>
+              <div className="banner">{error}</div>
+              <button type="button" className="tap" onClick={() => setVersion((value) => value + 1)}>
+                Try again
+              </button>
+            </>
+          ) : (
+            <p className="empty">Loading today’s check…</p>
+          )}
         </div>
       </Shell>
     )

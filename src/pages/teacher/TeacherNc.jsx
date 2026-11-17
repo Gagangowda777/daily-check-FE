@@ -3,22 +3,30 @@ import { api } from '../../lib/api.js'
 
 export default function TeacherNc({ data, grade, section, busy, run }) {
   const [draft, setDraft] = useState(null)
+  const [localError, setLocalError] = useState('')
   const ncDone = data.nc.count !== null && data.nc.updatedInNe
 
-  const save = (updatedInNe) =>
-    run(
+  const save = async (updatedInNe) => {
+    // Never turn an empty field into a silent 0 — the count has to be entered.
+    const raw = draft === null ? data.nc.count : draft
+    if (raw === null || raw === undefined || String(raw).trim() === '') {
+      setLocalError('Enter today’s NC count before saving.')
+      return
+    }
+    const count = Number(raw)
+    if (!Number.isFinite(count) || count < 0 || count > 999) {
+      setLocalError('Enter an NC count between 0 and 999.')
+      return
+    }
+
+    setLocalError('')
+    const ok = await run(
       'nc',
-      async () => {
-        await api.teacherNc({
-          grade,
-          section,
-          count: Number(draft ?? data.nc.count ?? 0),
-          updatedInNe,
-        })
-        setDraft(null)
-      },
+      () => api.teacherNc({ grade, section, count: Math.round(count), updatedInNe }),
       updatedInNe ? 'Marked updated in NE.' : 'NC count saved.'
     )
+    if (ok) setDraft(null)
+  }
 
   return (
     <section className="t-card">
@@ -29,16 +37,21 @@ export default function TeacherNc({ data, grade, section, busy, run }) {
         </span>
       </div>
       <div className="t-body">
+        {localError ? <div className="banner">{localError}</div> : null}
         <div className="nc-row">
           <input
             className="form-input nc-input"
             type="number"
             min="0"
             max="999"
+            step="1"
             aria-label="NC count"
             placeholder="NC count"
             value={draft ?? (data.nc.count ?? '')}
-            onChange={(event) => setDraft(event.target.value)}
+            onChange={(event) => {
+              setDraft(event.target.value)
+              setLocalError('')
+            }}
           />
           <button type="button" className="tap" disabled={busy === 'nc'} onClick={() => save(data.nc.updatedInNe)}>
             Save
