@@ -1,0 +1,243 @@
+.teacher {
+  min-height: 100vh;
+  background: #f6f8fc;
+  color: #0f172a;
+}
+
+.teacher-head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid #e4eaf4;
+  backdrop-filter: blur(8px);
+}
+
+.teacher-head h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.teacher-head p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.teacher-head-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-chip {
+  padding: 5px 10px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #15803d;
+  background: #e8f7ee;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.teacher-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 14px 14px 24px;
+}
+
+.t-card {
+  background: #ffffff;
+  border: 1px solid #e6ecf6;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.t-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #eef2f9;
+}
+
+.t-card-head h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.t-count {
+  padding: 3px 9px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #5b6b85;
+  background: #f1f5fb;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.t-count.is-ok {
+  color: #15803d;
+  background: #e8f7ee;
+}
+
+.t-count.is-alert {
+  color: #b42318;
+  background: #fdeaea;
+}
+
+.t-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px 14px;
+}
+
+.t-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+  border-top: 1px solid #f2f5fb;
+}
+
+.t-row:first-child {
+  padding-top: 2px;
+  border-top: 0;
+}
+
+.t-row-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.t-row-sub {
+  font-size: 12px;
+  color: #7b8698;
+}
+
+.minutes {
+  font-size: 12px;
+  font-weight: 800;
+  color: #b45309;
+  font-variant-numeric: tabular-nums;
+}
+
+.t-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.tap {
+  min-height: 38px;
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #2f66dd;
+  background: #eef3fd;
+  border: 1px solid #cdddf8;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.tap:hover:not(:disabled) {
+  background: #e3ecfc;
+}
+
+.tap.is-quiet {
+  color: #46536b;
+  background: #ffffff;
+  border-color: #dbe3f0;
+}
+
+.tap.is-good {
+  color: #15803d;
+  background: #e8f7ee;
+  border-color: #c6ecd4;
+}
+
+.tap:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.t-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.t-inline .form-input {
+  flex: 1 1 170px;
+}
+
+.subject-chip {
+  padding: 5px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #46536b;
+  background: #f4f7fd;
+  border: 1px dashed #c3d2ea;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.subject-chip:hover:not(:disabled) {
+  background: #e9f0fb;
+  border-style: solid;
+}
+
+.subject-chip:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.nc-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.nc-input {
+  max-width: 110px;
+}
+
+.msg-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  font-size: 12.5px;
+  color: #5b6b85;
+}
+
+@media (min-width: 600px) {
+  .teacher-head {
+    padding: 16px 20px;
+  }
+
+  .teacher-body {
+    padding: 18px 20px 28px;
+  }
+}
