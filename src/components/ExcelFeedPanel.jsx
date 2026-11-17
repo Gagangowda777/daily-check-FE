@@ -1,21 +1,15 @@
 import { useState, useRef } from 'react'
 import { api } from '../lib/api.js'
-import {
-  parseExcelFile,
-  parsePastedExcelText,
-  exportToExcel,
-  downloadTemplate,
-} from '../lib/excel.js'
+import { parseExcelFile, parsePastedExcelText } from '../lib/excel.js'
 import '../excel-feed.css'
 
-export default function ExcelFeedPanel({ date, onChanged, onClose }) {
+export default function ExcelFeedPanel({ date, onChanged }) {
   const [category, setCategory] = useState('exit') // 'exit' | 'entry' | 'roster'
-  const [activeTab, setActiveTab] = useState('upload') // 'upload' | 'paste' | 'grid' | 'student' | 'export'
+  const [activeTab, setActiveTab] = useState('upload') // 'upload' | 'paste' | 'grid' | 'student'
 
   // Upload & Preview state
   const [file, setFile] = useState(null)
   const [parsedRows, setParsedRows] = useState([])
-  const [parsing, setParsing] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -100,7 +94,6 @@ export default function ExcelFeedPanel({ date, onChanged, onClose }) {
     if (!selectedFile) return
 
     setFile(selectedFile)
-    setParsing(true)
     setError('')
     setNotice('')
     setImportSummary(null)
@@ -128,8 +121,6 @@ export default function ExcelFeedPanel({ date, onChanged, onClose }) {
     } catch (err) {
       setError(err.message || 'Failed to parse Excel file.')
       setParsedRows([])
-    } finally {
-      setParsing(false)
     }
   }
 
@@ -323,49 +314,6 @@ export default function ExcelFeedPanel({ date, onChanged, onClose }) {
     }
   }
 
-  // Export handlers
-  const handleExportData = async (type) => {
-    setBusy(true)
-    try {
-      if (type === 'exit') {
-        const res = await api.exitRestrictions({ date })
-        const rows = (res.rows || []).map((r) => ({
-          'Roll No': r.rollNo,
-          'Student Name': r.name,
-          Class: `${r.grade === 'PU1' ? '11' : '12'}${r.section}`,
-          Reason: r.restrictionReason,
-          Status: r.resolutionStatus,
-          Duration: r.restrictionUntilResolved ? 'Until resolved' : r.restrictionEndDate || 'Today',
-        }))
-        exportToExcel(`Exit_Restrictions_${date}.xlsx`, [
-          { name: 'Exit Restrictions', data: rows },
-        ])
-      } else if (type === 'register') {
-        const res = await api.records({ date })
-        const rows = (res.rows || []).map((r) => ({
-          'Roll No': r.rollNo,
-          Name: r.name,
-          Grade: r.grade,
-          Section: r.section,
-          Attendance: r.attendance,
-          'Bus Route': r.busRoute || 'N/A',
-          'Bus Late': r.busLate ? 'Yes' : 'No',
-          Restriction: r.restrictionType || 'None',
-          Reason: r.restrictionReason || '',
-          Status: r.resolutionStatus,
-        }))
-        exportToExcel(`Daily_Register_${date}.xlsx`, [
-          { name: 'Daily Register', data: rows },
-        ])
-      }
-      setNotice(`Export downloaded successfully!`)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setBusy(false)
-    }
-  }
-
   return (
     <div className="excel-feed-panel">
       {/* Category selector */}
@@ -398,15 +346,6 @@ export default function ExcelFeedPanel({ date, onChanged, onClose }) {
             </button>
           </div>
         </div>
-
-        <button
-          type="button"
-          className="excel-btn-secondary"
-          onClick={() => downloadTemplate(category)}
-          title="Download pre-formatted Excel template"
-        >
-          ⬇ Download {category === 'exit' ? 'Exit' : category === 'entry' ? 'Entry' : 'Roster'} Template (.xlsx)
-        </button>
       </div>
 
       {/* Tabs */}
@@ -443,13 +382,6 @@ export default function ExcelFeedPanel({ date, onChanged, onClose }) {
             + Add Single Student
           </button>
         )}
-        <button
-          type="button"
-          className={`excel-tab-btn ${activeTab === 'export' ? 'is-active' : ''}`}
-          onClick={() => setActiveTab('export')}
-        >
-          📤 Export to Excel
-        </button>
       </div>
 
       {/* Alerts */}
@@ -724,33 +656,6 @@ export default function ExcelFeedPanel({ date, onChanged, onClose }) {
             </button>
           </div>
         </form>
-      )}
-
-      {/* TAB 5: EXPORT TO EXCEL */}
-      {activeTab === 'export' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <p style={{ fontSize: '13.5px', color: '#475467' }}>
-            Export live data directly to formatted Excel (.xlsx) files:
-          </p>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              className="excel-btn-primary"
-              disabled={busy}
-              onClick={() => handleExportData('exit')}
-            >
-              📥 Download Active Exit Restrictions (.xlsx)
-            </button>
-            <button
-              type="button"
-              className="excel-btn-secondary"
-              disabled={busy}
-              onClick={() => handleExportData('register')}
-            >
-              📥 Download Complete Daily Register for {date} (.xlsx)
-            </button>
-          </div>
-        </div>
       )}
 
       {/* PREVIEW OF PARSED ROWS (For Upload & Paste) */}
