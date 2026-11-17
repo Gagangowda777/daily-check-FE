@@ -109,6 +109,9 @@ export const api = {
   teacherNotes: (params) => get(`/teacher/notes?${query(params)}`),
   teacherNoteRead: (id, payload) =>
     post(`/teacher/notes/${encodeURIComponent(id)}/read`, payload),
+  teacherNotices: (params) => get(`/teacher/notices?${query(params)}`),
+  teacherNoticeRead: (id, payload) =>
+    post(`/teacher/notices/${encodeURIComponent(id)}/read`, payload),
   teacherExit: (rollNo, action, payload) =>
     post(`/teacher/exit/${encodeURIComponent(rollNo)}/${action}`, payload),
   teacherEntry: (rollNo, action, payload) =>

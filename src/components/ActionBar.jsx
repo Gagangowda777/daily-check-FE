@@ -445,6 +445,8 @@ function EntryForm({ date, subjects: availableSubjects, onDone, onClose }) {
 function MessageForm({ date, onDone, onClose }) {
   const [type, setType] = useState('update')
   const [scope, setScope] = useState('ALL')
+  const [subject, setSubject] = useState('')
+  const [body, setBody] = useState('')
   const [sections, setSections] = useState([])
   const [grades, setGrades] = useState({ PU1: [], PU2: [] })
   const [error, setError] = useState('')
@@ -469,6 +471,10 @@ function MessageForm({ date, onDone, onClose }) {
   const submit = async (event) => {
     event.preventDefault()
 
+    if (body.trim().length < 3) {
+      setError('Write the message you want to send.')
+      return
+    }
     if (scope === 'SECTIONS' && sections.length === 0) {
       setError('Pick at least one section.')
       return
@@ -481,8 +487,17 @@ function MessageForm({ date, onDone, onClose }) {
         const [grade, section] = key.split(':')
         return { grade, section }
       })
-      const result = await api.sendMessage({ type, scope, sections: targets, date })
-      onDone(`${result.sent} message(s) sent — ${result.target}.`)
+      const result = await api.sendMessage({
+        type,
+        scope,
+        sections: targets,
+        date,
+        title: subject.trim(),
+        body: body.trim(),
+      })
+      onDone(
+        `${result.sent} section(s) notified — class leaders and class teachers. ${result.target}.`
+      )
     } catch (err) {
       setError(err.message)
     } finally {
@@ -493,6 +508,35 @@ function MessageForm({ date, onDone, onClose }) {
   return (
     <Drawer title="Send message" subtitle={`Broadcast for ${date}`} onClose={onClose}>
       <form onSubmit={submit}>
+        <div className="form-row">
+          <label htmlFor="message-subject">Subject</label>
+          <input
+            id="message-subject"
+            className="form-input"
+            maxLength="120"
+            placeholder="e.g. Bus routes delayed this morning"
+            value={subject}
+            onChange={(event) => setSubject(event.target.value)}
+          />
+        </div>
+
+        <div className="form-row">
+          <label htmlFor="message-body">Message</label>
+          <textarea
+            id="message-body"
+            className="form-input textarea"
+            rows="4"
+            maxLength="1000"
+            placeholder="Type the message that the class leaders and class teachers should receive."
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+          />
+          <p className="form-hint">
+            Delivered to the class leader inbox and the class teacher dashboard of every selected
+            section.
+          </p>
+        </div>
+
         <div className="form-row">
           <label htmlFor="message-type">Type</label>
           <select

@@ -26,6 +26,8 @@ const Stat = ({ label, value, note, tone }) => (
 export default function TeacherOverview({ data, grade, section, pendingBlocks, closed, busy, run }) {
   const [notes, setNotes] = useState({ key: '', rows: [], unread: 0 })
   const [noteError, setNoteError] = useState('')
+  const [notices, setNotices] = useState({ key: '', rows: [], unread: 0 })
+  const [noticeError, setNoticeError] = useState('')
 
   const key = `${grade}:${section}:${data.date}`
   const exitOpen = data.exit.filter((row) => ['pending', 'acknowledged'].includes(row.status))
@@ -45,6 +47,21 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
     }
   }, [grade, section, key])
 
+  useEffect(() => {
+    let alive = true
+    api
+      .teacherNotices({ grade, section })
+      .then((payload) => {
+        if (alive) setNotices({ key, rows: payload.notices, unread: payload.unread })
+      })
+      .catch((err) => {
+        if (alive) setNoticeError(err.message)
+      })
+    return () => {
+      alive = false
+    }
+  }, [grade, section, key])
+
   const markRead = async (note) => {
     setNoteError('')
     try {
@@ -58,6 +75,22 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
       }))
     } catch (err) {
       setNoteError(err.message)
+    }
+  }
+
+  const markNoticeRead = async (notice) => {
+    setNoticeError('')
+    try {
+      await api.teacherNoticeRead(notice.id, { grade, section })
+      setNotices((current) => ({
+        ...current,
+        unread: Math.max(0, current.unread - 1),
+        rows: current.rows.map((row) =>
+          row.id === notice.id ? { ...row, readAt: 'now', readBy: data.teacher } : row
+        ),
+      }))
+    } catch (err) {
+      setNoticeError(err.message)
     }
   }
 
@@ -139,6 +172,57 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
                 {busy === 'close' ? 'Closing…' : 'Complete daily check'}
               </button>
             </>
+          )}
+        </div>
+      </section>
+
+      <section className="t-card">
+        <div className="t-card-head">
+          <h2>Messages from admin</h2>
+          <span
+            className={`t-count${
+              notices.unread ? ' is-alert' : notices.rows.length ? ' is-ok' : ''
+            }`}
+          >
+            {notices.unread
+              ? `${notices.unread} unread`
+              : notices.rows.length
+                ? 'all read'
+                : 'none'}
+          </span>
+        </div>
+        <div className="t-body">
+          {noticeError ? <div className="banner">{noticeError}</div> : null}
+          {notices.key !== key ? (
+            <p className="muted">Loading messages…</p>
+          ) : notices.rows.length === 0 ? (
+            <p className="muted">No messages from the administration today.</p>
+          ) : (
+            notices.rows.map((notice) => (
+              <article key={notice.id} className={`note${notice.readAt ? ' is-read' : ''}`}>
+                <div className="note-head">
+                  <span className="note-kind kind-admin">{notice.typeLabel}</span>
+                  <span className="note-time">{notice.sentAt}</span>
+                </div>
+                <strong className="notice-title">{notice.title}</strong>
+                <p className="note-body">{notice.body}</p>
+                <div className="note-foot">
+                  <span className="muted">
+                    {notice.sender}
+                    {notice.readAt ? ` · read at ${notice.readAt}` : ''}
+                  </span>
+                  {notice.readAt ? null : (
+                    <button
+                      type="button"
+                      className="tap is-quiet"
+                      onClick={() => markNoticeRead(notice)}
+                    >
+                      Mark read
+                    </button>
+                  )}
+                </div>
+              </article>
+            ))
           )}
         </div>
       </section>

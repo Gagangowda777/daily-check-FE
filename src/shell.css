@@ -832,6 +832,13 @@ body,
   font-weight: 700;
 }
 
+.form-hint {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
 .note-list {
   display: flex;
   flex-direction: column;
@@ -881,6 +888,18 @@ body,
 .note-kind.kind-general {
   color: var(--violet);
   background: var(--violet-soft);
+}
+
+.note-kind.kind-admin {
+  color: var(--ink);
+  background: #e8edf6;
+}
+
+.notice-title {
+  display: block;
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  font-weight: 800;
 }
 
 .note-time {
