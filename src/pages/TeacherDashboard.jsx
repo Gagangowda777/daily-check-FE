@@ -78,14 +78,11 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
     }
   }
 
-  const headerActions = (
+  const headerActions = data ? (
     <div className="head-actions">
-      {data ? <span className="progress-chip">{4 - pendingBlocksOf(data).length}/4 done</span> : null}
-      <button type="button" className="tap is-quiet" onClick={onSignOut}>
-        Log out
-      </button>
+      <span className="progress-chip">{4 - pendingBlocksOf(data).length}/4 done</span>
     </div>
-  )
+  ) : null
 
   if (!data) {
     return (

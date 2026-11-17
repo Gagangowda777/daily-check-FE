@@ -108,9 +108,6 @@ export default function LeaderDashboard({ session, route, onSignOut }) {
           <a className={`progress-chip${data.stats.unread ? ' is-alert' : ''}`} href={routeHref('leader/inbox')}>
             {data.stats.unread ? `${data.stats.unread} unread` : 'inbox clear'}
           </a>
-          <button type="button" className="tap is-quiet" onClick={onSignOut}>
-            Log out
-          </button>
         </div>
       }
       onSignOut={onSignOut}

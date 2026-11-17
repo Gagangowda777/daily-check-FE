@@ -97,27 +97,6 @@ export default function GateDashboard({ session, route, onSignOut }) {
     role: 'Gate Security Desk',
   }
 
-  const headerActions = (
-    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-      <button
-        type="button"
-        className="btn-action-secondary"
-        style={{ padding: '6px 14px', fontSize: '13px' }}
-        onClick={() => refresh('Data refreshed.')}
-      >
-        ↻ Refresh
-      </button>
-      <button
-        type="button"
-        className="btn-action-secondary"
-        style={{ padding: '6px 14px', fontSize: '13px' }}
-        onClick={onSignOut}
-      >
-        Sign out
-      </button>
-    </div>
-  )
-
   return (
     <Shell
       user={user}
@@ -130,7 +109,6 @@ export default function GateDashboard({ session, route, onSignOut }) {
           ? `${data.date} · ${meta.subtitle}`
           : 'Loading gate records…'
       }
-      actions={headerActions}
       onSignOut={onSignOut}
     >
       <div className="gate-body">
