@@ -105,7 +105,9 @@ function HandoverPanel({ date, onChanged }) {
     }
   }
 
-  const rows = state.rows
+  // Never show the previous date's queue while the new one loads.
+  const rows = state.key === key ? state.rows : []
+  const since = (row) => (clockMinutes(row.handoverAt) === null ? null : row.handoverAt)
 
   return (
     <div>
@@ -124,13 +126,15 @@ function HandoverPanel({ date, onChanged }) {
                 </span>
               </div>
               <div className="queue-timer">
-                <span className="queue-since">In from {row.handoverAt}</span>
-                {isToday ? (
+                <span className="queue-since">In from {since(row) || '—'}</span>
+                {!isToday ? (
+                  <span className="queue-wait">historic</span>
+                ) : clockMinutes(row.handoverAt) === null ? (
+                  <span className="queue-wait">no arrival time logged</span>
+                ) : (
                   <span className="queue-wait">
                     waiting {waitLabel(nowMinutes - clockMinutes(row.handoverAt))}
                   </span>
-                ) : (
-                  <span className="queue-wait">historic</span>
                 )}
               </div>
               <div className="queue-actions">
@@ -186,7 +190,9 @@ function ExitPanel({ date, onChanged }) {
     api
       .exitRestrictions({ date })
       .then((data) => {
-        if (alive) setState({ key, rows: data.rows })
+        if (!alive) return
+        setError('')
+        setState({ key, rows: data.rows })
       })
       .catch((err) => {
         if (alive) setError(err.message)
@@ -197,7 +203,7 @@ function ExitPanel({ date, onChanged }) {
   }, [date, key])
 
   const term = search.trim().toLowerCase()
-  const rows = state.rows.filter((row) => {
+  const rows = (state.key === key ? state.rows : []).filter((row) => {
     if (status !== 'ALL' && row.resolutionStatus !== status) return false
     if (!term) return true
     return (
@@ -284,33 +290,39 @@ function ExitPanel({ date, onChanged }) {
 
               <span className={`badge ${row.resolutionStatus}`}>{row.resolutionStatus}</span>
 
-              <div className="queue-actions">
-                <button
-                  type="button"
-                  className="mini-button"
-                  onClick={() => {
-                    setAction({ rollNo: row.rollNo, mode: 'resolve' })
-                    setNote('')
-                    setError('')
-                  }}
-                >
-                  Resolved
-                </button>
-                <button
-                  type="button"
-                  className="mini-button"
-                  onClick={() => {
-                    setAction({ rollNo: row.rollNo, mode: 'excuse' })
-                    setApprover('')
-                    setEndDate(date)
-                    setError('')
-                  }}
-                >
-                  Excused
-                </button>
-              </div>
+              {row.resolutionStatus === 'resolved' ? (
+                <span className="muted queue-actions">
+                  {row.resolutionNote ? `Resolved: ${row.resolutionNote}` : 'Resolved — final'}
+                </span>
+              ) : (
+                <div className="queue-actions">
+                  <button
+                    type="button"
+                    className="mini-button"
+                    onClick={() => {
+                      setAction({ rollNo: row.rollNo, mode: 'resolve' })
+                      setNote('')
+                      setError('')
+                    }}
+                  >
+                    Resolved
+                  </button>
+                  <button
+                    type="button"
+                    className="mini-button"
+                    onClick={() => {
+                      setAction({ rollNo: row.rollNo, mode: 'excuse' })
+                      setApprover('')
+                      setEndDate(date)
+                      setError('')
+                    }}
+                  >
+                    Excused
+                  </button>
+                </div>
+              )}
 
-              {action?.rollNo === row.rollNo ? (
+              {action?.rollNo === row.rollNo && row.resolutionStatus !== 'resolved' ? (
                 <div className="inline-form">
                   {action.mode === 'resolve' ? (
                     <label className="inline-field">
@@ -381,7 +393,10 @@ function BusPanel({ date, onChanged }) {
     api
       .buses({ date })
       .then((data) => {
-        if (alive) setState({ key, rows: data.rows })
+        if (!alive) return
+        setError('')
+        setNotice('')
+        setState({ key, rows: data.rows })
       })
       .catch((err) => {
         if (alive) setError(err.message)
@@ -412,7 +427,7 @@ function BusPanel({ date, onChanged }) {
     }
   }
 
-  const rows = state.rows
+  const rows = state.key === key ? state.rows : []
   const lateCount = rows.filter((row) => row.status !== 'on-time').length
 
   return (
@@ -441,6 +456,11 @@ function BusPanel({ date, onChanged }) {
             <span className="bus-students">
               {row.lateStudents} late · {row.studentsOnRoute} on route
             </span>
+            {row.override ? (
+              <span className="bus-students muted">
+                Manual override: {row.override.reason}
+              </span>
+            ) : null}
             {row.status !== 'on-time' && row.lateStudents > 0 ? (
               <button
                 type="button"

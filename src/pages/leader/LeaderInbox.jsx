@@ -30,6 +30,9 @@ export default function LeaderInbox({ grade, section, onChanged }) {
 
   const key = `${grade}:${section}:${date}:${version}`
   const data = state.data
+  // Changing the date must not show the previous day's messages under the new
+  // date heading while the new day loads.
+  const loading = state.key !== key
 
   useEffect(() => {
     let alive = true
@@ -72,7 +75,12 @@ export default function LeaderInbox({ grade, section, onChanged }) {
           aria-label="Inbox date"
           value={date}
           max={today}
-          onChange={(event) => setDate(event.target.value > today ? today : event.target.value)}
+          onChange={(event) => {
+            const next = event.target.value
+            // Ignore a cleared field so the label can never become "Invalid Date".
+            if (!next) return
+            setDate(next > today ? today : next)
+          }}
         />
         {date !== today ? (
           <button type="button" className="inbox-today" onClick={() => setDate(today)}>
@@ -89,22 +97,22 @@ export default function LeaderInbox({ grade, section, onChanged }) {
 
       <div className="inbox-counters">
         <div className="inbox-counter is-unread">
-          <strong>{data ? data.counts.unread : '—'}</strong>
+          <strong>{!loading && data ? data.counts.unread : '—'}</strong>
           <span>Unread</span>
         </div>
         <div className="inbox-counter is-acked">
-          <strong>{data ? data.counts.acknowledged : '—'}</strong>
+          <strong>{!loading && data ? data.counts.acknowledged : '—'}</strong>
           <span>Acknowledged</span>
         </div>
       </div>
 
-      {!data ? <p className="inbox-empty">Loading messages…</p> : null}
+      {loading ? <p className="inbox-empty">Loading messages…</p> : null}
 
-      {data && data.messages.length === 0 ? (
+      {!loading && data && data.messages.length === 0 ? (
         <p className="inbox-empty">No messages for {prettyDate(date)}.</p>
       ) : null}
 
-      {data?.messages.map((message) => (
+      {(loading ? [] : data?.messages || []).map((message) => (
         <article
           key={message.id}
           className={`inbox-msg${message.status === 'acknowledged' ? ' is-acked' : ''}`}
@@ -131,14 +139,20 @@ export default function LeaderInbox({ grade, section, onChanged }) {
           ) : null}
 
           {message.status === 'unread' ? (
-            <button
-              type="button"
-              className="ack-button"
-              disabled={busy === message.id}
-              onClick={() => acknowledge(message)}
-            >
-              {busy === message.id ? 'Acknowledging…' : 'Acknowledge'}
-            </button>
+            date === today ? (
+              <button
+                type="button"
+                className="ack-button"
+                disabled={busy === message.id}
+                onClick={() => acknowledge(message)}
+              >
+                {busy === message.id ? 'Acknowledging…' : 'Acknowledge'}
+              </button>
+            ) : (
+              <p className="inbox-not-acked">
+                Not acknowledged — this message can only be acknowledged on the day it was sent.
+              </p>
+            )
           ) : (
             <p className="inbox-acked">
               Acknowledged by {message.acknowledgedBy || 'class leader'} at {message.acknowledgedAt} · locked

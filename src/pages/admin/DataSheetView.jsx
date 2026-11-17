@@ -93,11 +93,20 @@ export default function DataSheetView({ date, onChanged }) {
             }
           : null
         setRows((current) =>
-          current.map((row, i) => (i === index ? { ...row, student } : row))
+          current.map((row, i) =>
+            // Ignore a slow lookup if the roll number has been edited since.
+            i === index && row.rollNo.trim().toUpperCase() === norm
+              ? { ...row, student }
+              : row
+          )
         )
       } catch {
         setRows((current) =>
-          current.map((row, i) => (i === index ? { ...row, student: null } : row))
+          current.map((row, i) =>
+            i === index && row.rollNo.trim().toUpperCase() === norm
+              ? { ...row, student: null }
+              : row
+          )
         )
       }
     } else {
@@ -154,11 +163,17 @@ export default function DataSheetView({ date, onChanged }) {
           category: r.category,
           detail: r.detail,
           untilResolved: r.untilResolved,
-          endDate: r.endDate || null,
+          endDate: r.endDate || (r.untilResolved ? null : date),
         })),
       })
 
       setNotice(`Successfully committed ${res.count} record(s) directly to the Daily Register for ${date}!`)
+      if (res.errors?.length) {
+        setError(
+          `Skipped ${res.errors.length} row(s): ` +
+            res.errors.map((item) => `${item.rollNo} — ${item.error}`).join('; ')
+        )
+      }
       setVersion((v) => v + 1)
       if (onChanged) onChanged()
 

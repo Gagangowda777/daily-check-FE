@@ -248,6 +248,12 @@
   color: #15803d;
 }
 
+.inbox-not-acked {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #7b8698;
+}
+
 .inbox-empty {
   margin: 12px 0;
   font-size: 13px;

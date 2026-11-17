@@ -89,7 +89,16 @@ export default function LeaderDashboard({ session, route, onSignOut }) {
         onSignOut={onSignOut}
       >
         <div className="leader-body">
-          {error ? <div className="banner">{error}</div> : <p className="empty">Loading your section…</p>}
+          {error ? (
+            <>
+              <div className="banner">{error}</div>
+              <button type="button" className="tap" onClick={refresh}>
+                Try again
+              </button>
+            </>
+          ) : (
+            <p className="empty">Loading your section…</p>
+          )}
         </div>
       </Shell>
     )

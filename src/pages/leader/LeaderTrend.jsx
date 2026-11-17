@@ -96,8 +96,11 @@ export default function LeaderTrend({ grade, section, version }) {
                   {row.absent ? ` · ${row.absent} absent` : ''}
                 </span>
                 <span className="trend-extra">
-                  {row.busLate ? `${row.busLate} late bus` : 'buses on time'} ·{' '}
-                  {row.exit ? `${row.exit} exit` : 'no exit'} · NC {row.nc ?? '—'}
+                  {row.busLate
+                    ? `${row.busLate} late ${row.busLate === 1 ? 'bus' : 'buses'}`
+                    : 'buses on time'}{' '}
+                  · {row.exit ? `${row.exit} ${row.exit === 1 ? 'exit' : 'exits'}` : 'no exit'} · NC{' '}
+                  {row.nc ?? '—'}
                 </span>
               </li>
             ))}

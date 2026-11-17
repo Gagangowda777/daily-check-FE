@@ -251,6 +251,8 @@ export default function ExcelFeedPanel({ date, onChanged }) {
 
     setBusy(true)
     setError('')
+    setNotice('')
+    setImportSummary(null)
     try {
       if (category === 'exit') {
         const res = await api.bulkExitRestrictions({
@@ -259,9 +261,10 @@ export default function ExcelFeedPanel({ date, onChanged }) {
             rollNo: r.rollNo.trim().toUpperCase(),
             reason: r.reasonOrSubjects,
             untilResolved: r.untilResolved,
-            endDate: r.endDate || null,
+            endDate: r.untilResolved ? null : r.endDate || date,
           })),
         })
+        setImportSummary(res)
         setNotice(`Added ${res.count} exit restrictions!`)
       } else if (category === 'entry') {
         const res = await api.bulkEntryRestrictions({
@@ -271,6 +274,7 @@ export default function ExcelFeedPanel({ date, onChanged }) {
             subjects: r.reasonOrSubjects,
           })),
         })
+        setImportSummary(res)
         setNotice(`Added ${res.count} entry restrictions!`)
       }
 
@@ -504,7 +508,7 @@ export default function ExcelFeedPanel({ date, onChanged }) {
                 {category === 'exit' ? (
                   <select
                     className="gate-filter-select"
-                    value={row.untilResolved ? 'resolved' : 'date'}
+                    value={row.untilResolved ? 'resolved' : 'today'}
                     onChange={(e) => {
                       const next = [...gridRows]
                       next[idx].untilResolved = e.target.value === 'resolved'

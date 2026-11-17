@@ -2,11 +2,18 @@ import { routeHref } from '../../lib/router.js'
 
 const pendingBlocks = (data) => {
   const exitOpen = data.exit.filter((row) => ['pending', 'acknowledged'].includes(row.status))
+  // Admin broadcasts also land in the inbox, so the message block specifically
+  // needs a message the class teacher sent.
+  const teacherMessages = data.stats.teacherMessages ?? data.stats.messages
   return [
-    exitOpen.length ? 'Exit restrictions' : null,
-    data.entry.length ? 'Entry checks' : null,
-    data.nc.count !== null && data.nc.updatedInNe ? null : 'NC tracker',
-    data.stats.messages ? null : 'Class leader message',
+    exitOpen.length
+      ? { label: 'Exit restrictions', href: routeHref('leader/exit') }
+      : null,
+    data.entry.length ? { label: 'Entry checks', href: routeHref('leader/entry') } : null,
+    data.nc.count !== null && data.nc.updatedInNe
+      ? null
+      : { label: 'NC tracker', href: routeHref('leader/nc') },
+    teacherMessages ? null : { label: 'Class leader message', href: routeHref('leader/inbox') },
   ].filter(Boolean)
 }
 
@@ -44,11 +51,11 @@ export default function LeaderNc({ data }) {
             <p className="muted">Every block is complete. The class teacher can close today’s check.</p>
           ) : (
             <ul className="task-list">
-              {blocks.map((label) => (
-                <li key={label} className="task-item is-warn">
+              {blocks.map((block) => (
+                <li key={block.label} className="task-item is-warn">
                   <span className="task-dot" aria-hidden="true" />
-                  <a className="check-link" href={routeHref('leader/overview')}>
-                    {label}
+                  <a className="check-link" href={block.href}>
+                    {block.label}
                   </a>
                 </li>
               ))}
