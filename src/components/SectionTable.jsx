@@ -65,7 +65,7 @@ export default function SectionTable({ sections, loading }) {
                 <th>Exit check</th>
                 <th>Entry check</th>
                 <th>Daily NC</th>
-                <th>Leader ack</th>
+                <th>Leader read</th>
               </tr>
             </thead>
             <tbody>

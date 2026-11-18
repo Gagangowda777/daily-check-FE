@@ -26,7 +26,7 @@ const NAV = [
 
 const PAGE_META = {
   overview: { title: 'Class overview', subtitle: 'your section at a glance, and what needs you' },
-  inbox: { title: 'Inbox', subtitle: 'read and acknowledge messages from the class teacher' },
+  inbox: { title: 'Inbox', subtitle: 'read messages from the class teacher and write back' },
   register: { title: 'Class register', subtitle: 'mark today’s attendance for your section' },
   exit: { title: 'Exit restrictions', subtitle: 'who cannot leave, and where each one stands' },
   buses: { title: 'Late bus arrivals', subtitle: 'students whose bus reached after the cut-off' },

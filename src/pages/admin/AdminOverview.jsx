@@ -14,6 +14,7 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
   const [debouncedTitle, setDebouncedTitle] = useState('')
   const [dayFilter, setDayFilter] = useState('')
   const [sortOrder, setSortOrder] = useState('newest')
+  const [openDetails, setOpenDetails] = useState(() => new Set())
   const key = `${date}|${grade}|${section}|${reload}`
   const lookingUp = Boolean(debouncedTitle || dayFilter || sortOrder === 'oldest')
   const outboxKey = `${reload}|${debouncedTitle}|${dayFilter}|${sortOrder}`
@@ -69,6 +70,15 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
   const loading = state.key !== key
   const outboxLoading = outbox.key !== outboxKey
   const hasFilters = Boolean(debouncedTitle || dayFilter)
+
+  const toggleDetails = (id) => {
+    setOpenDetails((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const clearLookup = () => {
     setTitleQuery('')
@@ -162,35 +172,94 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
           </p>
         ) : (
           <ul className="sent-list">
-            {outbox.rows.map((message) => (
-              <li key={message.id} className="sent-item">
-                <div className="sent-item-top">
-                  <strong>{message.title}</strong>
-                  <span className="sent-type">{message.typeLabel}</span>
-                  <span className="sent-when">
-                    {message.date} · {message.sentAtIst || message.sentAt} IST
-                  </span>
-                </div>
-
-                {message.body ? <p className="sent-body">{message.body}</p> : null}
-
-                <div className="sent-meta">
-                  <span className="sent-target">{message.target}</span>
-                  <span>
-                    {message.sectionCount} section{message.sectionCount === 1 ? '' : 's'}
-                    {message.sectionsLabel ? `: ${message.sectionsLabel}` : ''}
-                  </span>
-                  <span>
-                    {message.acknowledged}/{message.sectionCount} leader ack
-                  </span>
-                  {message.teacherTotal > 0 ? (
-                    <span>
-                      {message.teacherRead}/{message.teacherTotal} teacher read
+            {outbox.rows.map((message) => {
+              const open = openDetails.has(message.id)
+              const recipients = message.recipients || []
+              return (
+                <li key={message.id} className="sent-item">
+                  <div className="sent-item-top">
+                    <strong>{message.title}</strong>
+                    <span className="sent-type">{message.typeLabel}</span>
+                    <span className="sent-when">
+                      {message.date} · {message.sentAtIst || message.sentAt} IST
                     </span>
+                  </div>
+
+                  {message.body ? <p className="sent-body">{message.body}</p> : null}
+
+                  <div className="sent-meta">
+                    <button
+                      type="button"
+                      className={`sent-target${open ? ' is-open' : ''}`}
+                      onClick={() => toggleDetails(message.id)}
+                      aria-expanded={open}
+                    >
+                      <span>{message.target}</span>
+                      <span className="sent-target-count">
+                        {recipients.length} section{recipients.length === 1 ? '' : 's'}
+                      </span>
+                      <span className="sent-caret" aria-hidden="true">
+                        ▾
+                      </span>
+                    </button>
+                  </div>
+
+                  {open ? (
+                    <div className="sent-detail">
+                      <p className="sent-detail-summary">
+                        <span>
+                          <strong>{recipients.filter((row) => row.readAt).length}</strong> of{' '}
+                          {recipients.length} class leaders read
+                        </span>
+                        {message.teacherTotal > 0 ? (
+                          <span>
+                            <strong>{message.teacherRead}</strong> of {message.teacherTotal} class
+                            teachers read
+                          </span>
+                        ) : null}
+                      </p>
+                      <div className="sent-detail-scroll">
+                        <table className="sent-detail-table">
+                          <thead>
+                            <tr>
+                              <th>Section</th>
+                              <th>Class leader</th>
+                              <th>Class teacher</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {recipients.map((row) => (
+                              <tr key={`${row.grade}-${row.section}`}>
+                                <td className="sent-section">{row.label}</td>
+                                <td>
+                                  {row.readAt ? (
+                                    <span className="sent-ok">
+                                      {row.readBy || 'Class leader'} · {row.readAt} IST
+                                    </span>
+                                  ) : (
+                                    <span className="sent-pending">Not read yet</span>
+                                  )}
+                                </td>
+                                <td>
+                                  {row.teacherReadAt ? (
+                                    <span className="sent-ok">
+                                      {row.teacherReadBy || 'Class teacher'} ·{' '}
+                                      {row.teacherReadAt} IST
+                                    </span>
+                                  ) : (
+                                    <span className="sent-pending">Unread</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   ) : null}
-                </div>
-              </li>
-            ))}
+                </li>
+              )
+            })}
           </ul>
         )}
 

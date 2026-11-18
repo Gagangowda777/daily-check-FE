@@ -64,8 +64,8 @@ export default function KpiCards({ kpi }) {
       title: 'Class leader messages',
       value: messages.sent,
       unit: 'sent',
-      sub: `${messages.overdue} overdue acknowledgements`,
-      note: `${messages.windowMinutes}-minute acknowledgement window`,
+      sub: `${messages.overdue} overdue reads`,
+      note: `${messages.windowMinutes}-minute read window`,
     },
   ]
 
@@ -245,20 +245,22 @@ export default function KpiCards({ kpi }) {
                         className={`badge ${
                           message.overdue
                             ? 'pending'
-                            : message.acknowledgedAt
+                            : message.readAt
                               ? 'resolved'
                               : 'late'
                         }`}
                       >
                         {message.overdue
                           ? 'overdue'
-                          : message.acknowledgedAt
-                            ? 'acked'
-                            : 'awaiting'}
+                          : message.readAt
+                            ? 'read'
+                            : 'unread'}
                       </span>
                       <span className="modal-date">
                         sent {message.sentAtIst || message.sentAt} IST ·{' '}
-                        {message.acknowledgedAt ? `ack ${message.acknowledgedAt}` : 'no ack'}
+                        {message.readAt
+                          ? `read ${message.readAt} IST${message.readBy ? ` · ${message.readBy}` : ''}`
+                          : 'not read'}
                       </span>
                     </li>
                   ))}

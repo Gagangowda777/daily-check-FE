@@ -32,7 +32,7 @@ export default function LeaderOverview({ data, grade, section, onChanged }) {
   const { stats } = data
   const tasks = [
     stats.unread
-      ? { href: routeHref('leader/inbox'), text: `${stats.unread} message(s) to read and acknowledge`, tone: 'alert' }
+      ? { href: routeHref('leader/inbox'), text: `${stats.unread} message(s) to read`, tone: 'alert' }
       : null,
     stats.exitOpen
       ? { href: routeHref('leader/exit'), text: `${stats.exitOpen} exit restriction(s) still open`, tone: 'alert' }
@@ -119,7 +119,7 @@ export default function LeaderOverview({ data, grade, section, onChanged }) {
           <div className="t-body">
             {tasks.length === 0 ? (
               <p className="muted">
-                Nothing pending. Your section has acknowledged everything and the check is closed.
+                Nothing pending. Your section has read everything and the check is closed.
               </p>
             ) : (
               <ul className="task-list">

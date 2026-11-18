@@ -134,8 +134,8 @@ export const api = {
     post(`/transport/routes/${encodeURIComponent(route)}/students/${encodeURIComponent(rollNo)}`, payload),
 
   inbox: (params) => get(`/inbox?${query(params)}`),
-  acknowledgeMessage: (id, payload) =>
-    post(`/inbox/${encodeURIComponent(id)}/acknowledge`, payload),
+  markInboxRead: (id, payload) =>
+    post(`/messages/inbox/${encodeURIComponent(id)}/read`, payload),
 
   leaderToday: (params) => get(`/leader/today?${query(params)}`),
   leaderRegister: (params) => get(`/leader/register?${query(params)}`),

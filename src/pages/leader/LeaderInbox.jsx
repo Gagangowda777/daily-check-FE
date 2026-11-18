@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../lib/api.js'
+import ChatMessages from '../../components/ChatMessages.jsx'
 import '../../components/inbox.css'
-
-const TYPE_LABEL = {
-  update: 'Update',
-  announcement: 'Announcement',
-  'authorized-exit': 'Authorized Exit',
-  broadcast: 'Broadcast',
-}
 
 const localIso = (value = new Date()) =>
   new Date(value.getTime() - value.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
@@ -27,7 +21,6 @@ export default function LeaderInbox({ grade, section, onChanged }) {
   const [version, setVersion] = useState(0)
   const [state, setState] = useState({ key: '', data: null })
   const [error, setError] = useState('')
-  const [busy, setBusy] = useState('')
   const [compose, setCompose] = useState({ title: '', body: '' })
   const [composeBusy, setComposeBusy] = useState(false)
   const [composeNotice, setComposeNotice] = useState('')
@@ -38,6 +31,35 @@ export default function LeaderInbox({ grade, section, onChanged }) {
   // Changing the date must not show the previous day's messages under the new
   // date heading while the new day loads.
   const loading = state.key !== key
+
+  const items = (loading ? [] : data?.messages || []).map((message) => {
+    const exits = message.students?.length
+      ? `Exit approved · ${message.students.join(', ')} · out at ${message.exitTime || '—'}`
+      : ''
+    return {
+      id: message.id,
+      kind: message.kind || 'leader',
+      fromName: message.sender,
+      fromContext: message.typeLabel,
+      title: message.title,
+      body: exits ? `${message.body}\n${exits}` : message.body,
+      sentAt: message.sentAt,
+      sentAtIst: message.sentAtIst,
+      readAt: message.readAt || message.seenAt || null,
+      readBy: message.readBy || null,
+    }
+  })
+
+  // Opening a message is the only thing that marks it read.
+  const markRead = async (message) => {
+    try {
+      await api.markInboxRead(message.id, { kind: 'leader' })
+      setVersion((value) => value + 1)
+      onChanged?.()
+    } catch (err) {
+      setError(err.message)
+    }
+  }
 
   useEffect(() => {
     let alive = true
@@ -55,20 +77,6 @@ export default function LeaderInbox({ grade, section, onChanged }) {
       alive = false
     }
   }, [grade, section, date, key])
-
-  const acknowledge = async (message) => {
-    setBusy(message.id)
-    setError('')
-    try {
-      await api.acknowledgeMessage(message.id, { grade, section })
-      setVersion((value) => value + 1)
-      onChanged?.()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setBusy('')
-    }
-  }
 
   const sendMessage = async (event) => {
     event.preventDefault()
@@ -173,73 +181,24 @@ export default function LeaderInbox({ grade, section, onChanged }) {
         </div>
       ) : null}
 
-      <div className="inbox-counters">
-        <div className="inbox-counter is-unread">
-          <strong>{!loading && data ? data.counts.unread : '—'}</strong>
-          <span>Unread</span>
+      <section className="msg-card">
+        <div className="msg-head">
+          <h2>Messages</h2>
+          <span className={`msg-count${!loading && data?.counts.unread ? ' is-new' : ''}`}>
+            {!loading && data
+              ? data.counts.unread
+                ? `${data.counts.unread} unread`
+                : `${data.counts.total} read`
+              : 'Loading…'}
+          </span>
         </div>
-        <div className="inbox-counter is-acked">
-          <strong>{!loading && data ? data.counts.acknowledged : '—'}</strong>
-          <span>Acknowledged</span>
-        </div>
-      </div>
-
-      {loading ? <p className="inbox-empty">Loading messages…</p> : null}
-
-      {!loading && data && data.messages.length === 0 ? (
-        <p className="inbox-empty">No messages for {prettyDate(date)}.</p>
-      ) : null}
-
-      {(loading ? [] : data?.messages || []).map((message) => (
-        <article
-          key={message.id}
-          className={`inbox-msg${message.status === 'acknowledged' ? ' is-acked' : ''}`}
-        >
-          <div className="inbox-msg-top">
-            <span className={`type-badge type-${message.type}`}>
-              {TYPE_LABEL[message.type] || message.type}
-            </span>
-            <span className="inbox-msg-time">
-              {message.sentAtIst || message.sentAt} IST
-            </span>
-          </div>
-
-          {message.title !== TYPE_LABEL[message.type] ? (
-            <h2 className="inbox-msg-title">{message.title}</h2>
-          ) : null}
-          <p className="inbox-msg-sender">
-            From {message.sender} · {message.typeLabel}
-          </p>
-          <p className="inbox-msg-body">{message.body}</p>
-
-          {message.students.length > 0 ? (
-            <p className="inbox-msg-exit">
-              Exit approved · {message.students.join(', ')} · out at {message.exitTime || '—'}
-            </p>
-          ) : null}
-
-          {message.status === 'unread' ? (
-            date === today ? (
-              <button
-                type="button"
-                className="ack-button"
-                disabled={busy === message.id}
-                onClick={() => acknowledge(message)}
-              >
-                {busy === message.id ? 'Acknowledging…' : 'Acknowledge'}
-              </button>
-            ) : (
-              <p className="inbox-not-acked">
-                Not acknowledged — this message can only be acknowledged on the day it was sent.
-              </p>
-            )
-          ) : (
-            <p className="inbox-acked">
-              Acknowledged by {message.acknowledgedBy || 'class leader'} at {message.acknowledgedAt} · locked
-            </p>
-          )}
-        </article>
-      ))}
+        <ChatMessages
+          items={items}
+          loading={loading}
+          emptyText={`No messages for ${prettyDate(date)}.`}
+          onRead={markRead}
+        />
+      </section>
     </div>
   )
 }
