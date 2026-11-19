@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api.js'
 import ExcelFeedPanel from './ExcelFeedPanel.jsx'
+import { BusArrivalsSheet } from './ExcelSheet.jsx'
 
 const TABS = [
   { id: 'handover', label: 'Hand-over queue' },
@@ -439,41 +440,32 @@ function BusPanel({ date, onChanged }) {
         {rows.length} routes · {lateCount} late or missing
       </p>
 
-      <div className="bus-grid">
-        {rows.map((row) => (
-          <div key={row.route} className={`bus-card is-${row.status}`}>
-            <div className="bus-head">
-              <strong>{row.route}</strong>
-              <span
-                className={`badge ${
-                  row.status === 'on-time' ? 'present' : row.status === 'late' ? 'late' : 'pending'
-                }`}
-              >
-                {row.status === 'on-time' ? 'On time' : row.status === 'late' ? 'Late' : 'Not arrived'}
-              </span>
-            </div>
-            <span className="bus-time">{row.arrivalTime || '—'}</span>
-            <span className="bus-students">
-              {row.lateStudents} late · {row.studentsOnRoute} on route
-            </span>
-            {row.override ? (
-              <span className="bus-students muted">
-                Manual override: {row.override.reason}
-              </span>
-            ) : null}
-            {row.status !== 'on-time' && row.lateStudents > 0 ? (
-              <button
-                type="button"
-                className="mini-button"
-                disabled={busy === row.route}
-                onClick={() => convert(row.route)}
-              >
-                {busy === row.route ? 'Converting…' : 'Convert to Exit Restriction'}
-              </button>
-            ) : null}
-          </div>
-        ))}
-      </div>
+      <BusArrivalsSheet
+        buses={rows.map((row) => ({
+          route: row.route,
+          arrivalTime: row.arrivalTime,
+          late: row.status !== 'on-time',
+          affectedStudents: row.lateStudents,
+          status: row.status,
+          override: row.override,
+        }))}
+        title="Bus arrivals"
+        meta={`${rows.length} routes · ${lateCount} late or missing`}
+        note="Routes that reached campus after the 8:20 am cut-off."
+        empty="No bus data for today."
+        renderActions={(bus) =>
+          bus.status !== 'on-time' && bus.affectedStudents > 0 ? (
+            <button
+              type="button"
+              className="tap"
+              disabled={busy === bus.route}
+              onClick={() => convert(bus.route)}
+            >
+              {busy === bus.route ? 'Converting…' : 'Convert to exit'}
+            </button>
+          ) : null
+        }
+      />
     </div>
   )
 }
@@ -482,10 +474,10 @@ function SettingsPanel() {
   const [settings, setSettings] = useState(null)
   const [reasons, setReasons] = useState('')
   const [subjects, setSubjects] = useState('')
-  const [cutoff, setCutoff] = useState('08:45')
+  const [cutoff, setCutoff] = useState('08:20')
   const [routeCutoffs, setRouteCutoffs] = useState({})
   const [newRoute, setNewRoute] = useState('R1')
-  const [newTime, setNewTime] = useState('08:45')
+  const [newTime, setNewTime] = useState('08:20')
   const [audit, setAudit] = useState([])
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')

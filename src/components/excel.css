@@ -1,0 +1,278 @@
+/* Excel-style daily-check sheets: one header band, one flat grid, no nested cards. */
+
+.xls-card {
+  background: #ffffff;
+  border: 1px solid #dbe4f0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.xls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 9px 12px;
+  background: #f7f9fc;
+  border-bottom: 1px solid #dbe4f0;
+}
+
+.xls-bar-text h2 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #0f172a;
+}
+
+.xls-note {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.xls-bar-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.xls-meta {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #475569;
+  background: #eef2f9;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.xls-scroll {
+  overflow-x: auto;
+}
+
+.xls-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  color: #1e293b;
+}
+
+.xls-table th {
+  padding: 6px 10px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  color: #475569;
+  background: #eef2f9;
+  border-right: 1px solid #e2e8f2;
+  border-bottom: 1px solid #d5dfec;
+  white-space: nowrap;
+}
+
+.xls-table th:last-child {
+  border-right: 0;
+}
+
+.xls-table td {
+  padding: 7px 10px;
+  border-right: 1px solid #edf1f8;
+  border-bottom: 1px solid #edf1f8;
+  vertical-align: top;
+}
+
+.xls-table td:last-child {
+  border-right: 0;
+}
+
+.xls-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.xls-row:hover td {
+  background: #fafcff;
+}
+
+.xls-row.is-late td:first-child {
+  box-shadow: inset 3px 0 0 #f59e0b;
+}
+
+.xls-no {
+  width: 36px;
+  text-align: right;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.xls-route {
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.xls-time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.xls-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.xls-sub-text {
+  display: block;
+  font-size: 11px;
+  color: #7b8698;
+}
+
+.xls-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  font-size: 10.5px;
+  font-weight: 800;
+  border-radius: 4px;
+  white-space: nowrap;
+  background: #f1f5fb;
+  color: #475569;
+}
+
+.xls-badge.is-late {
+  background: #fef3e2;
+  color: #b45309;
+}
+
+.xls-badge.is-ok {
+  background: #e8f7ee;
+  color: #15803d;
+}
+
+.xls-badge.is-pending,
+.xls-badge.is-alert {
+  background: #fdeaea;
+  color: #b42318;
+}
+
+.xls-badge.is-blue {
+  background: #e8f0fe;
+  color: #2563eb;
+}
+
+.xls-students {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.xls-student {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 1px 6px;
+  font-size: 11.5px;
+  color: #1e293b;
+  background: #f4f7fd;
+  border: 1px solid #e4ecf8;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.xls-student em {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 800;
+  color: #2563eb;
+}
+
+.xls-count {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.xls-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eef4ff;
+  border: 1px solid #d7e3fb;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.xls-more:hover {
+  background: #e2ebfd;
+  border-color: #c3d6f9;
+}
+
+.xls-more:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.xls-more-caret {
+  font-size: 9px;
+  line-height: 1;
+}
+
+.xls-empty {
+  padding: 18px 12px;
+  text-align: center;
+  font-size: 12.5px;
+  color: #8a94a6;
+}
+
+.xls-actions {
+  white-space: nowrap;
+}
+
+.xls-actions .tap,
+.xls-actions .mini-button {
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: 11.5px;
+}
+
+.xls-sub td {
+  padding: 8px 10px 10px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f2;
+}
+
+.xls-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.xls-pill {
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #dbe4f0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.xls-pill.is-active {
+  color: #1d4ed8;
+  background: #e8f0fe;
+  border-color: #bfd3f8;
+}

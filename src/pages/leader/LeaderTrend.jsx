@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../lib/api.js'
+import { ExcelSheet } from '../../components/ExcelSheet.jsx'
 
 const prettyDate = (iso) => {
   const [year, month, day] = iso.split('-').map(Number)
@@ -42,83 +43,61 @@ export default function LeaderTrend({ grade, section, version }) {
 
   const rows = state.rows
   const loading = state.key !== key
-  const maxRoster = rows.reduce((max, row) => Math.max(max, row.roster), 0) || 1
+
+  const toolbar = (
+    <div className="xls-toolbar" role="group" aria-label="Trend range">
+      {RANGES.map((range) => (
+        <button
+          key={range.days}
+          type="button"
+          className={`xls-pill${days === range.days ? ' is-active' : ''}`}
+          onClick={() => setDays(range.days)}
+        >
+          {range.label}
+        </button>
+      ))}
+    </div>
+  )
 
   return (
-    <section className="t-card">
-      <div className="t-card-head">
-        <h2>Attendance trend</h2>
-        <div className="pills" role="group" aria-label="Trend range">
-          {RANGES.map((range) => (
-            <button
-              key={range.days}
-              type="button"
-              className={`pill${days === range.days ? ' is-active' : ''}`}
-              onClick={() => setDays(range.days)}
-            >
-              {range.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="t-body">
-        {error ? <div className="banner">{error}</div> : null}
-        {loading ? <p className="muted">Loading the last {days} days…</p> : null}
-        {!loading && rows.length === 0 ? (
-          <p className="muted">No register data for this section yet.</p>
-        ) : null}
-
-        {!loading && rows.length > 0 ? (
-          <ul className="trend-list">
-            {rows.map((row) => (
-              <li key={row.date} className="trend-row">
-                <span className="trend-date">{prettyDate(row.date)}</span>
-                <span className="trend-bars">
-                  <span
-                    className="trend-bar is-present"
-                    style={{ width: `${(row.present / maxRoster) * 100}%` }}
-                    title={`${row.present} present`}
-                  />
-                  <span
-                    className="trend-bar is-late"
-                    style={{ width: `${(row.late / maxRoster) * 100}%` }}
-                    title={`${row.late} late`}
-                  />
-                  <span
-                    className="trend-bar is-absent"
-                    style={{ width: `${(row.absent / maxRoster) * 100}%` }}
-                    title={`${row.absent} absent`}
-                  />
-                </span>
-                <span className="trend-numbers">
-                  {row.present}/{row.roster}
-                  {row.absent ? ` · ${row.absent} absent` : ''}
-                </span>
-                <span className="trend-extra">
-                  {row.busLate
-                    ? `${row.busLate} late ${row.busLate === 1 ? 'bus' : 'buses'}`
-                    : 'buses on time'}{' '}
-                  · {row.exit ? `${row.exit} ${row.exit === 1 ? 'exit' : 'exits'}` : 'no exit'} · NC{' '}
-                  {row.nc ?? '—'}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
-        <div className="trend-legend">
-          <span>
-            <i className="trend-swatch is-present" /> Present
-          </span>
-          <span>
-            <i className="trend-swatch is-late" /> Late
-          </span>
-          <span>
-            <i className="trend-swatch is-absent" /> Absent
-          </span>
-        </div>
-      </div>
-    </section>
+    <>
+      {error ? <div className="banner">{error}</div> : null}
+      <ExcelSheet
+        title="Attendance trend"
+        meta={loading ? 'Loading…' : `Last ${days} days`}
+        toolbar={toolbar}
+        columns={['Sl. no.', 'Date', 'Present', 'Late', 'Absent', 'Late buses', 'Exits', 'NC']}
+      >
+        {loading ? (
+          <tr>
+            <td className="xls-empty" colSpan={8}>
+              Loading the last {days} days…
+            </td>
+          </tr>
+        ) : rows.length === 0 ? (
+          <tr>
+            <td className="xls-empty" colSpan={8}>
+              No register data for this section yet.
+            </td>
+          </tr>
+        ) : (
+          rows.map((row, index) => (
+            <tr key={row.date} className="xls-row">
+              <td className="xls-no">{index + 1}</td>
+              <td className="xls-name">{prettyDate(row.date)}</td>
+              <td>
+                <strong>{row.present}</strong>
+                <span className="xls-sub-text">of {row.roster}</span>
+              </td>
+              <td>{row.late}</td>
+              <td>{row.absent}</td>
+              <td>{row.busLate ? <span className="xls-badge is-late">{row.busLate}</span> : '0'}</td>
+              <td>{row.exit || 0}</td>
+              <td>{row.nc ?? '—'}</td>
+            </tr>
+          ))
+        )}
+      </ExcelSheet>
+    </>
   )
 }

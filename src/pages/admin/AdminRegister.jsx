@@ -55,6 +55,7 @@ export default function AdminRegister({ date, grade, section, reload }) {
             <table className="records">
               <thead>
                 <tr>
+                  <th>#</th>
                   <th>Roll no</th>
                   <th>Student</th>
                   <th>Class</th>
@@ -65,8 +66,9 @@ export default function AdminRegister({ date, grade, section, reload }) {
                 </tr>
               </thead>
               <tbody>
-                {visibleRows.map((row) => (
+                {visibleRows.map((row, index) => (
                   <tr key={row.rollNo}>
+                    <td className="sent-index">{index + 1}</td>
                     <td className="mono">{row.rollNo}</td>
                     <td className="student-name">{row.name}</td>
                     <td>{classLabel(row)}</td>

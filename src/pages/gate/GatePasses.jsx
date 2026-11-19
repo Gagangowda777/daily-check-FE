@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { api } from '../../lib/api.js'
+import { ExcelSheet } from '../../components/ExcelSheet.jsx'
 
 export default function GatePasses({ passes = [], onRefresh, onNotice, onError }) {
   const [filter, setFilter] = useState('all') // 'all' | 'pending' | 'exited'
@@ -43,115 +44,92 @@ export default function GatePasses({ passes = [], onRefresh, onNotice, onError }
     }
   }
 
-  return (
-    <div className="gate-table-card">
-      <div className="gate-filter-row">
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <button
-            type="button"
-            className={`gate-tab ${filter === 'all' ? 'is-active' : ''}`}
-            onClick={() => setFilter('all')}
-          >
-            All Passes <span className="gate-tab-count">{passes.length}</span>
-          </button>
-          <button
-            type="button"
-            className={`gate-tab ${filter === 'pending' ? 'is-active' : ''}`}
-            onClick={() => setFilter('pending')}
-          >
-            Pending Exit <span className="gate-tab-count">{pendingCount}</span>
-          </button>
-          <button
-            type="button"
-            className={`gate-tab ${filter === 'exited' ? 'is-active' : ''}`}
-            onClick={() => setFilter('exited')}
-          >
-            Departed <span className="gate-tab-count">{exitedCount}</span>
-          </button>
-        </div>
-
-        <input
-          type="search"
-          className="gate-filter-input"
-          placeholder="Filter by roll, name, class, reason..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      <div className="gate-table-wrap">
-        <table className="gate-table">
-          <thead>
-            <tr>
-              <th>Roll No</th>
-              <th>Student Name</th>
-              <th>Class</th>
-              <th>Approved Exit</th>
-              <th>Approver</th>
-              <th>Reason / Gate Pass</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredPasses.length === 0 ? (
-              <tr>
-                <td colSpan="8" className="empty-state">
-                  No authorized passes matching current filter.
-                </td>
-              </tr>
-            ) : (
-              filteredPasses.map((pass) => (
-                <tr key={pass.id}>
-                  <td>
-                    <strong>{pass.rollNo}</strong>
-                  </td>
-                  <td>
-                    <span style={{ fontWeight: 700 }}>{pass.name}</span>
-                  </td>
-                  <td>
-                    <span className="badge-status is-blue">{pass.classLabel}</span>
-                  </td>
-                  <td>
-                    <span style={{ fontWeight: 700, color: '#2563eb' }}>
-                      {pass.exitTime || 'Today'}
-                    </span>
-                  </td>
-                  <td style={{ color: '#475467', fontSize: '12.5px' }}>
-                    {pass.approvedBy || 'Teacher'}
-                  </td>
-                  <td style={{ maxWidth: '280px', color: '#334155', fontSize: '12.5px' }}>
-                    {pass.reason}
-                  </td>
-                  <td>
-                    {pass.exited ? (
-                      <span className="badge-status is-green">✓ Departed</span>
-                    ) : (
-                      <span className="badge-status is-amber">⏳ Pending Exit</span>
-                    )}
-                  </td>
-                  <td>
-                    {pass.exited ? (
-                      <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
-                        Logged
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        className="btn-mini-log"
-                        disabled={busyRoll === pass.rollNo}
-                        onClick={() => handleLogExit(pass)}
-                      >
-                        {busyRoll === pass.rollNo ? 'Logging…' : 'Log Exit'}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+  const toolbar = (
+    <div className="xls-toolbar">
+      {[
+        { id: 'all', label: `All passes ${passes.length}` },
+        { id: 'pending', label: `Pending exit ${pendingCount}` },
+        { id: 'exited', label: `Departed ${exitedCount}` },
+      ].map((tab) => (
+        <button
+          key={tab.id}
+          type="button"
+          className={`xls-pill${filter === tab.id ? ' is-active' : ''}`}
+          onClick={() => setFilter(tab.id)}
+        >
+          {tab.label}
+        </button>
+      ))}
+      <input
+        type="search"
+        className="gate-filter-input"
+        placeholder="Filter by roll, name, class, reason..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
     </div>
+  )
+
+  return (
+    <ExcelSheet
+      title="Authorized gate passes"
+      meta={`${filteredPasses.length} of ${passes.length} passes`}
+      note="Students approved for early dismissal, authorized exit or sent home."
+      toolbar={toolbar}
+      columns={[
+        'Sl. no.',
+        'Roll no',
+        'Student',
+        'Class',
+        'Approved exit',
+        'Approver',
+        'Reason / gate pass',
+        'Status',
+        'Action',
+      ]}
+    >
+      {filteredPasses.length === 0 ? (
+        <tr>
+          <td className="xls-empty" colSpan={9}>
+            No authorized passes matching current filter.
+          </td>
+        </tr>
+      ) : (
+        filteredPasses.map((pass, index) => (
+          <tr key={pass.id} className="xls-row">
+            <td className="xls-no">{index + 1}</td>
+            <td className="xls-name">{pass.rollNo}</td>
+            <td>{pass.name}</td>
+            <td>
+              <span className="badge-status is-blue">{pass.classLabel}</span>
+            </td>
+            <td className="xls-time">{pass.exitTime || 'Today'}</td>
+            <td>{pass.approvedBy || 'Teacher'}</td>
+            <td>{pass.reason}</td>
+            <td>
+              {pass.exited ? (
+                <span className="badge-status is-green">Departed</span>
+              ) : (
+                <span className="badge-status is-amber">Pending exit</span>
+              )}
+            </td>
+            <td className="xls-actions">
+              {pass.exited ? (
+                <span className="xls-count">Logged</span>
+              ) : (
+                <button
+                  type="button"
+                  className="btn-mini-log"
+                  disabled={busyRoll === pass.rollNo}
+                  onClick={() => handleLogExit(pass)}
+                >
+                  {busyRoll === pass.rollNo ? 'Logging…' : 'Log exit'}
+                </button>
+              )}
+            </td>
+          </tr>
+        ))
+      )}
+    </ExcelSheet>
   )
 }

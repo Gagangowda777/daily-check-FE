@@ -1428,6 +1428,47 @@
   border-radius: 10px;
 }
 
+.sent-filter {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.sent-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  color: #55637a;
+  background: #ffffff;
+  border: 1px solid #dde5f2;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.sent-filter-btn.is-active {
+  color: #1d4ed8;
+  background: #e8f0fe;
+  border-color: #bfd3f8;
+}
+
+.sent-filter-count {
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748b;
+  background: #eef2f9;
+  border-radius: 999px;
+}
+
+.sent-filter-btn.is-active .sent-filter-count {
+  color: #1d4ed8;
+  background: #ffffff;
+}
+
 .sent-detail-summary {
   display: flex;
   flex-wrap: wrap;
@@ -1477,6 +1518,13 @@
 
 .sent-detail-table tr:last-child td {
   border-bottom: 0;
+}
+
+.sent-index {
+  width: 24px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 .sent-section {

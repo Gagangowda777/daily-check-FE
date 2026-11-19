@@ -15,6 +15,7 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
   const [dayFilter, setDayFilter] = useState('')
   const [sortOrder, setSortOrder] = useState('newest')
   const [openDetails, setOpenDetails] = useState(() => new Set())
+  const [readFilters, setReadFilters] = useState({})
   const key = `${date}|${grade}|${section}|${reload}`
   const lookingUp = Boolean(debouncedTitle || dayFilter || sortOrder === 'oldest')
   const outboxKey = `${reload}|${debouncedTitle}|${dayFilter}|${sortOrder}`
@@ -175,6 +176,11 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
             {outbox.rows.map((message) => {
               const open = openDetails.has(message.id)
               const recipients = message.recipients || []
+              const readFilter = readFilters[message.id] || 'all'
+              const readCount = recipients.filter((row) => row.readAt).length
+              const visibleRecipients = recipients.filter((row) =>
+                readFilter === 'read' ? Boolean(row.readAt) : readFilter === 'unread' ? !row.readAt : true
+              )
               return (
                 <li key={message.id} className="sent-item">
                   <div className="sent-item-top">
@@ -206,6 +212,26 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
 
                   {open ? (
                     <div className="sent-detail">
+                      <div className="sent-filter" role="group" aria-label="Filter recipients by read status">
+                        {[
+                          { id: 'all', label: 'All', count: recipients.length },
+                          { id: 'read', label: 'Read', count: readCount },
+                          { id: 'unread', label: 'Unread', count: recipients.length - readCount },
+                        ].map((option) => (
+                          <button
+                            key={option.id}
+                            type="button"
+                            className={`sent-filter-btn${readFilter === option.id ? ' is-active' : ''}`}
+                            onClick={() =>
+                              setReadFilters((prev) => ({ ...prev, [message.id]: option.id }))
+                            }
+                          >
+                            {option.label}
+                            <span className="sent-filter-count">{option.count}</span>
+                          </button>
+                        ))}
+                      </div>
+
                       <p className="sent-detail-summary">
                         <span>
                           <strong>{recipients.filter((row) => row.readAt).length}</strong> of{' '}
@@ -222,14 +248,16 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
                         <table className="sent-detail-table">
                           <thead>
                             <tr>
+                              <th>#</th>
                               <th>Section</th>
                               <th>Class leader</th>
                               <th>Class teacher</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {recipients.map((row) => (
+                            {visibleRecipients.map((row, index) => (
                               <tr key={`${row.grade}-${row.section}`}>
+                                <td className="sent-index">{index + 1}</td>
                                 <td className="sent-section">{row.label}</td>
                                 <td>
                                   {row.readAt ? (
@@ -252,6 +280,13 @@ export default function AdminOverview({ date, grade, section, reload, onChanged 
                                 </td>
                               </tr>
                             ))}
+                            {visibleRecipients.length === 0 ? (
+                              <tr>
+                                <td className="sent-pending" colSpan={4}>
+                                  No sections in this filter.
+                                </td>
+                              </tr>
+                            ) : null}
                           </tbody>
                         </table>
                       </div>

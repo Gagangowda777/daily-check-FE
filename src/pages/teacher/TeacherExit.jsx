@@ -1,12 +1,13 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { api } from '../../lib/api.js'
+import { ExcelSheet } from '../../components/ExcelSheet.jsx'
 
 const EXIT_TONE = {
-  pending: 'pending',
-  acknowledged: 'late',
-  absent: 'none',
-  excused: 'late',
-  resolved: 'present',
+  pending: 'is-pending',
+  acknowledged: 'is-late',
+  absent: '',
+  excused: 'is-late',
+  resolved: 'is-ok',
 }
 
 export default function TeacherExit({ data, grade, section, busy, run }) {
@@ -41,113 +42,137 @@ export default function TeacherExit({ data, grade, section, busy, run }) {
   const exitPending = data.exit.filter((row) => ['pending', 'acknowledged'].includes(row.status))
 
   return (
-    <section className="t-card">
-      <div className="t-card-head">
-        <h2>Exit restrictions</h2>
-        <span className={`t-count${exitPending.length ? ' is-alert' : ' is-ok'}`}>
-          {exitPending.length} open
-        </span>
-      </div>
-      <div className="t-body">
-        {data.exit.length === 0 ? (
-          <p className="muted">Nobody restricted from exiting today.</p>
-        ) : (
-          data.exit.map((row) => {
-            const rowBusy = busy.startsWith(`exit-${row.rollNo}`)
-            const resolved = row.status === 'resolved'
+    <ExcelSheet
+      title="Exit restrictions"
+      meta={`${data.exit.length} flagged · ${exitPending.length} open`}
+      note="Acknowledge, excuse or resolve each student. Acknowledged rows still count as open."
+      columns={['Sl. no.', 'Roll no', 'Student', 'Reason', 'Status', 'Duration', 'Actions']}
+    >
+      {data.exit.length === 0 ? (
+        <tr>
+          <td className="xls-empty" colSpan={7}>
+            Nobody restricted from exiting today.
+          </td>
+        </tr>
+      ) : (
+        data.exit.map((row, index) => {
+          const rowBusy = busy.startsWith(`exit-${row.rollNo}`)
+          const resolved = row.status === 'resolved'
 
-            return (
-              <div key={row.rollNo} className="t-row">
-                <div className="t-row-main">
-                  <strong>{row.name}</strong>
-                  <span className="t-row-sub">{row.rollNo}</span>
-                  <span className={`badge ${EXIT_TONE[row.status]}`}>{row.status}</span>
+          return (
+            <Fragment key={row.rollNo}>
+              <tr className="xls-row">
+                <td className="xls-no">{index + 1}</td>
+                <td className="xls-time">{row.rollNo}</td>
+                <td>
+                  <span className="xls-name">{row.name}</span>
                   {row.repeatResolutions >= 2 ? (
-                    <span className="repeat-badge">{row.repeatResolutions}× repeat</span>
+                    <span className="xls-sub-text">{row.repeatResolutions}× repeat</span>
                   ) : null}
-                </div>
-                <span className="t-row-sub">
-                  {row.reason} · {row.untilResolved ? 'until resolved' : row.endDate || 'no end date'}
-                  {row.approver ? ` · approved by ${row.approver}` : ''}
-                  {row.acknowledgedBy ? ` · acked by ${row.acknowledgedBy} ${row.acknowledgedAt}` : ''}
-                </span>
-                {row.note ? <span className="t-row-sub">Note: {row.note}</span> : null}
-
-                <div className="t-actions">
-                  <button
-                    type="button"
-                    className="tap"
-                    disabled={rowBusy || row.status !== 'pending'}
-                    title={row.status !== 'pending' ? 'Already acknowledged' : 'Acknowledge this restriction'}
-                    onClick={() =>
-                      run(
-                        `exit-${row.rollNo}-acknowledge`,
-                        () => api.teacherExit(row.rollNo, 'acknowledge', { grade, section }),
-                        'Acknowledged.'
-                      )
-                    }
-                  >
-                    Acknowledge
-                  </button>
-                  <button
-                    type="button"
-                    className="tap is-quiet"
-                    disabled={rowBusy || resolved}
-                    onClick={() => openForm(row.rollNo, 'absent')}
-                  >
-                    Absent
-                  </button>
-                  <button
-                    type="button"
-                    className="tap is-quiet"
-                    disabled={rowBusy || resolved}
-                    onClick={() => openForm(row.rollNo, 'excuse')}
-                  >
-                    Excused
-                  </button>
-                  <button
-                    type="button"
-                    className="tap is-good"
-                    disabled={row.status !== 'acknowledged'}
-                    title={row.status !== 'acknowledged' ? 'Acknowledge before resolving' : 'Resolve with a note'}
-                    onClick={() => openForm(row.rollNo, 'resolve')}
-                  >
-                    Resolved
-                  </button>
-                </div>
-
-                {form?.rollNo === row.rollNo ? (
-                  <div className="t-inline">
-                    <input
-                      className="form-input"
-                      value={value}
-                      placeholder={
-                        form.mode === 'absent'
-                          ? 'Reason for absence'
-                          : form.mode === 'excuse'
-                            ? 'Approved by'
-                            : 'Short resolution note'
-                      }
-                      onChange={(event) => setValue(event.target.value)}
-                    />
+                </td>
+                <td>
+                  {row.reason}
+                  {row.note ? <span className="xls-sub-text">{row.note}</span> : null}
+                </td>
+                <td>
+                  <span className={`xls-badge ${EXIT_TONE[row.status] || ''}`.trim()}>{row.status}</span>
+                  {row.approver ? <span className="xls-sub-text">by {row.approver}</span> : null}
+                </td>
+                <td>
+                  {row.untilResolved ? 'Until resolved' : row.endDate || 'Today'}
+                  {row.acknowledgedBy ? (
+                    <span className="xls-sub-text">
+                      acked {row.acknowledgedAt} · {row.acknowledgedBy}
+                    </span>
+                  ) : null}
+                </td>
+                <td className="xls-actions">
+                  <div className="t-actions">
                     <button
                       type="button"
                       className="tap"
-                      disabled={busy.startsWith(`exit-${row.rollNo}`)}
-                      onClick={() => submit(row.rollNo, form.mode)}
+                      disabled={rowBusy || row.status !== 'pending'}
+                      title={
+                        row.status !== 'pending' ? 'Already acknowledged' : 'Acknowledge this restriction'
+                      }
+                      onClick={() =>
+                        run(
+                          `exit-${row.rollNo}-acknowledge`,
+                          () => api.teacherExit(row.rollNo, 'acknowledge', { grade, section }),
+                          'Acknowledged.'
+                        )
+                      }
                     >
-                      Save
+                      Acknowledge
                     </button>
-                    <button type="button" className="tap is-quiet" onClick={closeForm}>
-                      Cancel
+                    <button
+                      type="button"
+                      className="tap is-quiet"
+                      disabled={rowBusy || resolved}
+                      onClick={() => openForm(row.rollNo, 'absent')}
+                    >
+                      Absent
+                    </button>
+                    <button
+                      type="button"
+                      className="tap is-quiet"
+                      disabled={rowBusy || resolved}
+                      onClick={() => openForm(row.rollNo, 'excuse')}
+                    >
+                      Excused
+                    </button>
+                    <button
+                      type="button"
+                      className="tap is-good"
+                      disabled={row.status !== 'acknowledged'}
+                      title={
+                        row.status !== 'acknowledged'
+                          ? 'Acknowledge before resolving'
+                          : 'Resolve with a note'
+                      }
+                      onClick={() => openForm(row.rollNo, 'resolve')}
+                    >
+                      Resolved
                     </button>
                   </div>
-                ) : null}
-              </div>
-            )
-          })
-        )}
-      </div>
-    </section>
+                </td>
+              </tr>
+
+              {form?.rollNo === row.rollNo ? (
+                <tr className="xls-sub">
+                  <td colSpan={7}>
+                    <div className="t-inline">
+                      <input
+                        className="form-input"
+                        value={value}
+                        placeholder={
+                          form.mode === 'absent'
+                            ? 'Reason for absence'
+                            : form.mode === 'excuse'
+                              ? 'Approved by'
+                              : 'Short resolution note'
+                        }
+                        onChange={(event) => setValue(event.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="tap"
+                        disabled={busy.startsWith(`exit-${row.rollNo}`)}
+                        onClick={() => submit(row.rollNo, form.mode)}
+                      >
+                        Save
+                      </button>
+                      <button type="button" className="tap is-quiet" onClick={closeForm}>
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : null}
+            </Fragment>
+          )
+        })
+      )}
+    </ExcelSheet>
   )
 }

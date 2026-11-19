@@ -1,33 +1,18 @@
-// Read-only view of today's late bus arrivals for this section.
+import { BusArrivalsSheet } from '../../components/ExcelSheet.jsx'
+import { groupLateBuses } from '../../lib/busSheet.js'
+
+// Read-only view of today's late bus arrivals for this section, in the same
+// route / arrival / late / students layout as the daily-check workbook.
 export default function TeacherBuses({ data }) {
+  const buses = groupLateBuses(data.lateBuses, data.label)
+
   return (
-    <section className="t-card">
-      <div className="t-card-head">
-        <h2>Late bus arrivals</h2>
-        <span className={`t-count${data.lateBuses.length ? ' is-alert' : ' is-ok'}`}>
-          {data.lateBuses.length}
-        </span>
-      </div>
-      <div className="t-body">
-        {data.lateBuses.length === 0 ? (
-          <p className="muted">No late buses for this section.</p>
-        ) : (
-          data.lateBuses.map((row) => (
-            <div key={row.rollNo} className="t-row">
-              <div className="t-row-main">
-                <strong>{row.name}</strong>
-                <span className="t-row-sub">{row.rollNo}</span>
-                <span className="minutes">
-                  {row.minutesLate === null ? 'bus not arrived' : `${row.minutesLate} min late`}
-                </span>
-              </div>
-              <span className="t-row-sub">
-                Route {row.route} · arrived {row.arrivalTime || 'not yet'}
-              </span>
-            </div>
-          ))
-        )}
-      </div>
-    </section>
+    <BusArrivalsSheet
+      buses={buses}
+      title="Late bus arrivals"
+      meta={`${buses.length} late route${buses.length === 1 ? '' : 's'} · cut-off ${data.cutoff}`}
+      note={`Buses that reached campus after the ${data.cutoff} cut-off, with the students late on each route.`}
+      empty="No late buses for this section."
+    />
   )
 }

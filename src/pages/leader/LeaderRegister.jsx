@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../lib/api.js'
+import { ExcelSheet } from '../../components/ExcelSheet.jsx'
 
 const FILTERS = [
   { id: 'all', label: 'All' },
@@ -47,9 +48,7 @@ export default function LeaderRegister({ grade, section, version, onChanged }) {
   const visible = rows.filter((row) => {
     if (filter !== 'all' && row.attendance !== filter) return false
     if (!text) return true
-    return (
-      row.rollNo.toLowerCase().includes(text) || row.name.toLowerCase().includes(text)
-    )
+    return row.rollNo.toLowerCase().includes(text) || row.name.toLowerCase().includes(text)
   })
 
   const counts = rows.reduce(
@@ -81,68 +80,80 @@ export default function LeaderRegister({ grade, section, version, onChanged }) {
 
   const loading = state.key !== key
 
+  const toolbar = (
+    <div className="xls-toolbar">
+      <input
+        className="form-input"
+        type="search"
+        placeholder="Search roll or name"
+        aria-label="Search students"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+      />
+      {FILTERS.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          className={`xls-pill${filter === item.id ? ' is-active' : ''}`}
+          onClick={() => setFilter(item.id)}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  )
+
   return (
-    <section className="t-card">
-      <div className="t-card-head">
-        <h2>Class register</h2>
-        <span className="t-count">
-          {loading ? 'Loading…' : `${counts.present} present · ${counts.late} late · ${counts.absent} absent`}
-        </span>
-      </div>
-
-      <div className="t-body">
-        {error ? <div className="banner">{error}</div> : null}
-        {notice ? (
-          <p className="action-notice" role="status">
-            {notice}
-          </p>
-        ) : null}
-
-        <div className="register-tools">
-          <input
-            className="form-input"
-            type="search"
-            placeholder="Search roll number or name"
-            aria-label="Search students"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-          <div className="pills" role="group" aria-label="Attendance filter">
-            {FILTERS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`pill${filter === item.id ? ' is-active' : ''}`}
-                onClick={() => setFilter(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <p className="t-row-sub">
-          Attendance can be updated for today only, and only for your own section. Every change is
-          logged.
+    <>
+      {error ? <div className="banner">{error}</div> : null}
+      {notice ? (
+        <p className="action-notice" role="status">
+          {notice}
         </p>
-
+      ) : null}
+      <ExcelSheet
+        title="Class register"
+        meta={
+          loading
+            ? 'Loading…'
+            : `${counts.present} present · ${counts.late} late · ${counts.absent} absent`
+        }
+        note="Attendance can be updated for today only, and only for your own section. Every change is logged."
+        toolbar={toolbar}
+        columns={['Sl. no.', 'Roll no', 'Student', 'Bus', 'Attendance']}
+      >
         {loading ? (
-          <p className="muted">Loading the class register…</p>
+          <tr>
+            <td className="xls-empty" colSpan={5}>
+              Loading the class register…
+            </td>
+          </tr>
         ) : visible.length === 0 ? (
-          <p className="muted">No students match this search or filter.</p>
+          <tr>
+            <td className="xls-empty" colSpan={5}>
+              No students match this search or filter.
+            </td>
+          </tr>
         ) : (
-          <ul className="attendance-list">
-            {visible.map((row) => (
-              <li key={row.rollNo} className="attendance-row">
-                <span className="attendance-no mono">{row.rollNo}</span>
-                <span className="attendance-name">
-                  {row.name}
-                  <span className="t-row-sub">
-                    {row.busRoute ? `Route ${row.busRoute}${row.busLate ? ' · late' : ''}` : 'No bus'}
-                    {row.restrictionType ? ` · ${row.restrictionType} restriction` : ''}
-                  </span>
-                </span>
-                <span className="attendance-actions" role="group" aria-label={`Attendance for ${row.name}`}>
+          visible.map((row, index) => (
+            <tr key={row.rollNo} className="xls-row">
+              <td className="xls-no">{index + 1}</td>
+              <td className="xls-time">{row.rollNo}</td>
+              <td>
+                <span className="xls-name">{row.name}</span>
+                {row.restrictionType ? (
+                  <span className="xls-sub-text">{row.restrictionType} restriction</span>
+                ) : null}
+              </td>
+              <td>
+                {row.busRoute ? `${row.busRoute}${row.busLate ? ' · late' : ''}` : 'No bus'}
+              </td>
+              <td className="xls-actions">
+                <div
+                  className="t-actions"
+                  role="group"
+                  aria-label={`Attendance for ${row.name}`}
+                >
                   {ATTENDANCE.map((option) => (
                     <button
                       key={option.id}
@@ -157,12 +168,12 @@ export default function LeaderRegister({ grade, section, version, onChanged }) {
                       {option.label}
                     </button>
                   ))}
-                </span>
-              </li>
-            ))}
-          </ul>
+                </div>
+              </td>
+            </tr>
+          ))
         )}
-      </div>
-    </section>
+      </ExcelSheet>
+    </>
   )
 }
