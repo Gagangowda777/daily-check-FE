@@ -7,7 +7,7 @@ export default function TeacherNc({ data, grade, section, busy, run }) {
   const ncDone = data.nc.count !== null && data.nc.updatedInNe
 
   const save = async (updatedInNe) => {
-    // Never turn an empty field into a silent 0 — the count has to be entered.
+    // Never turn an empty field into a silent 0; the count has to be entered.
     const raw = draft === null ? data.nc.count : draft
     if (raw === null || raw === undefined || String(raw).trim() === '') {
       setLocalError('Enter today’s NC count before saving.')

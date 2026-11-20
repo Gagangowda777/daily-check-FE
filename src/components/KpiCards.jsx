@@ -22,7 +22,7 @@ export default function KpiCards({ kpi }) {
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className="kpi is-loading">
             <span className="kpi-title">Loading…</span>
-            <span className="kpi-value">—</span>
+            <span className="kpi-value">-</span>
           </div>
         ))}
       </section>
@@ -47,7 +47,7 @@ export default function KpiCards({ kpi }) {
       id: 'exit',
       title: 'Exit restrictions',
       value: exit.active,
-      unit: 'active',
+      unit: 'Active',
       sub: STATUS_ORDER.map((status) => `${status} ${exit[status]}`).join(' · '),
       note: `${exit.total} flagged today · ${exit.resolved} resolved`,
     },
@@ -55,7 +55,7 @@ export default function KpiCards({ kpi }) {
       id: 'entry',
       title: 'Entry restrictions',
       value: entry.total,
-      unit: 'flagged',
+      unit: 'Flagged',
       sub: `Hand-over queue ${entry.handoverQueue}`,
       note: `${entry.sectionsIncomplete} sections incomplete after ${entry.cutoff}`,
     },
@@ -63,7 +63,7 @@ export default function KpiCards({ kpi }) {
       id: 'messages',
       title: 'Class leader messages',
       value: messages.sent,
-      unit: 'sent',
+      unit: 'Sent',
       sub: `${messages.overdue} overdue reads`,
       note: `${messages.windowMinutes}-minute read window`,
     },
@@ -126,7 +126,7 @@ export default function KpiCards({ kpi }) {
                     <li key={route.route}>
                       <span className="detail-route">{route.route}</span>
                       <span className={`badge ${route.late ? 'late' : 'present'}`}>
-                        {route.late ? 'late' : 'on time'}
+                        {route.late ? 'Late' : 'On time'}
                       </span>
                       <span className="detail-time">
                         {route.arrivalTime || 'Not arrived'}
@@ -197,7 +197,7 @@ export default function KpiCards({ kpi }) {
                             {section.section}
                           </span>
                           <span className="modal-date">
-                            {section.submittedAt ? `submitted ${section.submittedAt}` : 'not submitted'}
+                            {section.submittedAt ? `Submitted ${section.submittedAt}` : 'Not submitted'}
                           </span>
                         </li>
                       ))}
@@ -258,9 +258,8 @@ export default function KpiCards({ kpi }) {
                       </span>
                       <span className="modal-date">
                         sent {message.sentAtIst || message.sentAt} IST ·{' '}
-                        {message.readAt
-                          ? `read ${message.readAt} IST${message.readBy ? ` · ${message.readBy}` : ''}`
-                          : 'not read'}
+                                              {message.readAt ? `Read ${message.readAt} IST${message.readBy ? ` · ${message.readBy}` : ''}`
+                          : 'Not read'}
                       </span>
                     </li>
                   ))}

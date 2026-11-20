@@ -118,7 +118,7 @@ export function BusArrivalsSheet({
           <tr key={bus.route} className={`xls-row ${bus.late ? 'is-late' : 'is-ok'}`}>
             <td className="xls-no">{index + 1}</td>
             <td className="xls-route">{bus.route}</td>
-            <td className="xls-time">{bus.arrivalTime || '—'}</td>
+            <td className="xls-time">{bus.arrivalTime || '-'}</td>
             <td>
               {bus.arrivalTime ? (
                 <span className={`xls-badge ${bus.late ? 'is-late' : 'is-ok'}`}>

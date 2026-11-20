@@ -480,7 +480,7 @@ export default function ExcelFeedPanel({ date, onChanged }) {
                 <input
                   type="text"
                   className="gate-filter-input"
-                  placeholder="e.g. 25A201"
+                  placeholder="E.g. 25A201"
                   value={row.rollNo}
                   onChange={(e) => {
                     const next = [...gridRows]
@@ -494,8 +494,8 @@ export default function ExcelFeedPanel({ date, onChanged }) {
                   className="gate-filter-input"
                   placeholder={
                     category === 'exit'
-                      ? 'e.g. Crossed 3 NCs'
-                      : 'e.g. BS, ECO, STATS'
+                      ? 'E.g. Crossed 3 NCs'
+                      : 'E.g. BS, ECO, STATS'
                   }
                   value={row.reasonOrSubjects}
                   onChange={(e) => {
@@ -596,7 +596,7 @@ export default function ExcelFeedPanel({ date, onChanged }) {
                 type="text"
                 className="gate-filter-input"
                 style={{ width: '100%', marginTop: '4px' }}
-                placeholder="e.g. 26A199"
+                placeholder="E.g. 26A199"
                 required
                 value={newStudent.rollNo}
                 onChange={(e) => setNewStudent({ ...newStudent, rollNo: e.target.value })}
@@ -608,7 +608,7 @@ export default function ExcelFeedPanel({ date, onChanged }) {
                 type="text"
                 className="gate-filter-input"
                 style={{ width: '100%', marginTop: '4px' }}
-                placeholder="e.g. Rahul Sharma"
+                placeholder="E.g. Rahul Sharma"
                 required
                 value={newStudent.name}
                 onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
@@ -635,7 +635,7 @@ export default function ExcelFeedPanel({ date, onChanged }) {
                 type="text"
                 className="gate-filter-input"
                 style={{ width: '100%', marginTop: '4px' }}
-                placeholder="e.g. A"
+                placeholder="E.g. A"
                 required
                 value={newStudent.section}
                 onChange={(e) => setNewStudent({ ...newStudent, section: e.target.value.toUpperCase() })}
@@ -647,7 +647,7 @@ export default function ExcelFeedPanel({ date, onChanged }) {
                 type="text"
                 className="gate-filter-input"
                 style={{ width: '100%', marginTop: '4px' }}
-                placeholder="e.g. R5 or None"
+                placeholder="E.g. R5 or None"
                 value={newStudent.busRoute}
                 onChange={(e) => setNewStudent({ ...newStudent, busRoute: e.target.value.toUpperCase() })}
               />
@@ -709,7 +709,7 @@ export default function ExcelFeedPanel({ date, onChanged }) {
                     </td>
                     {category === 'roster' ? (
                       <>
-                        <td>{row.name || '—'}</td>
+                        <td>{row.name || '-'}</td>
                         <td>{row.grade || 'PU1'}</td>
                         <td>{row.section || 'A'}</td>
                         <td>{row.busRoute || 'None'}</td>
@@ -727,7 +727,7 @@ export default function ExcelFeedPanel({ date, onChanged }) {
                       </>
                     )}
                     <td>
-                      <span className="badge-import-valid">✓ Valid</span>
+                      <span className="badge-import-valid">Valid</span>
                     </td>
                   </tr>
                 ))}

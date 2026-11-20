@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ExcelSheet } from '../../components/ExcelSheet.jsx'
+import { cap } from '../../lib/text.js'
 
 export default function GateLogs({ logs = [] }) {
   const [filter, setFilter] = useState('all') // 'all' | 'exit' | 'blocked_attempt' | 'entry'
@@ -106,12 +107,12 @@ export default function GateLogs({ logs = [] }) {
                       : 'is-neutral'
                 }`}
               >
-                {log.status}
+                {cap(log.status)}
               </span>
             </td>
-            <td>{log.passDetails || '—'}</td>
+            <td>{log.passDetails || '-'}</td>
             <td>{log.loggedBy || 'Security'}</td>
-            <td>{log.remarks || '—'}</td>
+            <td>{log.remarks || '-'}</td>
           </tr>
         ))
       )}

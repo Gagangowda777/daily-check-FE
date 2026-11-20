@@ -98,10 +98,6 @@
   background: #fafcff;
 }
 
-.xls-row.is-late td:first-child {
-  box-shadow: inset 3px 0 0 #f59e0b;
-}
-
 .xls-no {
   width: 40px;
   text-align: left;

@@ -72,7 +72,7 @@ export default function SectionTable({ sections, loading }) {
       ) : rows.length === 0 ? (
         <tr>
           <td className="xls-empty" colSpan={7}>
-            All sections have responded — nothing waiting on a teacher.
+            All sections have responded. Nothing waiting on a teacher.
           </td>
         </tr>
       ) : (

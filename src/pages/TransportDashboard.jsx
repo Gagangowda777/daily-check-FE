@@ -30,8 +30,8 @@ const NAV = [
 ]
 
 const PAGE_META = {
-  routes: { title: 'Bus routes', subtitle: 'mark arrivals and keep the route status honest' },
-  inbox: { title: 'Inbox', subtitle: 'messages from the admin and the rest of the school' },
+  routes: { title: 'Bus routes', subtitle: 'Mark arrivals and keep the route status honest' },
+  inbox: { title: 'Inbox', subtitle: 'Messages from the admin and the rest of the school' },
 }
 
 export default function TransportDashboard({ session, route, onSignOut }) {
@@ -136,7 +136,7 @@ export default function TransportDashboard({ session, route, onSignOut }) {
         page === 'inbox'
           ? meta.subtitle
           : data
-            ? `${data.date} · ${data.routes.length} routes · late cut-off ${data.cutoffs.default}`
+            ? `${data.date} · ${data.routes.length} routes · Late cut-off ${data.cutoffs.default}`
             : 'Loading routes…'
       }
       onSignOut={onSignOut}
@@ -164,7 +164,7 @@ export default function TransportDashboard({ session, route, onSignOut }) {
                 { id: 'late', label: 'Late', value: counts.late },
               ].map((card) => (
                 <div key={card.id} className={`tr-stat is-${card.id}`}>
-                  <strong>{data ? card.value : '—'}</strong>
+                  <strong>{data ? card.value : '-'}</strong>
                   <span>{card.label}</span>
                 </div>
               ))}
@@ -198,7 +198,7 @@ export default function TransportDashboard({ session, route, onSignOut }) {
                         <tr className={`xls-row ${bus.late ? 'is-late' : 'is-ok'}`}>
                           <td className="xls-no">{index + 1}</td>
                           <td className="xls-route">{bus.route}</td>
-                          <td className="xls-time">{bus.arrivalTime || '—'}</td>
+                          <td className="xls-time">{bus.arrivalTime || '-'}</td>
                           <td>
                             <span
                               className={`xls-badge ${
@@ -382,7 +382,7 @@ export default function TransportDashboard({ session, route, onSignOut }) {
                               {open ? (
                                 <div className="tr-students">
                                   <p className="tr-students-head">
-                                    {bus.riders} of {bus.students.length} students riding — untick
+                                    {bus.riders} of {bus.students.length} students riding. Untick
                                     anyone absent today.
                                   </p>
                                   {bus.students.map((student) => (
@@ -402,7 +402,7 @@ export default function TransportDashboard({ session, route, onSignOut }) {
                                                 riding: !student.rider,
                                               }),
                                             student.rider
-                                              ? `${student.name} marked absent — not counted late.`
+                                              ? `${student.name} marked absent, not counted late.`
                                               : `${student.name} back on the route.`
                                           )
                                         }
@@ -412,7 +412,7 @@ export default function TransportDashboard({ session, route, onSignOut }) {
                                         {student.rollNo} · {student.section}
                                       </span>
                                       {student.busLate ? (
-                                        <span className="tr-student-late">late</span>
+                                        <span className="tr-student-late">Late</span>
                                       ) : null}
                                     </label>
                                   ))}

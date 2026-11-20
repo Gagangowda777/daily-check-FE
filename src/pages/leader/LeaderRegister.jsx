@@ -15,18 +15,18 @@ const ATTENDANCE_LABEL = {
   absent: { label: 'Absent', tone: 'is-alert' },
 }
 
-export default function LeaderRegister({ grade, section, version }) {
+export default function LeaderRegister({ grade, section, date, version }) {
   const [state, setState] = useState({ key: '', rows: [] })
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
   const [error, setError] = useState('')
 
-  const key = `${grade}:${section}:${version}`
+  const key = `${grade}:${section}:${date}:${version}`
 
   useEffect(() => {
     let alive = true
     api
-      .leaderRegister({ grade, section })
+      .leaderRegister({ grade, section, date })
       .then((payload) => {
         if (alive) {
           setState({ key, rows: payload.rows })
@@ -39,7 +39,7 @@ export default function LeaderRegister({ grade, section, version }) {
     return () => {
       alive = false
     }
-  }, [grade, section, key])
+  }, [grade, section, date, key])
 
   const rows = state.rows
   const text = query.trim().toLowerCase()

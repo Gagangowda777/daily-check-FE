@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { api } from '../../lib/api.js'
 import { ExcelSheet } from '../../components/ExcelSheet.jsx'
+import { cap } from '../../lib/text.js'
 
 const TONE = { present: 'is-ok', absent: 'is-pending', late: 'is-late' }
 
-export default function TeacherAttendance({ data, grade, section, busy, run }) {
+export default function TeacherAttendance({ data, grade, section, date, busy, run }) {
   const [ncFor, setNcFor] = useState(null)
   const [ncReason, setNcReason] = useState('')
   const [localError, setLocalError] = useState('')
@@ -16,13 +17,13 @@ export default function TeacherAttendance({ data, grade, section, busy, run }) {
     setLocalError('')
     const action =
       status === 'late' && ncReasonText
-        ? () => api.teacherAttendance(rollNo, { grade, section, status, nc: true, ncReason: ncReasonText })
-        : () => api.teacherAttendance(rollNo, { grade, section, status })
+        ? () => api.teacherAttendance(rollNo, { grade, section, date, status, nc: true, ncReason: ncReasonText })
+        : () => api.teacherAttendance(rollNo, { grade, section, date, status })
     const notice =
       status === 'late' && ncReasonText
         ? 'Marked late with NC.'
         : status === 'absent'
-          ? 'Marked absent — this carries to tomorrow until you mark present.'
+          ? 'Marked absent. This carries to tomorrow until you mark present.'
           : status === 'late'
             ? 'Marked late.'
             : 'Marked present.'
@@ -70,14 +71,14 @@ export default function TeacherAttendance({ data, grade, section, busy, run }) {
               <td className="xls-name">{row.name}</td>
               <td>
                 <span className={`xls-badge ${TONE[row.attendance] || ''}`.trim()}>
-                  {row.attendance}
+                  {cap(row.attendance)}
                 </span>
               </td>
               <td>
                 {row.ncFlag ? (
-                  <span className="xls-sub-text">NC · {row.ncReason || 'delayed'}</span>
+                  <span className="xls-sub-text">NC · {cap(row.ncReason || 'delayed')}</span>
                 ) : (
-                  <span className="xls-count">—</span>
+                  <span className="xls-count">-</span>
                 )}
               </td>
               <td className="xls-actions">

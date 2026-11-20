@@ -6,7 +6,7 @@ const initialsFor = (name = '') =>
     .slice(0, 2)
     .map((part) => part[0])
     .join('')
-    .toUpperCase() || '—'
+    .toUpperCase() || '-'
 
 export default function Shell({
   user,

@@ -131,23 +131,23 @@ export default function SuperAdminApprovals({ date, query = '', grade = 'ALL' })
       <div className="stat-grid">
         <Stat
           label="Ready for approval"
-          value={loading ? '—' : summary.ready}
-          note="teacher acknowledged"
+          value={loading ? '-' : summary.ready}
+          note="Teacher acknowledged"
           accent="ready"
           active={focus === 'ready'}
           onClick={() => setFocus(focus === 'ready' ? '' : 'ready')}
         />
         <Stat
           label="Awaiting teacher"
-          value={loading ? '—' : summary.awaitingTeacher}
-          note="not acknowledged yet"
+          value={loading ? '-' : summary.awaitingTeacher}
+          note="Not acknowledged yet"
           accent="awaiting"
           active={focus === 'awaiting'}
           onClick={() => setFocus(focus === 'awaiting' ? '' : 'awaiting')}
         />
         <Stat
           label="Approved today"
-          value={loading ? '—' : summary.approved}
+          value={loading ? '-' : summary.approved}
           note={`${summary.withUploads} section(s) uploaded`}
           accent="approved"
           active={focus === 'approved'}
@@ -155,8 +155,8 @@ export default function SuperAdminApprovals({ date, query = '', grade = 'ALL' })
         />
         <Stat
           label="NCs deducted"
-          value={loading ? '—' : summary.ncDeducted}
-          note="on final approval"
+          value={loading ? '-' : summary.ncDeducted}
+          note="On final approval"
           accent="nc"
           active={focus === 'nc'}
           onClick={() => setFocus(focus === 'nc' ? '' : 'nc')}
@@ -222,7 +222,7 @@ export default function SuperAdminApprovals({ date, query = '', grade = 'ALL' })
               <td className="xls-route">{row.label}</td>
               <td>
                 {row.rowCount === 0 ? (
-                  <span className="xls-count">nothing uploaded</span>
+                  <span className="xls-count">Nothing uploaded</span>
                 ) : (
                   <span className="xls-time">{row.rowCount}</span>
                 )}
@@ -231,25 +231,25 @@ export default function SuperAdminApprovals({ date, query = '', grade = 'ALL' })
                 {row.teacherAcknowledged ? (
                   <span className="xls-badge is-ack">yes · {row.acknowledgedAt}</span>
                 ) : (
-                  <span className="xls-badge is-neutral">not yet</span>
+                  <span className="xls-badge is-neutral">Not yet</span>
                 )}
                 <span className="xls-sub-text">
                   {row.acknowledgedBy
-                    ? `by ${row.acknowledgedBy}`
+                    ? `By ${row.acknowledgedBy}`
                     : row.teacher
-                      ? `class teacher: ${row.teacher}`
-                      : 'no class teacher on record'}
+                      ? `Class teacher: ${row.teacher}`
+                      : 'No class teacher on record'}
                 </span>
               </td>
               <td>
                 <span className="xls-count">
-                  {row.ncCount === null ? '—' : `${row.ncCount} NC`}
+                  {row.ncCount === null ? '-' : `${row.ncCount} NC`}
                   {row.ncStudents.length ? ` · ${row.ncStudents.length} student(s)` : ''}
                 </span>
               </td>
               <td>
                 <span className={`xls-badge ${STATUS_TONE[row.finalStatus] || ''}`.trim()}>
-                  {row.finalStatus === 'pending' ? 'pending admin' : row.finalStatus}
+                  {row.finalStatus === 'pending' ? 'Pending admin' : row.finalStatus}
                 </span>
                 {row.finalStatus === 'approved' ? (
                   <span className="xls-sub-text">
@@ -260,7 +260,7 @@ export default function SuperAdminApprovals({ date, query = '', grade = 'ALL' })
               </td>
               <td className="xls-actions">
                 {row.finalStatus === 'approved' ? (
-                  <span className="xls-count">signed off</span>
+                  <span className="xls-count">Signed off</span>
                 ) : (
                   <a
                     className={`tap${row.ready ? ' sa-review-link' : ''}`}

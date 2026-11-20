@@ -9,6 +9,8 @@ import AdminRegister from './admin/AdminRegister.jsx'
 import AdminSections from './admin/AdminSections.jsx'
 import DataEntry from './admin/DataEntry.jsx'
 import ChatInbox from '../components/ChatInbox.jsx'
+import ArchiveGallery from '../components/ArchiveGallery.jsx'
+import AnnouncementBoard from '../components/AnnouncementBoard.jsx'
 import InfoTip from '../components/InfoTip.jsx'
 import '../dashboard.css'
 
@@ -23,6 +25,8 @@ const GRADES = [
 // them.
 const NAV = [
   { id: 'data-entry', label: 'Data entry', href: routeHref('admin/data-entry') },
+  { id: 'broadcast', label: 'Broadcast', href: routeHref('admin/broadcast') },
+  { id: 'announcement', label: 'Announcement', href: routeHref('admin/announcement') },
   { id: 'inbox', label: 'Inbox', href: routeHref('admin/inbox') },
 ]
 
@@ -34,11 +38,13 @@ const PAGES = {
   modules: { title: 'Modules', crumb: 'Modules' },
   register: { title: 'Daily register', crumb: 'Daily register' },
   'data-entry': { title: 'Data Entry', crumb: '' },
+  broadcast: { title: 'Broadcast', crumb: 'Broadcast' },
+  announcement: { title: 'Announcement', crumb: 'Announcement' },
   inbox: { title: 'Inbox', crumb: 'Inbox' },
 }
 
 const DATA_ENTRY_HELP =
-  'Coordinator only. Type the day’s rows exactly as in the workbook — they feed the register, ' +
+  'Coordinator only. Type the day’s rows exactly as in the workbook. They feed the register, ' +
   'gate and every dashboard. Edits save into that day’s register; deleting a saved row clears it ' +
   'for that date only.'
 
@@ -109,7 +115,11 @@ export default function Dashboard({ session, route, onSignOut }) {
 
   const subtitle =
     page === 'inbox' ? (
-      `${formatDate(date)} · chat with the school`
+      'Chat with the school'
+    ) : page === 'broadcast' ? (
+      'Excel data archived before the 30-day delete'
+    ) : page === 'announcement' ? (
+      'Announcements for the school'
     ) : page === 'data-entry' ? (
       <span className="page-meta">
         <span>{filters.total ? `${filters.total.toLocaleString()} on roster` : 'Loading roster…'}</span>
@@ -129,6 +139,7 @@ export default function Dashboard({ session, route, onSignOut }) {
       subtitle={subtitle}
       onSignOut={onSignOut}
     >
+      {page === 'broadcast' || page === 'announcement' || page === 'inbox' ? null : (
       <section className="control-bar">
         <div className="control-row">
           <div className="date-field">
@@ -196,11 +207,16 @@ export default function Dashboard({ session, route, onSignOut }) {
           )}
         </div>
       </section>
+      )}
 
       {error ? <div className="banner">{error}</div> : null}
 
       {page === 'inbox' ? (
-        <ChatInbox role="admin" date={date} />
+        <ChatInbox role="admin" />
+      ) : page === 'broadcast' ? (
+        <ArchiveGallery />
+      ) : page === 'announcement' ? (
+        <AnnouncementBoard />
       ) : page === 'sections' ? (
         <AdminSections date={date} grade={grade} section={section} reload={reload} />
       ) : page === 'modules' ? (

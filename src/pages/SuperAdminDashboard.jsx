@@ -4,6 +4,8 @@ import Shell from '../components/Shell.jsx'
 import SuperAdminApprovals from './superadmin/SuperAdminApprovals.jsx'
 import SuperAdminReview from './superadmin/SuperAdminReview.jsx'
 import ChatInbox from '../components/ChatInbox.jsx'
+import ArchiveGallery from '../components/ArchiveGallery.jsx'
+import AnnouncementBoard from '../components/AnnouncementBoard.jsx'
 import InfoTip from '../components/InfoTip.jsx'
 import '../dashboard.css'
 import '../teacher.css'
@@ -11,16 +13,20 @@ import '../superadmin.css'
 
 const NAV = [
   { id: 'approvals', label: 'Final approval', href: routeHref('superadmin/approvals') },
+  { id: 'broadcast', label: 'Broadcast', href: routeHref('superadmin/broadcast') },
+  { id: 'announcement', label: 'Announcement', href: routeHref('superadmin/announcement') },
   { id: 'inbox', label: 'Inbox', href: routeHref('superadmin/inbox') },
 ]
 
 const PAGE_META = {
   approvals: {
     title: 'Final approval',
-    subtitle: 'sign off the admin uploads the class teachers have acknowledged',
+    subtitle: 'Sign off the admin uploads the class teachers have acknowledged',
   },
-  review: { title: 'Section review', subtitle: 'the uploaded day for one section' },
-  inbox: { title: 'Inbox', subtitle: 'chat with the admin, teachers and class leaders' },
+  review: { title: 'Section review', subtitle: 'The uploaded day for one section' },
+  broadcast: { title: 'Broadcast', subtitle: 'Excel data archived before the 30-day delete' },
+  announcement: { title: 'Announcement', subtitle: 'Announcements for the school' },
+  inbox: { title: 'Inbox', subtitle: 'Chat with the admin, teachers and class leaders' },
 }
 
 const APPROVAL_HELP =
@@ -54,7 +60,11 @@ export default function SuperAdminDashboard({ session, route, onSignOut }) {
   const reviewDate = review?.date || date
   const subtitle = (
     <span className="page-meta">
-      <span>{`${formatDate(review ? reviewDate : date)} · ${meta.subtitle}`}</span>
+      <span>
+        {page === 'inbox' && !review
+          ? meta.subtitle
+          : `${formatDate(review ? reviewDate : date)} · ${meta.subtitle}`}
+      </span>
       {page === 'approvals' && !review ? (
         <InfoTip label="How final approval works">{APPROVAL_HELP}</InfoTip>
       ) : null}
@@ -71,7 +81,7 @@ export default function SuperAdminDashboard({ session, route, onSignOut }) {
       subtitle={subtitle}
       onSignOut={onSignOut}
     >
-      {!review ? (
+      {!review && page !== 'broadcast' && page !== 'announcement' && page !== 'inbox' ? (
         <section className="control-bar">
           <div className="control-row">
             <div className="date-field">
@@ -131,7 +141,11 @@ export default function SuperAdminDashboard({ session, route, onSignOut }) {
         {review ? (
           <SuperAdminReview grade={review.grade} section={review.section} date={reviewDate} />
         ) : page === 'inbox' ? (
-          <ChatInbox role="superadmin" date={date} />
+          <ChatInbox role="superadmin" />
+        ) : page === 'broadcast' ? (
+          <ArchiveGallery />
+        ) : page === 'announcement' ? (
+          <AnnouncementBoard />
         ) : (
           <SuperAdminApprovals date={date} query={query} grade={grade} />
         )}

@@ -82,7 +82,7 @@ export default function AdminRegister({ date, grade, section, reload }) {
                           {row.busLate ? ' · late' : ''}
                         </span>
                       ) : (
-                        <span className="muted">—</span>
+                        <span className="muted">-</span>
                       )}
                     </td>
                     <td>
@@ -94,7 +94,7 @@ export default function AdminRegister({ date, grade, section, reload }) {
                           {row.restrictionReason}
                         </span>
                       ) : (
-                        <span className="muted">—</span>
+                        <span className="muted">-</span>
                       )}
                     </td>
                     <td>

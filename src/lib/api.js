@@ -1,5 +1,5 @@
 // Locally the Vite proxy forwards /api to the API. On Vercel set VITE_API_URL
-// to the deployed API host, e.g. https://daily-check-be.onrender.com — the
+// to the deployed API host, e.g. https://daily-check-be.onrender.com; the
 // /api suffix is added here so a bare host still works.
 const configuredBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
 const BASE = configuredBase
@@ -93,6 +93,9 @@ export const api = {
   sendMessage: (payload) => post('/messages', payload),
   sentMessages: (params = {}) => get(`/messages/sent?${query(params)}`),
   inboxMessages: (params = {}) => get(`/messages/inbox?${query(params)}`),
+  archives: () => get('/archives'),
+  announcements: () => get('/announcements'),
+  postAnnouncement: (payload) => post('/announcements', payload),
   sendInboxMessage: (payload) => post('/messages/inbox', payload),
 
   handovers: (params) => get(`/handovers?${query(params)}`),

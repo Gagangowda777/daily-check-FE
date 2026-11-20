@@ -16,17 +16,17 @@ const RANGES = [
   { days: 14, label: '14 days' },
 ]
 
-export default function LeaderTrend({ grade, section, version }) {
+export default function LeaderTrend({ grade, section, date, version }) {
   const [days, setDays] = useState(7)
   const [state, setState] = useState({ key: '', rows: [] })
   const [error, setError] = useState('')
 
-  const key = `${grade}:${section}:${days}:${version}`
+  const key = `${grade}:${section}:${days}:${date}:${version}`
 
   useEffect(() => {
     let alive = true
     api
-      .leaderTrend({ grade, section, days })
+      .leaderTrend({ grade, section, days, date })
       .then((payload) => {
         if (alive) {
           setState({ key, rows: payload.rows })
@@ -39,7 +39,7 @@ export default function LeaderTrend({ grade, section, version }) {
     return () => {
       alive = false
     }
-  }, [grade, section, days, key])
+  }, [grade, section, days, date, key])
 
   const rows = state.rows
   const loading = state.key !== key
@@ -93,7 +93,7 @@ export default function LeaderTrend({ grade, section, version }) {
               <td>{row.absent}</td>
               <td>{row.busLate ? <span className="xls-badge is-late">{row.busLate}</span> : '0'}</td>
               <td>{row.exit || 0}</td>
-              <td>{row.nc ?? '—'}</td>
+              <td>{row.nc ?? '-'}</td>
             </tr>
           ))
         )}

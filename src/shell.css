@@ -688,21 +688,8 @@ body,
   padding: 13px 15px;
   background: var(--card);
   border: 1px solid var(--line);
-  border-left: 3px solid #cfd9ea;
   border-radius: 12px;
   box-shadow: var(--shadow);
-}
-
-.stat.is-ok {
-  border-left-color: #3aa567;
-}
-
-.stat.is-alert {
-  border-left-color: var(--red);
-}
-
-.stat.is-warn {
-  border-left-color: #e0a63a;
 }
 
 .stat-label {

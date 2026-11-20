@@ -4,7 +4,7 @@ import { ExcelSheet } from '../../components/ExcelSheet.jsx'
 // The coordinator enters the day's restrictions in the admin Data entry
 // screen. The class teacher reads them out in class and then acknowledges
 // receipt of exactly that upload.
-export default function TeacherAdminData({ data, grade, section, busy, run }) {
+export default function TeacherAdminData({ data, grade, section, date, busy, run }) {
   const admin = data.adminData || { rows: [] }
   const rows = admin.rows || []
   // The announcement covers the exact upload; a later admin edit needs a
@@ -21,7 +21,7 @@ export default function TeacherAdminData({ data, grade, section, busy, run }) {
           <span
             className={`t-count${acknowledged ? ' is-ok' : announced ? ' is-alert' : ''}`}
           >
-            {acknowledged ? 'acknowledged' : announced ? 'announced' : `${rows.length} to announce`}
+            {acknowledged ? 'Acknowledged' : announced ? 'Announced' : `${rows.length} to announce`}
           </span>
         </div>
         <div className="t-body">
@@ -37,7 +37,7 @@ export default function TeacherAdminData({ data, grade, section, busy, run }) {
               onClick={() =>
                 run(
                   'admin-announce',
-                  () => api.teacherAnnounceAdmin({ grade, section }),
+                  () => api.teacherAnnounceAdmin({ grade, section, date }),
                   'Announced to the class.'
                 )
               }
@@ -52,7 +52,7 @@ export default function TeacherAdminData({ data, grade, section, busy, run }) {
               onClick={() =>
                 run(
                   'admin-ack',
-                  () => api.teacherAckAdmin({ grade, section }),
+                  () => api.teacherAckAdmin({ grade, section, date }),
                   'Admin upload acknowledged.'
                 )
               }
@@ -64,7 +64,7 @@ export default function TeacherAdminData({ data, grade, section, busy, run }) {
             {announced
               ? `Announced at ${admin.announcedAt}${admin.announcedBy ? ` by ${admin.announcedBy}` : ''}.`
               : admin.announcedAt
-                ? 'The admin upload changed since you announced it — announce the new rows again.'
+                ? 'The admin upload changed since you announced it. Announce the new rows again.'
                 : 'Not announced yet.'}
             {acknowledged
               ? ` Acknowledged at ${admin.acknowledgedAt}${admin.acknowledgedBy ? ` by ${admin.acknowledgedBy}` : ''}.`

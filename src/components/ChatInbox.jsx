@@ -133,7 +133,19 @@ export default function ChatInbox({ role, date, version = 0, onSent }) {
       thread.items.push(message)
       thread.lastAt = message.at || clock(message)
       if (!message.mine && !message.readAt) thread.unread += 1
-      if (!message.mine && message.fromContext && peer !== 'ALL') thread.label = message.fromContext
+      // Keep the role label unless the thread belongs to one person, so a
+      // stray sender name can never rename the whole admin conversation.
+      if (
+        !message.mine &&
+        message.fromContext &&
+        peer !== 'ALL' &&
+        peer !== 'ADMIN' &&
+        peer !== 'SUPERADMIN' &&
+        !thread.labelSet
+      ) {
+        thread.label = message.fromContext
+        thread.labelSet = true
+      }
     }
     for (const thread of map.values()) {
       thread.items.sort((a, b) =>

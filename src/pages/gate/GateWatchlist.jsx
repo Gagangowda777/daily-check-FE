@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ExcelSheet } from '../../components/ExcelSheet.jsx'
+import { cap } from '../../lib/text.js'
 
 export default function GateWatchlist({ restrictions = [], onInspect }) {
   const [gradeFilter, setGradeFilter] = useState('ALL')
@@ -86,7 +87,7 @@ export default function GateWatchlist({ restrictions = [], onInspect }) {
             <td>{item.restrictionReason}</td>
             <td>
               <span className="xls-badge is-late">
-                {item.resolutionStatus || 'pending'}
+                {cap(item.resolutionStatus || 'pending')}
               </span>
             </td>
             <td>

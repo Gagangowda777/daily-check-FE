@@ -5,7 +5,9 @@ const CHECKS = [
   { id: 'exit', label: 'Exit restrictions', href: routeHref('teacher/exit') },
   { id: 'entry', label: 'Entry checks', href: routeHref('teacher/entry') },
   { id: 'nc', label: 'NC tracker', href: routeHref('teacher/nc') },
-  { id: 'inbox', label: 'Inbox', href: routeHref('teacher/inbox') },
+  // The close check waits on a message the teacher sends to the class leader,
+  // not on simply opening the inbox.
+  { id: 'message', label: 'Message to class leader', href: routeHref('teacher/inbox') },
 ]
 
 const Stat = ({ label, value, note, tone }) => (
@@ -21,7 +23,7 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
 
   const done = (id) => !pendingBlocks.includes(id)
   const pendingLabels = CHECKS.filter((check) => pendingBlocks.includes(check.id)).map(
-    (check) => check.label.toLowerCase()
+    (check) => check.label
   )
 
   return (
@@ -30,7 +32,7 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
         <Stat
           label="Late buses"
           value={data.lateBuses.length}
-          note={data.lateBuses.length ? 'students affected' : 'none today'}
+          note={data.lateBuses.length ? 'Students affected' : 'None today'}
           tone={data.lateBuses.length ? 'alert' : 'ok'}
         />
         <Stat
@@ -42,13 +44,13 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
         <Stat
           label="Entry checks"
           value={data.entry.length}
-          note={data.entry.length ? 'students to verify' : 'all closed'}
+          note={data.entry.length ? 'Students to verify' : 'All closed'}
           tone={data.entry.length ? 'alert' : 'ok'}
         />
         <Stat
           label="NC count"
-          value={data.nc.count ?? '—'}
-          note={data.nc.updatedInNe ? 'updated in NE' : 'not updated in NE'}
+          value={data.nc.count ?? '-'}
+          note={data.nc.updatedInNe ? 'Updated in NE' : 'Not updated in NE'}
           tone={data.nc.updatedInNe ? 'ok' : 'alert'}
         />
       </div>
@@ -69,7 +71,7 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
                   {check.label}
                 </a>
                 <span className={`badge ${done(check.id) ? 'resolved' : 'pending'}`}>
-                  {done(check.id) ? 'done' : 'to do'}
+                  {done(check.id) ? 'Done' : 'To do'}
                 </span>
               </li>
             ))}

@@ -10,7 +10,7 @@ const EXIT_TONE = {
   resolved: 'is-ok',
 }
 
-export default function TeacherExit({ data, grade, section, busy, run }) {
+export default function TeacherExit({ data, grade, section, date, busy, run }) {
   const [form, setForm] = useState(null)
   const [value, setValue] = useState('')
 
@@ -28,10 +28,10 @@ export default function TeacherExit({ data, grade, section, busy, run }) {
     const id = `exit-${rollNo}-${mode}`
     const call =
       mode === 'absent'
-        ? () => api.teacherExit(rollNo, 'absent', { grade, section, reason: value })
+        ? () => api.teacherExit(rollNo, 'absent', { grade, section, date, reason: value })
         : mode === 'excuse'
-          ? () => api.teacherExit(rollNo, 'excuse', { grade, section, approver: value })
-          : () => api.teacherExit(rollNo, 'resolve', { grade, section, note: value })
+          ? () => api.teacherExit(rollNo, 'excuse', { grade, section, date, approver: value })
+          : () => api.teacherExit(rollNo, 'resolve', { grade, section, date, note: value })
     const notice =
       mode === 'absent' ? 'Marked absent.' : mode === 'excuse' ? 'Excused.' : 'Restriction resolved.'
     const ok = await run(id, call, notice)
@@ -98,7 +98,7 @@ export default function TeacherExit({ data, grade, section, busy, run }) {
                       onClick={() =>
                         run(
                           `exit-${row.rollNo}-acknowledge`,
-                          () => api.teacherExit(row.rollNo, 'acknowledge', { grade, section }),
+                          () => api.teacherExit(row.rollNo, 'acknowledge', { grade, section, date }),
                           'Acknowledged.'
                         )
                       }

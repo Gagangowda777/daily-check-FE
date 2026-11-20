@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react'
 import { api } from '../lib/api.js'
 import ExcelFeedPanel from './ExcelFeedPanel.jsx'
 import { BusArrivalsSheet } from './ExcelSheet.jsx'
+import { cap } from '../lib/text.js'
 
 const TABS = [
   { id: 'handover', label: 'Hand-over queue' },
   { id: 'exit', label: 'Exit restrictions' },
   { id: 'buses', label: 'Bus arrivals' },
-  { id: 'excel-feed', label: '📊 Excel & Data Feed' },
+  { id: 'excel-feed', label: 'Excel & Data Feed' },
   { id: 'settings', label: 'Settings & audit' },
 ]
 
@@ -17,7 +18,7 @@ const todayIso = () => new Date().toLocaleDateString('en-CA')
 const classOf = (row) => `${row.grade === 'PU1' ? '11' : '12'}${row.section}`
 
 const waitLabel = (minutes) => {
-  if (minutes === null || Number.isNaN(minutes)) return '—'
+  if (minutes === null || Number.isNaN(minutes)) return '-'
   const safe = Math.max(0, minutes)
   const hours = Math.floor(safe / 60)
   return hours > 0 ? `${hours}h ${String(safe % 60).padStart(2, '0')}m` : `${safe}m`
@@ -127,14 +128,14 @@ function HandoverPanel({ date, onChanged }) {
                 </span>
               </div>
               <div className="queue-timer">
-                <span className="queue-since">In from {since(row) || '—'}</span>
+                <span className="queue-since">In from {since(row) || '-'}</span>
                 {!isToday ? (
-                  <span className="queue-wait">historic</span>
+                  <span className="queue-wait">Historic</span>
                 ) : clockMinutes(row.handoverAt) === null ? (
-                  <span className="queue-wait">no arrival time logged</span>
+                  <span className="queue-wait">No arrival time logged</span>
                 ) : (
                   <span className="queue-wait">
-                    waiting {waitLabel(nowMinutes - clockMinutes(row.handoverAt))}
+                    Waiting {waitLabel(nowMinutes - clockMinutes(row.handoverAt))}
                   </span>
                 )}
               </div>
@@ -276,10 +277,10 @@ function ExitPanel({ date, onChanged }) {
                 <span className="picked-meta">
                   {row.rollNo} · {classOf(row)} · {row.restrictionReason} ·{' '}
                   {row.restrictionUntilResolved
-                    ? 'until resolved'
+                    ? 'Until resolved'
                     : row.restrictionEndDate
-                      ? `until ${row.restrictionEndDate}`
-                      : 'no end date'}
+                      ? `Until ${row.restrictionEndDate}`
+                      : 'No end date'}
                 </span>
                 {row.resolutionNote ? (
                   <span className="picked-meta">Note: {row.resolutionNote}</span>
@@ -289,11 +290,11 @@ function ExitPanel({ date, onChanged }) {
                 ) : null}
               </div>
 
-              <span className={`badge ${row.resolutionStatus}`}>{row.resolutionStatus}</span>
+              <span className={`badge ${row.resolutionStatus}`}>{cap(row.resolutionStatus)}</span>
 
               {row.resolutionStatus === 'resolved' ? (
                 <span className="muted queue-actions">
-                  {row.resolutionNote ? `Resolved: ${row.resolutionNote}` : 'Resolved — final'}
+                  {row.resolutionNote ? `Resolved: ${row.resolutionNote}` : 'Resolved, final'}
                 </span>
               ) : (
                 <div className="queue-actions">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { api } from '../../lib/api.js'
+import { cap } from '../../lib/text.js'
 
 export default function GateCheck({ data, onRefresh, onNotice, onError }) {
   const [query, setQuery] = useState('')
@@ -135,7 +136,7 @@ export default function GateCheck({ data, onRefresh, onNotice, onError }) {
             <input
               type="text"
               className="scanner-input"
-              placeholder="e.g. 25A201 or scan student barcode..."
+              placeholder="E.g. 25A201 or scan student barcode..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               autoFocus
@@ -183,15 +184,15 @@ export default function GateCheck({ data, onRefresh, onNotice, onError }) {
                 }`}
               >
                 {checkedStudent.clearance.isBlocked
-                  ? '🛑 Exit Restricted / Blocked'
+                  ? 'Exit Restricted / Blocked'
                   : checkedStudent.clearance.isAuthorized
-                  ? '🟢 Authorized for Exit'
-                  : '⚪ Regular Student (No Early Pass)'}
+                  ? 'Authorized for Exit'
+                  : 'Regular Student (No Early Pass)'}
               </span>
 
               {checkedStudent.clearance.isExited && (
                 <span className="badge-status is-blue">
-                  ✓ Exited Campus Today {checkedStudent.clearance.exitedAt ? `at ${checkedStudent.clearance.exitedAt}` : ''}
+                  Exited Campus Today {checkedStudent.clearance.exitedAt ? `at ${checkedStudent.clearance.exitedAt}` : ''}
                 </span>
               )}
             </div>
@@ -276,7 +277,7 @@ export default function GateCheck({ data, onRefresh, onNotice, onError }) {
                       )
                     }
                   >
-                    {checkedStudent.clearance.isExited ? 'Re-Log Departure' : '✓ Verify & Log Campus Exit'}
+                    {checkedStudent.clearance.isExited ? 'Re-Log Departure' : 'Verify & Log Campus Exit'}
                   </button>
                   <button
                     type="button"
@@ -337,7 +338,7 @@ export default function GateCheck({ data, onRefresh, onNotice, onError }) {
                 <ul style={{ margin: '6px 0 0', paddingLeft: '18px', fontSize: '12.5px', color: '#475467' }}>
                   {checkedStudent.recentLogs.map((log) => (
                     <li key={log._id}>
-                      <strong>{log.date} at {log.time}</strong> — {log.type === 'blocked_attempt' ? '🛑 Exit Blocked' : log.type === 'exit' ? '↗ Exited' : '↙ Entered'} ({log.status}) {log.remarks ? `[${log.remarks}]` : ''}
+                      <strong>{log.date} at {log.time}</strong>: {log.type === 'blocked_attempt' ? 'Exit Blocked' : log.type === 'exit' ? 'Exited' : 'Entered'} ({cap(log.status)}) {log.remarks ? `[${log.remarks}]` : ''}
                     </li>
                   ))}
                 </ul>

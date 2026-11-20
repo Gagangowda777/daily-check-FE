@@ -10,6 +10,7 @@ import LeaderNc from './leader/LeaderNc.jsx'
 import LeaderOverview from './leader/LeaderOverview.jsx'
 import LeaderRegister from './leader/LeaderRegister.jsx'
 import LeaderTrend from './leader/LeaderTrend.jsx'
+import AnnouncementBoard from '../components/AnnouncementBoard.jsx'
 import '../teacher.css'
 import '../leader.css'
 
@@ -21,36 +22,44 @@ const NAV = [
   { id: 'entry', label: 'Entry checks', href: routeHref('leader/entry') },
   { id: 'nc', label: 'NC & check', href: routeHref('leader/nc') },
   { id: 'trend', label: 'Trend', href: routeHref('leader/trend') },
+  { id: 'announcement', label: 'Announcement', href: routeHref('leader/announcement') },
   { id: 'inbox', label: 'Inbox', href: routeHref('leader/inbox') },
 ]
 
 const PAGE_META = {
-  overview: { title: 'Class overview', subtitle: 'your section at a glance' },
-  inbox: { title: 'Inbox', subtitle: 'read messages from the class teacher' },
-  register: { title: 'Class register', subtitle: 'today’s attendance for your section' },
-  exit: { title: 'Exit restrictions', subtitle: 'who cannot leave, and where each one stands' },
-  buses: { title: 'Late bus arrivals', subtitle: 'students whose bus reached after the cut-off' },
-  entry: { title: 'Entry checks', subtitle: 'subjects still pending with the class teacher' },
+  overview: { title: 'Class overview', subtitle: 'Your section at a glance' },
+  inbox: { title: 'Inbox', subtitle: 'Read messages from the class teacher' },
+  register: { title: 'Class register', subtitle: 'Today’s attendance for your section' },
+  exit: { title: 'Exit restrictions', subtitle: 'Who cannot leave, and where each one stands' },
+  buses: { title: 'Late bus arrivals', subtitle: 'Students whose bus reached after the cut-off' },
+  entry: { title: 'Entry checks', subtitle: 'Subjects still pending with the class teacher' },
   nc: { title: 'NC & daily check', subtitle: 'NC tracker and today’s close status' },
-  trend: { title: 'Trend', subtitle: 'attendance, buses and exits over the last days' },
+  trend: { title: 'Trend', subtitle: 'Attendance, buses and exits over the last days' },
+  announcement: { title: 'Announcement', subtitle: 'Announcements from the school, view only' },
 }
+
+const DATE_PAGES = ['register', 'exit', 'buses', 'entry', 'trend']
+
+const todayIso = () => new Date().toLocaleDateString('en-CA')
 
 export default function LeaderDashboard({ session, route, onSignOut }) {
   const { grade, section } = session
   const page = pageFor(route, 'leader', 'overview')
   const meta = PAGE_META[page] || PAGE_META.overview
 
+  const today = todayIso()
+  const [date, setDate] = useState(today)
   const [version, setVersion] = useState(0)
   const [state, setState] = useState({ key: '', data: null })
   const [error, setError] = useState('')
 
-  const key = `${grade}:${section}:${version}`
+  const key = `${grade}:${section}:${date}:${version}`
   const data = state.data
 
   useEffect(() => {
     let alive = true
     api
-      .leaderToday({ grade, section })
+      .leaderToday({ grade, section, date })
       .then((payload) => {
         if (!alive) return
         setState({ key, data: payload })
@@ -62,7 +71,7 @@ export default function LeaderDashboard({ session, route, onSignOut }) {
     return () => {
       alive = false
     }
-  }, [grade, section, key])
+  }, [grade, section, date, key])
 
   const refresh = () => setVersion((value) => value + 1)
 
@@ -112,22 +121,39 @@ export default function LeaderDashboard({ session, route, onSignOut }) {
       crumb={`Class leader · ${data.label}`}
       title={page === 'overview' ? `${data.label} overview` : meta.title}
       subtitle={`${data.date} · ${meta.subtitle}`}
-      actions={
-        <div className="head-actions">
-          <a className={`progress-chip${data.stats.unread ? ' is-alert' : ''}`} href={routeHref('leader/inbox')}>
-            {data.stats.unread ? `${data.stats.unread} unread` : 'inbox clear'}
-          </a>
-        </div>
-      }
       onSignOut={onSignOut}
     >
       <div className="leader-body">
+        {DATE_PAGES.includes(page) ? (
+          <section className="control-bar">
+            <div className="control-row">
+              <div className="date-field">
+                <input
+                  className="date-input"
+                  type="date"
+                  value={date}
+                  max={today}
+                  aria-label="Report date"
+                  onChange={(event) => setDate(event.target.value || today)}
+                />
+                <button
+                  type="button"
+                  className="ghost-button"
+                  onClick={() => setDate(today)}
+                  disabled={date === today}
+                >
+                  Today
+                </button>
+              </div>
+            </div>
+          </section>
+        ) : null}
         {error ? <div className="banner">{error}</div> : null}
 
         {page === 'inbox' ? (
           <LeaderInbox grade={grade} section={section} onChanged={refresh} />
         ) : page === 'register' ? (
-          <LeaderRegister grade={grade} section={section} version={version} />
+          <LeaderRegister grade={grade} section={section} date={date} version={version} />
         ) : page === 'exit' ? (
           <LeaderExit data={data} />
         ) : page === 'buses' ? (
@@ -137,7 +163,9 @@ export default function LeaderDashboard({ session, route, onSignOut }) {
         ) : page === 'nc' ? (
           <LeaderNc data={data} />
         ) : page === 'trend' ? (
-          <LeaderTrend grade={grade} section={section} version={version} />
+          <LeaderTrend grade={grade} section={section} date={date} version={version} />
+        ) : page === 'announcement' ? (
+          <AnnouncementBoard readOnly />
         ) : (
           <LeaderOverview data={data} />
         )}

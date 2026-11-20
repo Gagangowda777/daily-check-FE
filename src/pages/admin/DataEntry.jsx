@@ -232,7 +232,7 @@ export default function DataEntry({ date }) {
       if (res.errors?.length) {
         setError(
           `Skipped ${res.errors.length} row(s): ` +
-            res.errors.map((item) => `${item.rollNo} — ${item.error}`).join('; ')
+            res.errors.map((item) => `${item.rollNo}: ${item.error}`).join('; ')
         )
       }
       await refresh()
@@ -282,7 +282,7 @@ export default function DataEntry({ date }) {
     setNotice('')
     try {
       const res = await api.transportArrive(route, { date, time })
-      setNotice(`${route} arrival saved at ${time} — ${res.late ? 'late' : 'not late'} (cut-off ${res.cutoff}).`)
+      setNotice(`${route} arrival saved at ${time}, ${res.late ? 'late' : 'not late'} (cut-off ${res.cutoff}).`)
       await refresh()
     } catch (err) {
       setError(err.message)
@@ -355,7 +355,7 @@ export default function DataEntry({ date }) {
             exitRows.map((row, index) => (
               <tr key={row.key} className="xls-row">
                 <td className="xls-no">{index + 1}</td>
-                <td className="de-sec">{row.classLabel || '—'}</td>
+                <td className="de-sec">{row.classLabel || '-'}</td>
                 <td>
                   <input
                     className="de-input is-roll"
@@ -365,7 +365,7 @@ export default function DataEntry({ date }) {
                     onBlur={(event) => lookup(index, event.target.value, setExitRows)}
                   />
                 </td>
-                <td className="xls-name">{row.name || '—'}</td>
+                <td className="xls-name">{row.name || '-'}</td>
                 <td>
                   <input
                     className="de-input"
@@ -426,7 +426,7 @@ export default function DataEntry({ date }) {
             entryRows.map((row, index) => (
               <tr key={row.key} className="xls-row">
                 <td className="xls-no">{index + 1}</td>
-                <td className="de-sec">{row.classLabel || '—'}</td>
+                <td className="de-sec">{row.classLabel || '-'}</td>
                 <td>
                   <input
                     className="de-input is-roll"
@@ -436,7 +436,7 @@ export default function DataEntry({ date }) {
                     onBlur={(event) => lookup(index, event.target.value, setEntryRows)}
                   />
                 </td>
-                <td className="xls-name">{row.name || '—'}</td>
+                <td className="xls-name">{row.name || '-'}</td>
                 <td>
                   <input
                     className="de-input"
@@ -493,7 +493,7 @@ export default function DataEntry({ date }) {
                         value={value.updatedInNe ? 'yes' : 'no'}
                         onChange={(event) => setNc(group.grade, section, { updatedInNe: event.target.value === 'yes' })}
                       >
-                        <option value="no">—</option>
+                        <option value="no">Not set</option>
                         <option value="yes">Yes - CC</option>
                       </select>
                     </td>

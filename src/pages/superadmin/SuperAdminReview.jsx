@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../../lib/api.js'
 import { routeHref } from '../../lib/router.js'
 import { ExcelSheet } from '../../components/ExcelSheet.jsx'
+import { cap } from '../../lib/text.js'
 
 const prettyDate = (iso) => String(iso || '').split('-').reverse().join('/')
 
@@ -66,7 +67,7 @@ export default function SuperAdminReview({ grade, section, date }) {
       setNotice(
         `${row.label} approved for ${prettyDate(date)}` +
           (res.ncDeducted
-            ? ` — ${res.ncDeducted} NC(s) deducted, NC count is now ${res.ncCount}.`
+            ? `, ${res.ncDeducted} NC(s) deducted, NC count is now ${res.ncCount}.`
             : '.')
       )
       setForm({ deductNc: false, deductCount: '', note: '' })
@@ -119,22 +120,22 @@ export default function SuperAdminReview({ grade, section, date }) {
 
       <div className="sa-review-head">
         <div>
-          <h2>{labelOf(grade, section)} · uploaded day</h2>
+          <h2>{labelOf(grade, section)} · Uploaded day</h2>
           <p className="t-row-sub">
             {prettyDate(date)} · {row.rowCount} row{row.rowCount === 1 ? '' : 's'} from the
             coordinator
             {row.teacherAcknowledged
               ? ` · acknowledged by ${row.acknowledgedBy || 'the class teacher'} at ${row.acknowledgedAt}`
-              : ' · not acknowledged by the class teacher yet'}
+              : ' · Not acknowledged by the class teacher yet'}
           </p>
         </div>
         <span className={`xls-badge ${approved ? 'is-ok' : 'is-pending'}`}>
-          {approved ? 'approved' : row.ready ? 'ready to approve' : 'waiting for teacher'}
+          {approved ? 'Approved' : row.ready ? 'Ready to approve' : 'Waiting for teacher'}
         </span>
       </div>
 
       <div className="stat-grid">
-        <Stat label="Admin rows" value={row.rowCount} note="uploaded today" />
+        <Stat label="Admin rows" value={row.rowCount} note="Uploaded today" />
         <Stat
           label="Present"
           value={row.attendance.present}
@@ -149,13 +150,13 @@ export default function SuperAdminReview({ grade, section, date }) {
         />
         <Stat
           label="NCs today"
-          value={row.ncCount === null ? '—' : row.ncCount}
+          value={row.ncCount === null ? '-' : row.ncCount}
           note={
             row.ncStudents.length
               ? `${row.ncStudents.length} student(s) flagged`
               : row.ncCount
-                ? 'from the NC tracker'
-                : 'none recorded'
+                ? 'From the NC tracker'
+                : 'None recorded'
           }
           tone={row.ncCount ? 'warn' : 'ok'}
         />
@@ -185,7 +186,7 @@ export default function SuperAdminReview({ grade, section, date }) {
               <td className="xls-name">{item.name}</td>
               <td>{item.detail}</td>
               <td>
-                <span className="xls-count">{item.status}</span>
+                <span className="xls-count">{cap(item.status)}</span>
               </td>
             </tr>
           ))
@@ -196,7 +197,7 @@ export default function SuperAdminReview({ grade, section, date }) {
         <div className="t-card-head">
           <h2>Final approval</h2>
           <span className={`t-count${approved ? ' is-ok' : row.ready ? ' is-alert' : ''}`.trim()}>
-            {approved ? 'signed off' : row.ready ? 'ready' : 'waiting for teacher'}
+            {approved ? 'Signed off' : row.ready ? 'Ready' : 'Waiting for teacher'}
           </span>
         </div>
         <div className="t-body">

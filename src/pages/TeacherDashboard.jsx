@@ -10,6 +10,7 @@ import TeacherExit from './teacher/TeacherExit.jsx'
 import TeacherInbox from './teacher/TeacherInbox.jsx'
 import TeacherNc from './teacher/TeacherNc.jsx'
 import TeacherOverview from './teacher/TeacherOverview.jsx'
+import AnnouncementBoard from '../components/AnnouncementBoard.jsx'
 import '../teacher.css'
 
 const TEACHER_NAV = [
@@ -20,18 +21,24 @@ const TEACHER_NAV = [
   { id: 'exit', label: 'Exit restrictions', href: routeHref('teacher/exit') },
   { id: 'entry', label: 'Entry restrictions', href: routeHref('teacher/entry') },
   { id: 'nc', label: 'NC tracker', href: routeHref('teacher/nc') },
+  { id: 'announcement', label: 'Announcement', href: routeHref('teacher/announcement') },
   { id: 'inbox', label: 'Inbox', href: routeHref('teacher/inbox') },
 ]
 
+const DATE_PAGES = ['attendance', 'admin-data', 'buses', 'exit', 'entry']
+
+const todayIso = () => new Date().toLocaleDateString('en-CA')
+
 const PAGE_META = {
-    overview: { title: 'Overview', subtitle: 'finish every block to close today’s check' },
-  attendance: { title: 'Attendance', subtitle: 'present, absent or late — absences carry forward' },
-  'admin-data': { title: 'Admin data', subtitle: 'announce and acknowledge the coordinator’s upload' },
-  buses:{ title: 'Late bus arrivals', subtitle: 'students whose bus reached after the cut-off' },
-  exit: { title: 'Exit restrictions', subtitle: 'acknowledge, excuse or resolve each student' },
-  entry: { title: 'Entry restrictions', subtitle: 'clear the subjects still pending today' },
-  nc: { title: 'NC tracker', subtitle: 'daily NC count and NE update' },
-  inbox: { title: 'Inbox', subtitle: 'receive messages and write to the leader, admin or every dashboard' },
+    overview: { title: 'Overview', subtitle: 'Finish every block to close today’s check' },
+  attendance: { title: 'Attendance', subtitle: 'Present, absent or late. Absences carry forward' },
+  'admin-data': { title: 'Admin data', subtitle: 'Announce and acknowledge the coordinator’s upload' },
+  buses:{ title: 'Late bus arrivals', subtitle: 'Students whose bus reached after the cut-off' },
+  exit: { title: 'Exit restrictions', subtitle: 'Acknowledge, excuse or resolve each student' },
+  entry: { title: 'Entry restrictions', subtitle: 'Clear the subjects still pending today' },
+  nc: { title: 'NC tracker', subtitle: 'Daily NC count and NE update' },
+  announcement: { title: 'Announcement', subtitle: 'Announcements for the school' },
+  inbox: { title: 'Inbox', subtitle: 'Receive messages and write to the leader, admin or every dashboard' },
 }
 
 export default function TeacherDashboard({ session, route, onSignOut }) {
@@ -39,19 +46,21 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
   const page = pageFor(route, 'teacher', 'overview')
   const meta = PAGE_META[page] || PAGE_META.overview
 
+  const today = todayIso()
+  const [date, setDate] = useState(today)
   const [version, setVersion] = useState(0)
   const [state, setState] = useState({ key: '', data: null })
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState('')
 
-  const key = `${grade}:${section}:${version}`
+  const key = `${grade}:${section}:${date}:${version}`
   const data = state.data
 
   useEffect(() => {
     let alive = true
     api
-      .teacherToday({ grade, section })
+      .teacherToday({ grade, section, date })
       .then((payload) => {
         if (!alive) return
         setState({ key, data: payload })
@@ -63,7 +72,7 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
     return () => {
       alive = false
     }
-  }, [grade, section, key])
+  }, [grade, section, date, key])
 
   const refresh = (message) => {
     if (message) setNotice(message)
@@ -137,6 +146,30 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
       onSignOut={onSignOut}
     >
       <div className="teacher-body">
+        {DATE_PAGES.includes(page) ? (
+          <section className="control-bar">
+            <div className="control-row">
+              <div className="date-field">
+                <input
+                  className="date-input"
+                  type="date"
+                  value={date}
+                  max={today}
+                  aria-label="Report date"
+                  onChange={(event) => setDate(event.target.value || today)}
+                />
+                <button
+                  type="button"
+                  className="ghost-button"
+                  onClick={() => setDate(today)}
+                  disabled={date === today}
+                >
+                  Today
+                </button>
+              </div>
+            </div>
+          </section>
+        ) : null}
         {error ? <div className="banner">{error}</div> : null}
         {notice ? (
           <p className="action-notice" role="status">
@@ -145,19 +178,49 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
         ) : null}
 
         {page === 'attendance' ? (
-          <TeacherAttendance data={data} grade={grade} section={section} busy={busy} run={run} />
+          <TeacherAttendance
+            data={data}
+            grade={grade}
+            section={section}
+            date={date}
+            busy={busy}
+            run={run}
+          />
         ) : page === 'admin-data' ? (
-          <TeacherAdminData data={data} grade={grade} section={section} busy={busy} run={run} />
+          <TeacherAdminData
+            data={data}
+            grade={grade}
+            section={section}
+            date={date}
+            busy={busy}
+            run={run}
+          />
         ) : page === 'buses' ? (
           <TeacherBuses data={data} />
         ) : page === 'exit' ? (
-          <TeacherExit data={data} grade={grade} section={section} busy={busy} run={run} />
+          <TeacherExit
+            data={data}
+            grade={grade}
+            section={section}
+            date={date}
+            busy={busy}
+            run={run}
+          />
         ) : page === 'entry' ? (
-          <TeacherEntry data={data} grade={grade} section={section} busy={busy} run={run} />
+          <TeacherEntry
+            data={data}
+            grade={grade}
+            section={section}
+            date={date}
+            busy={busy}
+            run={run}
+          />
         ) : page === 'nc' ? (
           <TeacherNc data={data} grade={grade} section={section} busy={busy} run={run} />
         ) : page === 'inbox' || page === 'message' ? (
           <TeacherInbox grade={grade} section={section} onSent={refresh} />
+        ) : page === 'announcement' ? (
+          <AnnouncementBoard />
         ) : (
           <TeacherOverview
             data={data}

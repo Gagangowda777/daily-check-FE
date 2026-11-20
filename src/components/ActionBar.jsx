@@ -90,7 +90,7 @@ export default function ActionBar({ date, onCreated }) {
           + Send message
         </button>
         <button type="button" className="action-button is-secondary" style={{ background: '#0b1220', color: '#ffffff' }} onClick={() => start('excel')}>
-          📊 Feed from Excel / Bulk
+          Feed from Excel / Bulk
         </button>
       </div>
 
@@ -169,7 +169,7 @@ function Drawer({ title, subtitle, onClose, children }) {
   )
 }
 
-// Students can only be chosen from the master list — the box is a search field,
+// Students can only be chosen from the master list; the box is a search field,
 // never free text.
 function StudentPicker({ value, onPick }) {
   const [text, setText] = useState('')
@@ -496,7 +496,7 @@ function MessageForm({ date, onDone, onClose }) {
         body: body.trim(),
       })
       onDone(
-        `${result.sent} section(s) notified — class leaders and class teachers. ${result.target}.`
+        `${result.sent} section(s) notified: class leaders and class teachers. ${result.target}.`
       )
     } catch (err) {
       setError(err.message)
@@ -514,7 +514,7 @@ function MessageForm({ date, onDone, onClose }) {
             id="message-subject"
             className="form-input"
             maxLength="120"
-            placeholder="e.g. Bus routes delayed this morning"
+            placeholder="E.g. Bus routes delayed this morning"
             value={subject}
             onChange={(event) => setSubject(event.target.value)}
           />

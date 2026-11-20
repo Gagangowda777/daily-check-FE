@@ -38,12 +38,12 @@ const readSession = () => {
 
 // Keep the browser tab in step with the screen the user is on.
 const TITLES = {
-  superadmin: 'Daily Check — Super Admin',
-  admin: 'Daily Check — Admin',
-  teacher: 'Daily Check — Class Teacher',
-  transport: 'Daily Check — Transport',
-  leader: 'Daily Check — Class Leader',
-  gate: 'Daily Check — Gate & Security',
+  superadmin: 'Daily Check · Super Admin',
+  admin: 'Daily Check · Admin',
+  teacher: 'Daily Check · Class Teacher',
+  transport: 'Daily Check · Transport',
+  leader: 'Daily Check · Class Leader',
+  gate: 'Daily Check · Gate & Security',
 }
 
 export default function App() {
@@ -68,7 +68,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    document.title = session ? TITLES[session.role] || 'Daily Check' : 'Daily Check — Sign In'
+    document.title = session ? TITLES[session.role] || 'Daily Check' : 'Daily Check · Sign In'
   }, [session])
 
   // Keep each role inside its own area of the app.

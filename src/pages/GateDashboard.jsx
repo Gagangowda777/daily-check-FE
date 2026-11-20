@@ -22,27 +22,27 @@ const GATE_NAV = [
 const PAGE_META = {
   check: {
     title: 'Gate clearance & scanner',
-    subtitle: 'verify student roll number, check clearance status, and log campus departures',
+    subtitle: 'Verify student roll number, check clearance status, and log campus departures',
   },
   passes: {
     title: 'Authorized gate passes',
-    subtitle: 'students approved for early dismissal, authorized exit, or sent home',
+    subtitle: 'Students approved for early dismissal, authorized exit, or sent home',
   },
   watchlist: {
     title: 'Exit restriction watchlist',
-    subtitle: 'students prohibited from leaving campus during school hours',
+    subtitle: 'Students prohibited from leaving campus during school hours',
   },
   logs: {
     title: 'Gate movement log',
-    subtitle: 'chronological record of campus entries, exits, and blocked attempts today',
+    subtitle: 'Chronological record of campus entries, exits, and blocked attempts today',
   },
   buses: {
     title: 'Bus arrival monitor',
-    subtitle: 'status of morning bus arrivals entering campus through the main gate',
+    subtitle: 'Status of morning bus arrivals entering campus through the main gate',
   },
   inbox: {
     title: 'Inbox',
-    subtitle: 'messages from the admin and the rest of the school',
+    subtitle: 'Messages from the admin and the rest of the school',
   },
 }
 
@@ -124,19 +124,19 @@ export default function GateDashboard({ session, route, onSignOut }) {
             <div className="gate-stat is-blocked">
               <span className="gate-stat-label">Active Exit Blocks</span>
               <strong>{data.summary.activeRestrictions}</strong>
-              <span className="gate-stat-sub">prohibited from leaving</span>
+              <span className="gate-stat-sub">Prohibited from leaving</span>
             </div>
 
             <div className="gate-stat is-authorized">
               <span className="gate-stat-label">Authorized Passes</span>
               <strong>{data.summary.authorizedPasses}</strong>
-              <span className="gate-stat-sub">approved exit passes</span>
+              <span className="gate-stat-sub">Approved exit passes</span>
             </div>
 
             <div className="gate-stat is-exited">
               <span className="gate-stat-label">Exited Today</span>
               <strong>{data.summary.exitedCount}</strong>
-              <span className="gate-stat-sub">departures verified</span>
+              <span className="gate-stat-sub">Departures verified</span>
             </div>
 
             <div className="gate-stat is-neutral">

@@ -167,7 +167,7 @@ export default function StudentSearch() {
                   {detail.busLateHistory.map((item) => (
                     <li key={`${item.date}-bus`}>
                       <span>{item.date}</span>
-                      <span className="modal-date">{item.busRoute || '—'}</span>
+                      <span className="modal-date">{item.busRoute || '-'}</span>
                     </li>
                   ))}
                 </ul>
@@ -184,7 +184,7 @@ export default function StudentSearch() {
                     <span className="modal-date">
                       {item.restrictionReason
                         ? `${item.restrictionReason} (${item.resolutionStatus})`
-                        : '—'}
+                        : '-'}
                     </span>
                   </li>
                 ))}

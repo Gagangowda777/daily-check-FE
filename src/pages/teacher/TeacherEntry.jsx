@@ -2,7 +2,7 @@ import { Fragment, useState } from 'react'
 import { api } from '../../lib/api.js'
 import { ExcelSheet } from '../../components/ExcelSheet.jsx'
 
-export default function TeacherEntry({ data, grade, section, busy, run }) {
+export default function TeacherEntry({ data, grade, section, date, busy, run }) {
   const [handoverFor, setHandoverFor] = useState(null)
   const [note, setNote] = useState('')
 
@@ -16,7 +16,7 @@ export default function TeacherEntry({ data, grade, section, busy, run }) {
   const sendHandover = async (row) => {
     const ok = await run(
       `entry-${row.rollNo}`,
-      () => api.teacherEntry(row.rollNo, 'handover', { grade, section, note }),
+      () => api.teacherEntry(row.rollNo, 'handover', { grade, section, date, note }),
       `${row.name} sent to the admin queue.`
     )
     // Keep the note on screen if the hand-over failed.
@@ -65,6 +65,7 @@ export default function TeacherEntry({ data, grade, section, busy, run }) {
                             api.teacherEntry(row.rollNo, 'submitted', {
                               grade,
                               section,
+                              date,
                               cleared: [subject],
                             }),
                           `${subject} cleared for ${row.name}.`
@@ -94,6 +95,7 @@ export default function TeacherEntry({ data, grade, section, busy, run }) {
                           api.teacherEntry(row.rollNo, 'submitted', {
                             grade,
                             section,
+                            date,
                             cleared: row.subjects,
                           }),
                         `${row.name} submitted.`
@@ -109,7 +111,7 @@ export default function TeacherEntry({ data, grade, section, busy, run }) {
                     onClick={() =>
                       run(
                         `entry-${row.rollNo}`,
-                        () => api.teacherEntry(row.rollNo, 'absent', { grade, section }),
+                        () => api.teacherEntry(row.rollNo, 'absent', { grade, section, date }),
                         `${row.name} marked absent.`
                       )
                     }

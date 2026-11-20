@@ -44,13 +44,13 @@ export default function LeaderOverview({ data }) {
         <Stat
           label="Absent"
           value={stats.absent}
-          note={stats.late ? `${stats.late} late` : 'no late marks'}
+          note={stats.late ? `${stats.late} late` : 'No late marks'}
           tone={stats.absent ? 'alert' : 'ok'}
         />
         <Stat
           label="Late buses"
           value={stats.busLate}
-          note={stats.busLate ? 'students affected' : 'all on time'}
+          note={stats.busLate ? 'Students affected' : 'All on time'}
           tone={stats.busLate ? 'alert' : 'ok'}
         />
         <Stat
@@ -62,7 +62,7 @@ export default function LeaderOverview({ data }) {
         <Stat
           label="Entry checks"
           value={stats.entryPending}
-          note={stats.entryPending ? 'with the teacher' : 'all clear'}
+          note={stats.entryPending ? 'With the teacher' : 'All clear'}
           tone={stats.entryPending ? 'warn' : 'ok'}
         />
         <Stat
@@ -78,7 +78,7 @@ export default function LeaderOverview({ data }) {
           <div className="t-card-head">
             <h2>What needs you</h2>
             <span className={`t-count${tasks.length ? ' is-alert' : ' is-ok'}`}>
-              {tasks.length ? `${tasks.length} item(s)` : 'all clear'}
+              {tasks.length ? `${tasks.length} item(s)` : 'All clear'}
             </span>
           </div>
           <div className="t-body">
@@ -110,7 +110,7 @@ export default function LeaderOverview({ data }) {
               </div>
               <div>
                 <dt>Daily check</dt>
-                <dd>{data.check.submittedAt ? `closed ${data.check.submittedAt}` : 'open'}</dd>
+                <dd>{data.check.submittedAt ? `Closed ${data.check.submittedAt}` : 'Open'}</dd>
               </div>
             </dl>
           </div>
@@ -135,7 +135,7 @@ export default function LeaderOverview({ data }) {
                     <p className="note-body">{note.body}</p>
                     <div className="note-foot">
                       <span className="muted">
-                        {note.readAt ? `read by ${note.readBy || 'the teacher'} at ${note.readAt}` : 'not read yet'}
+                        {note.readAt ? `Read by ${note.readBy || 'the teacher'} at ${note.readAt}` : 'Not read yet'}
                       </span>
                     </div>
                   </article>
