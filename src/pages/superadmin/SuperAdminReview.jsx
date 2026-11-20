@@ -194,8 +194,10 @@ export default function SuperAdminReview({ grade, section, date }) {
         ) : (
           row.adminRows.map((item, index) => {
             const ncStudent = row.ncStudents.find((s) => s.rollNo === item.rollNo)
-            const hasNc = Boolean(item.ncFlag || ncStudent)
-            const max = Number(item.ncCount || ncStudent?.count) || (hasNc ? 1 : 0)
+            const detailNcMatch = String(item.detail || '').match(/(?:crossed\s*(\d+)|(\d+))\s*nc/i)
+            const detailNcCount = detailNcMatch ? Number(detailNcMatch[1] || detailNcMatch[2]) || 3 : (/nc/i.test(String(item.detail || '')) ? 3 : 0)
+            const hasNc = Boolean(item.ncFlag || ncStudent || detailNcCount > 0)
+            const max = Number(item.ncCount || ncStudent?.count || detailNcCount) || (hasNc ? 1 : 0)
             const reduced = form.reduceQty[item.rollNo] || 0
 
             return (
