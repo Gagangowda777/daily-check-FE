@@ -123,7 +123,7 @@ export default function AnnouncementBoard({ readOnly = false }) {
             {readOnly ? null : (
               <button
                 type="button"
-                className="wa-new ann-new"
+                className="ann-post"
                 aria-label="Post an announcement photo"
                 title="Post an announcement photo"
                 onClick={() => {
@@ -132,7 +132,7 @@ export default function AnnouncementBoard({ readOnly = false }) {
                   setCompose(true)
                 }}
               >
-                +
+                <span aria-hidden="true">+</span> Post
               </button>
             )}
           </div>
@@ -393,16 +393,26 @@ function PhotoComposer({ onClose, onPosted }) {
               Retake
             </button>
           ) : (
-            <button type="button" className="ann-open" onClick={capture} disabled={!ready}>
-              Capture photo
-            </button>
+            <>
+              <button type="button" className="ann-open" onClick={capture} disabled={!ready}>
+                Capture photo
+              </button>
+              <label className="ann-file">
+                <input type="file" accept="image/*" capture="environment" onChange={choose} />
+                Take photo
+              </label>
+            </>
           )}
 
           <label className="ann-file">
-            <input type="file" accept="image/*" capture="environment" onChange={choose} />
-            Choose from device
+            <input type="file" accept="image/*" onChange={choose} />
+            Upload photo
           </label>
         </div>
+
+        <p className="ann-help">
+          Take a new photo or upload one from your device, then add the text below.
+        </p>
 
         <label className="ann-field">
           <span>Announcement</span>
