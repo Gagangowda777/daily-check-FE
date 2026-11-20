@@ -52,6 +52,19 @@ const listStamp = (item) =>
 
 const dayHeading = (iso) => (iso === todayIso() ? 'Today' : shortDate(iso))
 
+const initials = (name = '') => {
+  const parts = String(name || '')
+    .split(/[\s·•-]+/)
+    .map((part) => part.replace(/[^A-Za-z0-9]/g, ''))
+    .filter(Boolean)
+  return (
+    parts
+      .slice(0, 2)
+      .map((part) => part[0].toUpperCase())
+      .join('') || 'CL'
+  )
+}
+
 export default function AnnouncementBoard({ readOnly = false }) {
   const [state, setState] = useState({ key: '', items: [] })
   const [compose, setCompose] = useState(false)
@@ -154,8 +167,8 @@ export default function AnnouncementBoard({ readOnly = false }) {
                     className={`wa-thread${openId === item.id ? ' is-active' : ''}`}
                     onClick={() => read(item)}
                   >
-                    <span className="wa-avatar ann-avatar">
-                      <img src={item.photoUrl} alt="" loading="lazy" />
+                    <span className="wa-avatar">
+                      {initials(item.context || item.author || 'Class Leader')}
                     </span>
                     <span className="wa-thread-main">
                       <span className="wa-thread-top">
@@ -199,8 +212,8 @@ export default function AnnouncementBoard({ readOnly = false }) {
                 >
                   ←
                 </button>
-                <span className="wa-avatar ann-avatar">
-                  <img src={open.photoUrl} alt="" />
+                <span className="wa-avatar">
+                  {initials(open.context || open.author || 'Class Leader')}
                 </span>
                 <div className="wa-chat-title">
                   <strong>{open.caption || 'Photo announcement'}</strong>
