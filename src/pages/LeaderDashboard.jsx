@@ -15,19 +15,19 @@ import '../leader.css'
 
 const NAV = [
   { id: 'overview', label: 'Overview', href: routeHref('leader/overview') },
-  { id: 'inbox', label: 'Inbox', href: routeHref('leader/inbox') },
   { id: 'register', label: 'Class register', href: routeHref('leader/register') },
   { id: 'exit', label: 'Exit restrictions', href: routeHref('leader/exit') },
   { id: 'buses', label: 'Late arrivals', href: routeHref('leader/buses') },
   { id: 'entry', label: 'Entry checks', href: routeHref('leader/entry') },
   { id: 'nc', label: 'NC & check', href: routeHref('leader/nc') },
   { id: 'trend', label: 'Trend', href: routeHref('leader/trend') },
+  { id: 'inbox', label: 'Inbox', href: routeHref('leader/inbox') },
 ]
 
 const PAGE_META = {
-  overview: { title: 'Class overview', subtitle: 'your section at a glance, and what needs you' },
-  inbox: { title: 'Inbox', subtitle: 'read messages from the class teacher and write back' },
-  register: { title: 'Class register', subtitle: 'mark today’s attendance for your section' },
+  overview: { title: 'Class overview', subtitle: 'your section at a glance' },
+  inbox: { title: 'Inbox', subtitle: 'read messages from the class teacher' },
+  register: { title: 'Class register', subtitle: 'today’s attendance for your section' },
   exit: { title: 'Exit restrictions', subtitle: 'who cannot leave, and where each one stands' },
   buses: { title: 'Late bus arrivals', subtitle: 'students whose bus reached after the cut-off' },
   entry: { title: 'Entry checks', subtitle: 'subjects still pending with the class teacher' },
@@ -127,7 +127,7 @@ export default function LeaderDashboard({ session, route, onSignOut }) {
         {page === 'inbox' ? (
           <LeaderInbox grade={grade} section={section} onChanged={refresh} />
         ) : page === 'register' ? (
-          <LeaderRegister grade={grade} section={section} version={version} onChanged={refresh} />
+          <LeaderRegister grade={grade} section={section} version={version} />
         ) : page === 'exit' ? (
           <LeaderExit data={data} />
         ) : page === 'buses' ? (
@@ -139,7 +139,7 @@ export default function LeaderDashboard({ session, route, onSignOut }) {
         ) : page === 'trend' ? (
           <LeaderTrend grade={grade} section={section} version={version} />
         ) : (
-          <LeaderOverview data={data} grade={grade} section={section} onChanged={refresh} />
+          <LeaderOverview data={data} />
         )}
       </div>
     </Shell>

@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { api } from '../../lib/api.js'
 import { routeHref } from '../../lib/router.js'
 
@@ -9,12 +8,6 @@ const CHECKS = [
   { id: 'inbox', label: 'Inbox', href: routeHref('teacher/inbox') },
 ]
 
-const NOTE_KIND = {
-  attendance: 'Attendance',
-  exit: 'Exit',
-  general: 'General',
-}
-
 const Stat = ({ label, value, note, tone }) => (
   <div className={`stat${tone ? ` is-${tone}` : ''}`}>
     <span className="stat-label">{label}</span>
@@ -24,79 +17,7 @@ const Stat = ({ label, value, note, tone }) => (
 )
 
 export default function TeacherOverview({ data, grade, section, pendingBlocks, closed, busy, run }) {
-  const [notes, setNotes] = useState({ key: '', rows: [], unread: 0 })
-  const [noteError, setNoteError] = useState('')
-  const [notices, setNotices] = useState({ key: '', rows: [], unread: 0 })
-  const [noticeError, setNoticeError] = useState('')
-
-  const key = `${grade}:${section}:${data.date}`
   const exitOpen = data.exit.filter((row) => ['pending', 'acknowledged'].includes(row.status))
-
-  useEffect(() => {
-    let alive = true
-    api
-      .teacherNotes({ grade, section })
-      .then((payload) => {
-        if (alive) setNotes({ key, rows: payload.notes, unread: payload.unread })
-      })
-      .catch((err) => {
-        if (alive) setNoteError(err.message)
-      })
-    return () => {
-      alive = false
-    }
-  }, [grade, section, key])
-
-  useEffect(() => {
-    let alive = true
-    api
-      .teacherNotices({ grade, section })
-      .then((payload) => {
-        if (alive) setNotices({ key, rows: payload.notices, unread: payload.unread })
-      })
-      .catch((err) => {
-        if (alive) setNoticeError(err.message)
-      })
-    return () => {
-      alive = false
-    }
-  }, [grade, section, key])
-
-  const markRead = async (note) => {
-    setNoteError('')
-    try {
-      const result = await api.teacherNoteRead(note.id, { grade, section })
-      setNotes((current) => ({
-        ...current,
-        unread: Math.max(0, current.unread - 1),
-        rows: current.rows.map((row) =>
-          row.id === note.id
-            ? { ...row, readAt: result.readAt || row.readAt, readBy: result.readBy || data.teacher }
-            : row
-        ),
-      }))
-    } catch (err) {
-      setNoteError(err.message)
-    }
-  }
-
-  const markNoticeRead = async (notice) => {
-    setNoticeError('')
-    try {
-      const result = await api.teacherNoticeRead(notice.id, { grade, section })
-      setNotices((current) => ({
-        ...current,
-        unread: Math.max(0, current.unread - 1),
-        rows: current.rows.map((row) =>
-          row.id === notice.id
-            ? { ...row, readAt: result.readAt || row.readAt, readBy: result.readBy || data.teacher }
-            : row
-        ),
-      }))
-    } catch (err) {
-      setNoticeError(err.message)
-    }
-  }
 
   const done = (id) => !pendingBlocks.includes(id)
   const pendingLabels = CHECKS.filter((check) => pendingBlocks.includes(check.id)).map(
@@ -176,95 +97,6 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
                 {busy === 'close' ? 'Closing…' : 'Complete daily check'}
               </button>
             </>
-          )}
-        </div>
-      </section>
-
-      <section className="t-card">
-        <div className="t-card-head">
-          <h2>Messages from admin</h2>
-          <span
-            className={`t-count${
-              notices.unread ? ' is-alert' : notices.rows.length ? ' is-ok' : ''
-            }`}
-          >
-            {notices.unread
-              ? `${notices.unread} unread`
-              : notices.rows.length
-                ? 'all read'
-                : 'none'}
-          </span>
-        </div>
-        <div className="t-body">
-          {noticeError ? <div className="banner">{noticeError}</div> : null}
-          {notices.key !== key ? (
-            <p className="muted">Loading messages…</p>
-          ) : notices.rows.length === 0 ? (
-            <p className="muted">No messages from the administration today.</p>
-          ) : (
-            notices.rows.map((notice) => (
-              <article key={notice.id} className={`note${notice.readAt ? ' is-read' : ''}`}>
-                <div className="note-head">
-                  <span className="note-kind kind-admin">{notice.typeLabel}</span>
-                  <span className="note-time">{notice.sentAtIst || notice.sentAt} IST</span>
-                </div>
-                <strong className="notice-title">{notice.title}</strong>
-                <p className="note-body">{notice.body}</p>
-                <div className="note-foot">
-                  <span className="muted">
-                    {notice.sender}
-                    {notice.readAt ? ` · read at ${notice.readAt}` : ''}
-                  </span>
-                  {notice.readAt ? null : (
-                    <button
-                      type="button"
-                      className="tap is-quiet"
-                      onClick={() => markNoticeRead(notice)}
-                    >
-                      Mark read
-                    </button>
-                  )}
-                </div>
-              </article>
-            ))
-          )}
-        </div>
-      </section>
-
-      <section className="t-card">
-        <div className="t-card-head">
-          <h2>Notes from the class leader</h2>
-          <span className={`t-count${notes.unread ? ' is-alert' : notes.rows.length ? ' is-ok' : ''}`}>
-            {notes.unread ? `${notes.unread} unread` : notes.rows.length ? 'all read' : 'none'}
-          </span>
-        </div>
-        <div className="t-body">
-          {noteError ? <div className="banner">{noteError}</div> : null}
-          {notes.key !== key ? (
-            <p className="muted">Loading notes…</p>
-          ) : notes.rows.length === 0 ? (
-            <p className="muted">The class leader has not sent any notes today.</p>
-          ) : (
-            notes.rows.map((note) => (
-              <article key={note.id} className={`note${note.readAt ? ' is-read' : ''}`}>
-                <div className="note-head">
-                  <span className={`note-kind kind-${note.kind}`}>{NOTE_KIND[note.kind] || 'Note'}</span>
-                  <span className="note-time">{note.sentAtIst || note.sentAt} IST</span>
-                </div>
-                <p className="note-body">{note.body}</p>
-                <div className="note-foot">
-                  <span className="muted">
-                    {note.author}
-                    {note.readAt ? ` · read at ${note.readAt}` : ''}
-                  </span>
-                  {note.readAt ? null : (
-                    <button type="button" className="tap is-quiet" onClick={() => markRead(note)}>
-                      Mark read
-                    </button>
-                  )}
-                </div>
-              </article>
-            ))
           )}
         </div>
       </section>

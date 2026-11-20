@@ -120,6 +120,10 @@ export const api = {
   teacherEntry: (rollNo, action, payload) =>
     post(`/teacher/entry/${encodeURIComponent(rollNo)}/${action}`, payload),
   teacherNc: (payload) => post('/teacher/nc', payload),
+  teacherAttendance: (rollNo, payload) =>
+    post(`/teacher/attendance/${encodeURIComponent(rollNo)}`, payload),
+  teacherAnnounceAdmin: (payload) => post('/teacher/admin-data/announce', payload),
+  teacherAckAdmin: (payload) => post('/teacher/admin-data/acknowledge', payload),
   teacherClose: (payload) => post('/teacher/check/close', payload),
   teacherMessage: (payload) => post('/teacher/message', payload),
 
@@ -151,14 +155,12 @@ export const api = {
   gateLog: (payload) => post('/gate/log', payload),
   gateLogs: (params = {}) => get(`/gate/logs?${query(params)}`),
 
-  notes: (params = {}) => get(`/notes?${query(params)}`),
-  addNote: (payload) => post('/notes', payload),
-  updateNote: (id, payload) =>
-    send(`/notes/${encodeURIComponent(id)}`, 'PUT', payload),
-  deleteNote: (id) => send(`/notes/${encodeURIComponent(id)}`, 'DELETE', {}),
-  applyNote: (id, payload) =>
-    post(`/notes/${encodeURIComponent(id)}/apply`, payload),
-  commitDataSheet: (payload) => post('/datasheet/commit', payload),
+  superAdminToday: (params) => get(`/superadmin/today?${query(params)}`),
+  superAdminApprove: (payload) => post('/superadmin/approve', payload),
+
+  dataEntry: (date) => get(`/datasheet/${encodeURIComponent(date)}`),
+  saveDataEntry: (payload) => post('/datasheet/entry', payload),
+  saveNcSheet: (payload) => post('/datasheet/nc', payload),
 
   settings: () => get('/settings'),
   saveSettings: (payload) => send('/settings', 'PUT', payload),

@@ -1,12 +1,4 @@
-import { useState } from 'react'
-import { api } from '../../lib/api.js'
 import { routeHref } from '../../lib/router.js'
-
-const NOTE_KINDS = [
-  { id: 'attendance', label: 'Attendance' },
-  { id: 'exit', label: 'Exit' },
-  { id: 'general', label: 'General' },
-]
 
 const KIND_LABEL = {
   attendance: 'Attendance',
@@ -22,13 +14,7 @@ const Stat = ({ label, value, note, tone }) => (
   </div>
 )
 
-export default function LeaderOverview({ data, grade, section, onChanged }) {
-  const [kind, setKind] = useState('general')
-  const [body, setBody] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
-
+export default function LeaderOverview({ data }) {
   const { stats } = data
   const tasks = [
     stats.unread
@@ -45,27 +31,6 @@ export default function LeaderOverview({ data, grade, section, onChanged }) {
       ? null
       : { href: routeHref('leader/nc'), text: 'Daily check not closed by the teacher yet', tone: 'warn' },
   ].filter(Boolean)
-
-  const send = async (event) => {
-    event.preventDefault()
-    if (body.trim().length < 3) {
-      setError('Write a short note for the class teacher.')
-      return
-    }
-    setBusy(true)
-    setError('')
-    setNotice('')
-    try {
-      await api.leaderNoteSend({ grade, section, kind, body: body.trim() })
-      setBody('')
-      setNotice('Note sent to the class teacher.')
-      onChanged?.()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setBusy(false)
-    }
-  }
 
   return (
     <>
@@ -153,38 +118,10 @@ export default function LeaderOverview({ data, grade, section, onChanged }) {
 
         <section className="t-card">
           <div className="t-card-head">
-            <h2>Report to the class teacher</h2>
+            <h2>Notes sent today</h2>
             <span className="t-count">{data.notes.length} today</span>
           </div>
           <div className="t-body">
-            <form className="note-form" onSubmit={send}>
-              <div className="t-actions">
-                {NOTE_KINDS.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    className={`tap${kind === option.id ? '' : ' is-quiet'}`}
-                    onClick={() => setKind(option.id)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-              <textarea
-                className="form-input textarea"
-                rows="3"
-                maxLength="600"
-                placeholder="E.g. 3 students absent in the first hour, 25A201 has an exit slip pending."
-                value={body}
-                onChange={(event) => setBody(event.target.value)}
-              />
-              {error ? <div className="banner">{error}</div> : null}
-              {notice ? <p className="action-notice">{notice}</p> : null}
-              <button type="submit" className="action-button" disabled={busy}>
-                {busy ? 'Sending…' : 'Send note'}
-              </button>
-            </form>
-
             {data.notes.length > 0 ? (
               <div className="note-list">
                 {data.notes.map((note) => (

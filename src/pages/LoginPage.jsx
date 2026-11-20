@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api.js'
 
+// The Transport In-charge and Gate / Security dashboards are kept in the code
+// but hidden from the portal for now; put their entries back here to re-enable
+// them.
 const LOGIN_TYPES = [
+  { id: 'superadmin', label: 'Super Admin', email: 'superadmin@dailycheck.demo' },
   { id: 'admin', label: 'Admin / Coordinator', email: 'admin@dailycheck.demo' },
   { id: 'teacher', label: 'Class Teacher', email: 'teacher@dailycheck.demo' },
-  { id: 'transport', label: 'Transport In-charge', email: 'transport@dailycheck.demo' },
   { id: 'leader', label: 'Class Leader', email: 'leader@dailycheck.demo' },
-  { id: 'gate', label: 'Gate / Security', email: 'security@dailycheck.demo' },
 ]
+
+const DEFAULT_TYPE = LOGIN_TYPES.find((item) => item.id === 'admin') || LOGIN_TYPES[0]
 
 const DEMO_PASSWORD = 'demo1234'
 
@@ -61,8 +65,8 @@ function LockIcon() {
 }
 
 export default function LoginPage({ onSignIn }) {
-  const [type, setType] = useState(LOGIN_TYPES[0])
-  const [email, setEmail] = useState(LOGIN_TYPES[0].email)
+  const [type, setType] = useState(DEFAULT_TYPE)
+  const [email, setEmail] = useState(DEFAULT_TYPE.email)
   const [password, setPassword] = useState(DEMO_PASSWORD)
   const [showPassword, setShowPassword] = useState(false)
   const [sections, setSections] = useState([])

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { api } from '../lib/api.js'
 import { pageFor, routeHref } from '../lib/router.js'
 import Shell from '../components/Shell.jsx'
+import TeacherAdminData from './teacher/TeacherAdminData.jsx'
+import TeacherAttendance from './teacher/TeacherAttendance.jsx'
 import TeacherBuses from './teacher/TeacherBuses.jsx'
 import TeacherEntry from './teacher/TeacherEntry.jsx'
 import TeacherExit from './teacher/TeacherExit.jsx'
@@ -12,6 +14,8 @@ import '../teacher.css'
 
 const TEACHER_NAV = [
   { id: 'overview', label: 'Overview', href: routeHref('teacher/overview') },
+  { id: 'attendance', label: 'Attendance', href: routeHref('teacher/attendance') },
+  { id: 'admin-data', label: 'Admin data', href: routeHref('teacher/admin-data') },
   { id: 'buses', label: 'Late bus arrivals', href: routeHref('teacher/buses') },
   { id: 'exit', label: 'Exit restrictions', href: routeHref('teacher/exit') },
   { id: 'entry', label: 'Entry restrictions', href: routeHref('teacher/entry') },
@@ -20,8 +24,10 @@ const TEACHER_NAV = [
 ]
 
 const PAGE_META = {
-  overview: { title: 'Overview', subtitle: 'finish every block to close today’s check' },
-  buses: { title: 'Late bus arrivals', subtitle: 'students whose bus reached after the cut-off' },
+    overview: { title: 'Overview', subtitle: 'finish every block to close today’s check' },
+  attendance: { title: 'Attendance', subtitle: 'present, absent or late — absences carry forward' },
+  'admin-data': { title: 'Admin data', subtitle: 'announce and acknowledge the coordinator’s upload' },
+  buses:{ title: 'Late bus arrivals', subtitle: 'students whose bus reached after the cut-off' },
   exit: { title: 'Exit restrictions', subtitle: 'acknowledge, excuse or resolve each student' },
   entry: { title: 'Entry restrictions', subtitle: 'clear the subjects still pending today' },
   nc: { title: 'NC tracker', subtitle: 'daily NC count and NE update' },
@@ -138,7 +144,11 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
           </p>
         ) : null}
 
-        {page === 'buses' ? (
+        {page === 'attendance' ? (
+          <TeacherAttendance data={data} grade={grade} section={section} busy={busy} run={run} />
+        ) : page === 'admin-data' ? (
+          <TeacherAdminData data={data} grade={grade} section={section} busy={busy} run={run} />
+        ) : page === 'buses' ? (
           <TeacherBuses data={data} />
         ) : page === 'exit' ? (
           <TeacherExit data={data} grade={grade} section={section} busy={busy} run={run} />

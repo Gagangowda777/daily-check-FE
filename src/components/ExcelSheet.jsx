@@ -3,23 +3,34 @@ import './excel.css'
 
 // A compact, Excel-like sheet used by every dashboard so the daily sections
 // (buses, exits, entries, register, trend) read the same way as the workbook.
-export function ExcelSheet({ title, note, meta, toolbar, columns, children, className = '' }) {
+export function ExcelSheet({
+  title,
+  note,
+  meta,
+  toolbar,
+  reserveHeader = false,
+  columns,
+  children,
+  className = '',
+}) {
   const cols = columns.map((col) =>
     typeof col === 'string' ? { key: col, label: col } : { key: col.key || col.label, ...col }
   )
 
   return (
     <section className={`xls-card ${className}`.trim()}>
-      <div className="xls-bar">
-        <div className="xls-bar-text">
-          <h2>{title}</h2>
-          {note ? <p className="xls-note">{note}</p> : null}
+      {title || note || meta || toolbar || reserveHeader ? (
+        <div className="xls-bar">
+          <div className="xls-bar-text">
+            {title ? <h2>{title}</h2> : null}
+            {note ? <p className="xls-note">{note}</p> : null}
+          </div>
+          <div className="xls-bar-side">
+            {meta ? <span className="xls-meta">{meta}</span> : null}
+            {toolbar || null}
+          </div>
         </div>
-        <div className="xls-bar-side">
-          {meta ? <span className="xls-meta">{meta}</span> : null}
-          {toolbar || null}
-        </div>
-      </div>
+      ) : null}
       <div className="xls-scroll">
         <table className="xls-table">
           <thead>

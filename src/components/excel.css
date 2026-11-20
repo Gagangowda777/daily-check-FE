@@ -83,7 +83,7 @@
   padding: 7px 10px;
   border-right: 1px solid #edf1f8;
   border-bottom: 1px solid #edf1f8;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .xls-table td:last-child {
@@ -103,11 +103,12 @@
 }
 
 .xls-no {
-  width: 36px;
-  text-align: right;
-  font-size: 11px;
+  width: 40px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: #94a3b8;
+  color: #0f172a;
   white-space: nowrap;
 }
 
@@ -118,6 +119,7 @@
 }
 
 .xls-time {
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   color: #0f172a;
@@ -125,6 +127,7 @@
 }
 
 .xls-name {
+  font-size: 12px;
   font-weight: 700;
   color: #0f172a;
 }
@@ -165,6 +168,11 @@
 .xls-badge.is-blue {
   background: #e8f0fe;
   color: #2563eb;
+}
+
+.xls-badge.is-neutral {
+  background: #eef2f9;
+  color: #475569;
 }
 
 .xls-students {

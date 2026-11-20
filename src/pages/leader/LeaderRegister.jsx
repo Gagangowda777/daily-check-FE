@@ -9,19 +9,17 @@ const FILTERS = [
   { id: 'absent', label: 'Absent' },
 ]
 
-const ATTENDANCE = [
-  { id: 'present', label: 'P' },
-  { id: 'late', label: 'L' },
-  { id: 'absent', label: 'A' },
-]
+const ATTENDANCE_LABEL = {
+  present: { label: 'Present', tone: 'is-ok' },
+  late: { label: 'Late', tone: 'is-late' },
+  absent: { label: 'Absent', tone: 'is-alert' },
+}
 
-export default function LeaderRegister({ grade, section, version, onChanged }) {
+export default function LeaderRegister({ grade, section, version }) {
   const [state, setState] = useState({ key: '', rows: [] })
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
-  const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
 
   const key = `${grade}:${section}:${version}`
 
@@ -56,28 +54,6 @@ export default function LeaderRegister({ grade, section, version, onChanged }) {
     { present: 0, late: 0, absent: 0 }
   )
 
-  const mark = async (row, status) => {
-    if (row.attendance === status) return
-    setBusy(row.rollNo)
-    setError('')
-    setNotice('')
-    try {
-      await api.leaderAttendance(row.rollNo, { grade, section, status })
-      setState((current) => ({
-        ...current,
-        rows: current.rows.map((item) =>
-          item.rollNo === row.rollNo ? { ...item, attendance: status } : item
-        ),
-      }))
-      setNotice(`${row.rollNo} ${row.name} marked ${status}.`)
-      onChanged?.()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setBusy('')
-    }
-  }
-
   const loading = state.key !== key
 
   const toolbar = (
@@ -106,11 +82,6 @@ export default function LeaderRegister({ grade, section, version, onChanged }) {
   return (
     <>
       {error ? <div className="banner">{error}</div> : null}
-      {notice ? (
-        <p className="action-notice" role="status">
-          {notice}
-        </p>
-      ) : null}
       <ExcelSheet
         title="Class register"
         meta={
@@ -118,7 +89,7 @@ export default function LeaderRegister({ grade, section, version, onChanged }) {
             ? 'Loading…'
             : `${counts.present} present · ${counts.late} late · ${counts.absent} absent`
         }
-        note="Attendance can be updated for today only, and only for your own section. Every change is logged."
+        note="Read only. The class teacher marks attendance for this section."
         toolbar={toolbar}
         columns={['Sl. no.', 'Roll no', 'Student', 'Bus', 'Attendance']}
       >
@@ -148,27 +119,12 @@ export default function LeaderRegister({ grade, section, version, onChanged }) {
               <td>
                 {row.busRoute ? `${row.busRoute}${row.busLate ? ' · late' : ''}` : 'No bus'}
               </td>
-              <td className="xls-actions">
-                <div
-                  className="t-actions"
-                  role="group"
-                  aria-label={`Attendance for ${row.name}`}
+              <td>
+                <span
+                  className={`xls-badge ${ATTENDANCE_LABEL[row.attendance]?.tone || 'is-pending'}`}
                 >
-                  {ATTENDANCE.map((option) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      className={`attendance-tap att-${option.id}${
-                        row.attendance === option.id ? ' is-on' : ''
-                      }`}
-                      disabled={busy === row.rollNo}
-                      title={option.id}
-                      onClick={() => mark(row, option.id)}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
+                  {ATTENDANCE_LABEL[row.attendance]?.label || row.attendance}
+                </span>
               </td>
             </tr>
           ))

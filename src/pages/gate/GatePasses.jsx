@@ -101,16 +101,16 @@ export default function GatePasses({ passes = [], onRefresh, onNotice, onError }
             <td className="xls-name">{pass.rollNo}</td>
             <td>{pass.name}</td>
             <td>
-              <span className="badge-status is-blue">{pass.classLabel}</span>
+              <span className="xls-badge is-blue">{pass.classLabel}</span>
             </td>
             <td className="xls-time">{pass.exitTime || 'Today'}</td>
             <td>{pass.approvedBy || 'Teacher'}</td>
             <td>{pass.reason}</td>
             <td>
               {pass.exited ? (
-                <span className="badge-status is-green">Departed</span>
+                <span className="xls-badge is-ok">Departed</span>
               ) : (
-                <span className="badge-status is-amber">Pending exit</span>
+                <span className="xls-badge is-late">Pending exit</span>
               )}
             </td>
             <td className="xls-actions">

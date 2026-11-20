@@ -81,11 +81,11 @@ export default function GateWatchlist({ restrictions = [], onInspect }) {
             <td className="xls-name">{item.rollNo}</td>
             <td>{item.name}</td>
             <td>
-              <span className="badge-status is-blue">{item.classLabel}</span>
+              <span className="xls-badge is-blue">{item.classLabel}</span>
             </td>
             <td>{item.restrictionReason}</td>
             <td>
-              <span className="badge-status is-amber">
+              <span className="xls-badge is-late">
                 {item.resolutionStatus || 'pending'}
               </span>
             </td>
@@ -97,7 +97,7 @@ export default function GateWatchlist({ restrictions = [], onInspect }) {
                   : 'Today'}
             </td>
             <td>
-              <span className="badge-status is-red">Block exit</span>
+              <span className="xls-badge is-alert">Block exit</span>
             </td>
             <td className="xls-actions">
               {onInspect ? (

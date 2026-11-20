@@ -81,29 +81,29 @@ export default function GateLogs({ logs = [] }) {
             <td className="xls-time">{log.time}</td>
             <td>
               {log.type === 'blocked_attempt' ? (
-                <span className="badge-status is-red">Blocked</span>
+                <span className="xls-badge is-alert">Blocked</span>
               ) : log.type === 'exit' ? (
-                <span className="badge-status is-green">Exit</span>
+                <span className="xls-badge is-ok">Exit</span>
               ) : (
-                <span className="badge-status is-blue">Entry</span>
+                <span className="xls-badge is-blue">Entry</span>
               )}
             </td>
             <td className="xls-name">{log.rollNo}</td>
             <td>{log.name}</td>
             <td>
-              <span className="badge-status is-blue">
+              <span className="xls-badge is-blue">
                 {log.grade === 'PU1' ? '11' : '12'}
                 {log.section}
               </span>
             </td>
             <td>
               <span
-                className={`badge-status ${
+                className={`xls-badge ${
                   log.status === 'blocked'
-                    ? 'is-red'
+                    ? 'is-alert'
                     : log.status === 'authorized'
-                      ? 'is-green'
-                      : 'is-gray'
+                      ? 'is-ok'
+                      : 'is-neutral'
                 }`}
               >
                 {log.status}
