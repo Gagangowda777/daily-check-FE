@@ -31,11 +31,11 @@ export default function TeacherEntry({ data, grade, section, date, busy, run }) 
       title="Entry restrictions"
       meta={`${entryLeft} to verify`}
       note="Clear each pending subject, mark the student absent, or hand the case over to administration."
-      columns={['Sl. no.', 'Roll no', 'Student', 'Pending subjects', 'Status', 'Actions']}
+      columns={['Sl. no.', 'Roll no', 'Student', 'Pending subjects', 'Actions']}
     >
       {entryLeft === 0 ? (
         <tr>
-          <td className="xls-empty" colSpan={6}>
+          <td className="xls-empty" colSpan={5}>
             All entry checks closed for this section.
           </td>
         </tr>
@@ -76,11 +76,6 @@ export default function TeacherEntry({ data, grade, section, date, busy, run }) 
                     </button>
                   ))}
                 </div>
-              </td>
-              <td>
-                <span className={`xls-badge ${row.handover ? 'is-late' : 'is-pending'}`}>
-                  {row.handover ? 'Handed over' : 'Pending'}
-                </span>
               </td>
               <td className="xls-actions">
                 <div className="t-actions">
@@ -127,7 +122,7 @@ export default function TeacherEntry({ data, grade, section, date, busy, run }) 
 
             {handoverFor === row.rollNo ? (
               <tr className="xls-sub">
-                <td colSpan={6}>
+                <td colSpan={5}>
                   <div className="t-inline">
                     <input
                       className="form-input"

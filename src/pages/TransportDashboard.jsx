@@ -3,6 +3,7 @@ import { api } from '../lib/api.js'
 import { pageFor, routeHref } from '../lib/router.js'
 import Shell from '../components/Shell.jsx'
 import { ExcelSheet } from '../components/ExcelSheet.jsx'
+import InboxHub from '../components/InboxHub.jsx'
 import TransportInbox from './transport/TransportInbox.jsx'
 import '../transport.css'
 
@@ -143,7 +144,9 @@ export default function TransportDashboard({ session, route, onSignOut }) {
     >
       <div className="tr-body">
         {page === 'inbox' ? (
-          <TransportInbox />
+          <InboxHub>
+            <TransportInbox />
+          </InboxHub>
         ) : (
           <>
             {error ? (

@@ -2,8 +2,15 @@ import { api } from '../../lib/api.js'
 import { ExcelSheet } from '../../components/ExcelSheet.jsx'
 
 // The coordinator enters the day's restrictions in the admin Data entry
-// screen. The class teacher reads them out in class and then acknowledges
-// receipt of exactly that upload.
+// screen. The class teacher reads them out in class, acknowledges receipt of
+// exactly that upload, and ticks each student off one row at a time.
+
+// Status words read as sentences, not database values.
+const capital = (text) => {
+  const value = String(text || '').trim()
+  return value ? value.charAt(0).toUpperCase() + value.slice(1) : ''
+}
+
 export default function TeacherAdminData({ data, grade, section, date, busy, run }) {
   const admin = data.adminData || { rows: [] }
   const rows = admin.rows || []
@@ -80,11 +87,19 @@ export default function TeacherAdminData({ data, grade, section, date, busy, run
         title="Uploaded rows"
         meta={`${rows.length} row${rows.length === 1 ? '' : 's'}`}
         note="These are the exit and entry restrictions the coordinator fed today."
-        columns={['Sl. no.', 'Type', 'Roll no', 'Student', 'Uploaded detail', 'Status']}
+        columns={[
+          'Sl. no.',
+          'Type',
+          'Roll no',
+          'Student',
+          'Uploaded detail',
+          'Status',
+          'Acknowledge',
+        ]}
       >
         {rows.length === 0 ? (
           <tr>
-            <td className="xls-empty" colSpan={6}>
+            <td className="xls-empty" colSpan={7}>
               Nothing uploaded by the admin today.
             </td>
           </tr>
@@ -101,7 +116,38 @@ export default function TeacherAdminData({ data, grade, section, date, busy, run
               <td className="xls-name">{row.name}</td>
               <td>{row.detail}</td>
               <td>
-                <span className="xls-badge is-pending">{row.status}</span>
+                <span className="xls-badge is-pending">{capital(row.status)}</span>
+              </td>
+              <td className="xls-actions">
+                {row.acknowledgedAt ? (
+                  <span className="t-ack-done">
+                    Acknowledged {row.acknowledgedAt}
+                    {row.acknowledgedBy ? ` · ${row.acknowledgedBy}` : ''}
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    className="tap"
+                    disabled={Boolean(busy)}
+                    title={`Acknowledge the upload for ${row.name}`}
+                    onClick={() =>
+                      run(
+                        `admin-row-${row.type}-${row.rollNo}`,
+                        () =>
+                          api.teacherAckRowAdmin({
+                            grade,
+                            section,
+                            date,
+                            type: row.type,
+                            rollNo: row.rollNo,
+                          }),
+                        `${row.name} acknowledged.`
+                      )
+                    }
+                  >
+                    Acknowledge
+                  </button>
+                )}
               </td>
             </tr>
           ))

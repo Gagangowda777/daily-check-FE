@@ -4,7 +4,8 @@ import './announcement.css'
 
 // Shared announcement screen. A photo is taken with the device camera (or
 // chosen from the device), resized in the browser, then uploaded by the API to
-// Cloudinary. The board below lists what the school has posted.
+// Cloudinary. Announcements behave like inbox messages: the list shows one row
+// each, and a row is only read once somebody opens it.
 
 const MAX_EDGE = 1280
 
@@ -40,6 +41,7 @@ export default function AnnouncementBoard({ readOnly = false }) {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [version, setVersion] = useState(0)
+  const [openId, setOpenId] = useState('')
 
   const key = `announcements:${version}`
 
@@ -61,18 +63,35 @@ export default function AnnouncementBoard({ readOnly = false }) {
   }, [key])
 
   const loading = state.key !== key
+  const open = state.items.find((item) => item.id === openId) || null
+  const unread = state.items.filter((item) => !item.seen).length
+
+  // A row counts as read only when it is opened, as with an inbox message.
+  const read = (item) => {
+    setOpenId(item.id)
+    if (item.seen) return
+    setState((prev) => ({
+      ...prev,
+      items: prev.items.map((row) => (row.id === item.id ? { ...row, seen: true } : row)),
+    }))
+    api.viewAnnouncement(item.id).catch(() => null)
+  }
 
   return (
     <section className="ann-board">
       <div className="ann-head">
         <div>
-          <h2>Announcement photos</h2>
+          <h2>Announcements</h2>
           <p className="ann-sub">
             {loading
-              ? 'Loading photos…'
+              ? 'Loading announcements…'
               : state.items.length
-                ? `${state.items.length} photo${state.items.length === 1 ? '' : 's'} posted`
-                : 'Photos posted by the school appear here'}
+                ? unread
+                  ? `${unread} unread of ${state.items.length}`
+                  : 'You are all caught up'
+                : readOnly
+                  ? 'Photos the class leader posts appear here'
+                  : 'No announcements yet. Take one to start'}
           </p>
         </div>
         {readOnly ? null : (
@@ -98,28 +117,64 @@ export default function AnnouncementBoard({ readOnly = false }) {
       ) : null}
 
       {loading ? (
-        <p className="empty">Loading photos…</p>
+        <p className="empty">Loading announcements…</p>
       ) : state.items.length === 0 ? (
         <p className="empty">
-          {readOnly ? 'No announcements yet.' : 'No announcements yet. Take a photo to start.'}
+          {readOnly
+            ? 'No announcements yet. Photos the class leader posts appear here.'
+            : 'No announcements yet. Take a photo to start.'}
         </p>
       ) : (
-        <ul className="ann-grid">
+        <ul className="ann-list">
           {state.items.map((item) => (
             <li key={item.id}>
-              <figure className="ann-card">
-                <img src={item.photoUrl} alt={item.caption || 'Announcement photo'} loading="lazy" />
-                <figcaption>
-                  {item.caption ? <p className="ann-caption">{item.caption}</p> : null}
-                  <span className="ann-meta">
-                    {item.context || item.author} · {stamp(item)}
+              <button
+                type="button"
+                className={`ann-row${item.seen ? '' : ' is-unread'}`}
+                onClick={() => read(item)}
+              >
+                <img className="ann-thumb" src={item.photoUrl} alt="" loading="lazy" />
+                <span className="ann-row-main">
+                  <span className="ann-row-top">
+                    <strong>{item.caption || 'Photo announcement'}</strong>
+                    <span className="ann-row-time">{stamp(item)}</span>
                   </span>
-                </figcaption>
-              </figure>
+                  <span className="ann-row-meta">{item.context || item.author}</span>
+                </span>
+                {item.seen ? null : <span className="ann-dot" aria-label="Unread" />}
+              </button>
             </li>
           ))}
         </ul>
       )}
+
+      {open ? (
+        <div className="ann-modal" role="presentation" onClick={() => setOpenId('')}>
+          <div
+            className="ann-dialog ann-reader"
+            role="dialog"
+            aria-modal="true"
+            aria-label={open.caption || 'Announcement photo'}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="ann-dialog-head">
+              <h3>{open.caption || 'Photo announcement'}</h3>
+              <button type="button" className="ghost-button" onClick={() => setOpenId('')}>
+                Close
+              </button>
+            </div>
+            <img
+              className="ann-reader-photo"
+              src={open.photoUrl}
+              alt={open.caption || 'Announcement photo'}
+            />
+            {open.caption ? <p className="ann-caption">{open.caption}</p> : null}
+            <p className="ann-reader-meta">
+              {open.context || open.author} · {stamp(open)}
+            </p>
+          </div>
+        </div>
+      ) : null}
 
       {compose && !readOnly ? (
         <PhotoComposer

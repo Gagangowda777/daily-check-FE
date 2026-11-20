@@ -9,6 +9,7 @@ import AdminRegister from './admin/AdminRegister.jsx'
 import AdminSections from './admin/AdminSections.jsx'
 import DataEntry from './admin/DataEntry.jsx'
 import ChatInbox from '../components/ChatInbox.jsx'
+import InboxHub from '../components/InboxHub.jsx'
 import ArchiveGallery from '../components/ArchiveGallery.jsx'
 import AnnouncementBoard from '../components/AnnouncementBoard.jsx'
 import InfoTip from '../components/InfoTip.jsx'
@@ -25,8 +26,6 @@ const GRADES = [
 // them.
 const NAV = [
   { id: 'data-entry', label: 'Data entry', href: routeHref('admin/data-entry') },
-  { id: 'broadcast', label: 'Broadcast', href: routeHref('admin/broadcast') },
-  { id: 'announcement', label: 'Announcement', href: routeHref('admin/announcement') },
   { id: 'inbox', label: 'Inbox', href: routeHref('admin/inbox') },
 ]
 
@@ -115,7 +114,7 @@ export default function Dashboard({ session, route, onSignOut }) {
 
   const subtitle =
     page === 'inbox' ? (
-      'Chat with the school'
+      'Chats, broadcasts and announcements in one place'
     ) : page === 'broadcast' ? (
       'Excel data archived before the 30-day delete'
     ) : page === 'announcement' ? (
@@ -212,11 +211,13 @@ export default function Dashboard({ session, route, onSignOut }) {
       {error ? <div className="banner">{error}</div> : null}
 
       {page === 'inbox' ? (
-        <ChatInbox role="admin" />
+        <InboxHub>
+          <ChatInbox role="admin" />
+        </InboxHub>
       ) : page === 'broadcast' ? (
         <ArchiveGallery />
       ) : page === 'announcement' ? (
-        <AnnouncementBoard />
+        <AnnouncementBoard readOnly />
       ) : page === 'sections' ? (
         <AdminSections date={date} grade={grade} section={section} reload={reload} />
       ) : page === 'modules' ? (

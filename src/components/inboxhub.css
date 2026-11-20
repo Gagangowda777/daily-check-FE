@@ -1,0 +1,50 @@
+/* Inbox tabs: chats, broadcast archive and announcements in one section. */
+
+.ih-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ih-tabs {
+  display: flex;
+  gap: 20px;
+  padding: 0 12px;
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  background: #ffffff;
+  border: 1px solid #dbe4f0;
+  border-radius: 10px;
+}
+
+.ih-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.ih-tab {
+  margin-bottom: -1px;
+  padding: 11px 2px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #64748b;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ih-tab:hover {
+  color: #1d4ed8;
+}
+
+.ih-tab.is-active {
+  color: #1d4ed8;
+  border-bottom-color: #1d4ed8;
+}
+
+.ih-pane[hidden] {
+  display: none;
+}

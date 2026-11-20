@@ -4,6 +4,7 @@ import Shell from '../components/Shell.jsx'
 import SuperAdminApprovals from './superadmin/SuperAdminApprovals.jsx'
 import SuperAdminReview from './superadmin/SuperAdminReview.jsx'
 import ChatInbox from '../components/ChatInbox.jsx'
+import InboxHub from '../components/InboxHub.jsx'
 import ArchiveGallery from '../components/ArchiveGallery.jsx'
 import AnnouncementBoard from '../components/AnnouncementBoard.jsx'
 import InfoTip from '../components/InfoTip.jsx'
@@ -13,8 +14,6 @@ import '../superadmin.css'
 
 const NAV = [
   { id: 'approvals', label: 'Final approval', href: routeHref('superadmin/approvals') },
-  { id: 'broadcast', label: 'Broadcast', href: routeHref('superadmin/broadcast') },
-  { id: 'announcement', label: 'Announcement', href: routeHref('superadmin/announcement') },
   { id: 'inbox', label: 'Inbox', href: routeHref('superadmin/inbox') },
 ]
 
@@ -26,7 +25,10 @@ const PAGE_META = {
   review: { title: 'Section review', subtitle: 'The uploaded day for one section' },
   broadcast: { title: 'Broadcast', subtitle: 'Excel data archived before the 30-day delete' },
   announcement: { title: 'Announcement', subtitle: 'Announcements for the school' },
-  inbox: { title: 'Inbox', subtitle: 'Chat with the admin, teachers and class leaders' },
+  inbox: {
+    title: 'Inbox',
+    subtitle: 'Chat with the admin, teachers and class leaders, plus broadcasts and announcements',
+  },
 }
 
 const APPROVAL_HELP =
@@ -141,11 +143,13 @@ export default function SuperAdminDashboard({ session, route, onSignOut }) {
         {review ? (
           <SuperAdminReview grade={review.grade} section={review.section} date={reviewDate} />
         ) : page === 'inbox' ? (
-          <ChatInbox role="superadmin" />
+          <InboxHub>
+            <ChatInbox role="superadmin" />
+          </InboxHub>
         ) : page === 'broadcast' ? (
           <ArchiveGallery />
         ) : page === 'announcement' ? (
-          <AnnouncementBoard />
+          <AnnouncementBoard readOnly />
         ) : (
           <SuperAdminApprovals date={date} query={query} grade={grade} />
         )}

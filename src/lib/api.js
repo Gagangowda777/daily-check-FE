@@ -96,6 +96,7 @@ export const api = {
   archives: () => get('/archives'),
   announcements: () => get('/announcements'),
   postAnnouncement: (payload) => post('/announcements', payload),
+  viewAnnouncement: (id) => post(`/announcements/${encodeURIComponent(id)}/view`, {}),
   sendInboxMessage: (payload) => post('/messages/inbox', payload),
 
   handovers: (params) => get(`/handovers?${query(params)}`),
@@ -127,6 +128,7 @@ export const api = {
     post(`/teacher/attendance/${encodeURIComponent(rollNo)}`, payload),
   teacherAnnounceAdmin: (payload) => post('/teacher/admin-data/announce', payload),
   teacherAckAdmin: (payload) => post('/teacher/admin-data/acknowledge', payload),
+  teacherAckRowAdmin: (payload) => post('/teacher/admin-data/row/acknowledge', payload),
   teacherClose: (payload) => post('/teacher/check/close', payload),
   teacherMessage: (payload) => post('/teacher/message', payload),
 

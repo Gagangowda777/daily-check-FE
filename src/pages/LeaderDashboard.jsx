@@ -10,6 +10,7 @@ import LeaderNc from './leader/LeaderNc.jsx'
 import LeaderOverview from './leader/LeaderOverview.jsx'
 import LeaderRegister from './leader/LeaderRegister.jsx'
 import LeaderTrend from './leader/LeaderTrend.jsx'
+import InboxHub from '../components/InboxHub.jsx'
 import AnnouncementBoard from '../components/AnnouncementBoard.jsx'
 import '../teacher.css'
 import '../leader.css'
@@ -22,20 +23,22 @@ const NAV = [
   { id: 'entry', label: 'Entry checks', href: routeHref('leader/entry') },
   { id: 'nc', label: 'NC & check', href: routeHref('leader/nc') },
   { id: 'trend', label: 'Trend', href: routeHref('leader/trend') },
-  { id: 'announcement', label: 'Announcement', href: routeHref('leader/announcement') },
   { id: 'inbox', label: 'Inbox', href: routeHref('leader/inbox') },
 ]
 
 const PAGE_META = {
   overview: { title: 'Class overview', subtitle: 'Your section at a glance' },
-  inbox: { title: 'Inbox', subtitle: 'Read messages from the class teacher' },
+  inbox: {
+    title: 'Inbox',
+    subtitle: 'Messages, broadcasts and the announcement photos you post',
+  },
   register: { title: 'Class register', subtitle: 'Today’s attendance for your section' },
   exit: { title: 'Exit restrictions', subtitle: 'Who cannot leave, and where each one stands' },
   buses: { title: 'Late bus arrivals', subtitle: 'Students whose bus reached after the cut-off' },
   entry: { title: 'Entry checks', subtitle: 'Subjects still pending with the class teacher' },
   nc: { title: 'NC & daily check', subtitle: 'NC tracker and today’s close status' },
   trend: { title: 'Trend', subtitle: 'Attendance, buses and exits over the last days' },
-  announcement: { title: 'Announcement', subtitle: 'Announcements from the school, view only' },
+  announcement: { title: 'Announcement', subtitle: 'Post a photo for the school to see' },
 }
 
 const DATE_PAGES = ['register', 'exit', 'buses', 'entry', 'trend']
@@ -151,7 +154,9 @@ export default function LeaderDashboard({ session, route, onSignOut }) {
         {error ? <div className="banner">{error}</div> : null}
 
         {page === 'inbox' ? (
-          <LeaderInbox grade={grade} section={section} onChanged={refresh} />
+          <InboxHub canPostAnnouncement>
+            <LeaderInbox grade={grade} section={section} onChanged={refresh} />
+          </InboxHub>
         ) : page === 'register' ? (
           <LeaderRegister grade={grade} section={section} date={date} version={version} />
         ) : page === 'exit' ? (
@@ -165,7 +170,7 @@ export default function LeaderDashboard({ session, route, onSignOut }) {
         ) : page === 'trend' ? (
           <LeaderTrend grade={grade} section={section} date={date} version={version} />
         ) : page === 'announcement' ? (
-          <AnnouncementBoard readOnly />
+          <AnnouncementBoard />
         ) : (
           <LeaderOverview data={data} />
         )}

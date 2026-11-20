@@ -5,6 +5,8 @@ export default function TeacherNc({ data, grade, section, busy, run }) {
   const [draft, setDraft] = useState(null)
   const [localError, setLocalError] = useState('')
   const ncDone = data.nc.count !== null && data.nc.updatedInNe
+  // The count above is the section total; this is who it came from.
+  const ncStudents = (data.attendance?.rows || []).filter((row) => row.ncFlag)
 
   const save = async (updatedInNe) => {
     // Never turn an empty field into a silent 0; the count has to be entered.
@@ -75,6 +77,29 @@ export default function TeacherNc({ data, grade, section, busy, run }) {
         <p className="t-row-sub">
           The class teacher marks the NC count as updated in NE before closing the daily check.
         </p>
+
+        <div className="nc-list">
+          <div className="nc-list-head">
+            <h3>Students with an NC today</h3>
+            <span className={`t-count${ncStudents.length ? ' is-alert' : ' is-ok'}`}>
+              {ncStudents.length}
+            </span>
+          </div>
+          {ncStudents.length === 0 ? (
+            <p className="t-row-sub">No student carries an NC today.</p>
+          ) : (
+            <ul className="nc-students">
+              {ncStudents.map((student) => (
+                <li key={student.rollNo}>
+                  <strong>{student.name}</strong>
+                  <span className="nc-student-meta">
+                    {student.rollNo} · {student.ncReason || 'Delayed arrival'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </section>
   )

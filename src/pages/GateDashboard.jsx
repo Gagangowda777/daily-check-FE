@@ -8,6 +8,7 @@ import GateWatchlist from './gate/GateWatchlist.jsx'
 import GateLogs from './gate/GateLogs.jsx'
 import GateBuses from './gate/GateBuses.jsx'
 import GateInbox from './gate/GateInbox.jsx'
+import InboxHub from '../components/InboxHub.jsx'
 import '../gate.css'
 
 const GATE_NAV = [
@@ -203,7 +204,11 @@ export default function GateDashboard({ session, route, onSignOut }) {
 
         {page === 'buses' && <GateBuses buses={data?.buses || []} />}
 
-        {page === 'inbox' && <GateInbox />}
+        {page === 'inbox' && (
+          <InboxHub>
+            <GateInbox />
+          </InboxHub>
+        )}
       </div>
     </Shell>
   )

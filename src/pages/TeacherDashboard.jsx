@@ -10,6 +10,7 @@ import TeacherExit from './teacher/TeacherExit.jsx'
 import TeacherInbox from './teacher/TeacherInbox.jsx'
 import TeacherNc from './teacher/TeacherNc.jsx'
 import TeacherOverview from './teacher/TeacherOverview.jsx'
+import InboxHub from '../components/InboxHub.jsx'
 import AnnouncementBoard from '../components/AnnouncementBoard.jsx'
 import '../teacher.css'
 
@@ -21,7 +22,6 @@ const TEACHER_NAV = [
   { id: 'exit', label: 'Exit restrictions', href: routeHref('teacher/exit') },
   { id: 'entry', label: 'Entry restrictions', href: routeHref('teacher/entry') },
   { id: 'nc', label: 'NC tracker', href: routeHref('teacher/nc') },
-  { id: 'announcement', label: 'Announcement', href: routeHref('teacher/announcement') },
   { id: 'inbox', label: 'Inbox', href: routeHref('teacher/inbox') },
 ]
 
@@ -38,7 +38,10 @@ const PAGE_META = {
   entry: { title: 'Entry restrictions', subtitle: 'Clear the subjects still pending today' },
   nc: { title: 'NC tracker', subtitle: 'Daily NC count and NE update' },
   announcement: { title: 'Announcement', subtitle: 'Announcements for the school' },
-  inbox: { title: 'Inbox', subtitle: 'Receive messages and write to the leader, admin or every dashboard' },
+  inbox: {
+    title: 'Inbox',
+    subtitle: 'Messages, broadcasts and announcements, all in one place',
+  },
 }
 
 export default function TeacherDashboard({ session, route, onSignOut }) {
@@ -218,9 +221,11 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
         ) : page === 'nc' ? (
           <TeacherNc data={data} grade={grade} section={section} busy={busy} run={run} />
         ) : page === 'inbox' || page === 'message' ? (
-          <TeacherInbox grade={grade} section={section} onSent={refresh} />
+          <InboxHub>
+            <TeacherInbox grade={grade} section={section} onSent={refresh} />
+          </InboxHub>
         ) : page === 'announcement' ? (
-          <AnnouncementBoard />
+          <AnnouncementBoard readOnly />
         ) : (
           <TeacherOverview
             data={data}

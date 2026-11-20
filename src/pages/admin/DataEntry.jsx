@@ -28,6 +28,13 @@ const PU2_SECTIONS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'
 const classLabelOf = (grade, section) => `${grade === 'PU1' ? '11' : '12'}${section}`
 const prettyDate = (iso) => String(iso || '').split('-').reverse().join('/')
 
+const previousDayOf = (iso) => {
+  const when = new Date(`${iso}T00:00:00Z`)
+  if (Number.isNaN(when.getTime())) return ''
+  when.setUTCDate(when.getUTCDate() - 1)
+  return when.toISOString().slice(0, 10)
+}
+
 // Arrival times are typed, not picked: "8:18", "08:18" and "0818" all become 08:18.
 const normalizeTime = (raw) => {
   const match = String(raw || '')
@@ -71,6 +78,7 @@ export default function DataEntry({ date }) {
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [dirty, setDirty] = useState(false)
+  const [repeats, setRepeats] = useState(null)
   const skipDirty = useRef(true)
   const freshRolls = useRef({ exit: [], entry: [] })
 
@@ -229,6 +237,15 @@ export default function DataEntry({ date }) {
       setNotice(
         `${res.saved} row${res.saved === 1 ? '' : 's'} saved to the register for ${prettyDate(date)}.`
       )
+      if (res.repeats?.length) {
+        setRepeats({
+          sheet: sheet === 'exit' ? 'exit restriction' : 'entry restriction',
+          date: previousDayOf(date),
+          items: res.repeats,
+        })
+      } else {
+        setRepeats(null)
+      }
       if (res.errors?.length) {
         setError(
           `Skipped ${res.errors.length} row(s): ` +
@@ -583,6 +600,55 @@ export default function DataEntry({ date }) {
           >
             {busy === tab ? 'Saving…' : tab === 'nc' ? 'Save NC sheet' : 'Save sheet'}
           </button>
+        </div>
+      ) : null}
+
+      {repeats ? (
+        <div
+          className="de-modal"
+          role="presentation"
+          onClick={() => setRepeats(null)}
+        >
+          <div
+            className="de-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Student appeared yesterday too"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="de-dialog-head">
+              <h3>Appeared yesterday too</h3>
+              <button
+                type="button"
+                className="de-dialog-close"
+                aria-label="Close"
+                onClick={() => setRepeats(null)}
+              >
+                ✕
+              </button>
+            </div>
+            <p className="de-dialog-sub">
+              {repeats.items.length} {repeats.items.length === 1 ? 'student is' : 'students are'} on
+              the {repeats.sheet} sheet for both {prettyDate(repeats.date)} and{' '}
+              {prettyDate(date)}. Check whether yesterday's row should still stand.
+            </p>
+            <ul className="de-repeat-list">
+              {repeats.items.map((item) => (
+                <li key={`${item.rollNo}-${item.date}`}>
+                  <strong>{item.name}</strong>
+                  <span className="de-repeat-meta">
+                    {item.rollNo} · {item.classLabel}
+                    {item.reason ? ` · ${item.reason}` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="de-dialog-actions">
+              <button type="button" className="de-btn is-primary" onClick={() => setRepeats(null)}>
+                Got it
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>

@@ -2,14 +2,6 @@ import { Fragment, useState } from 'react'
 import { api } from '../../lib/api.js'
 import { ExcelSheet } from '../../components/ExcelSheet.jsx'
 
-const EXIT_TONE = {
-  pending: 'is-pending',
-  acknowledged: 'is-late',
-  absent: '',
-  excused: 'is-late',
-  resolved: 'is-ok',
-}
-
 export default function TeacherExit({ data, grade, section, date, busy, run }) {
   const [form, setForm] = useState(null)
   const [value, setValue] = useState('')
@@ -46,11 +38,11 @@ export default function TeacherExit({ data, grade, section, date, busy, run }) {
       title="Exit restrictions"
       meta={`${data.exit.length} flagged · ${exitPending.length} open`}
       note="Acknowledge, excuse or resolve each student. Acknowledged rows still count as open."
-      columns={['Sl. no.', 'Roll no', 'Student', 'Reason', 'Status', 'Duration', 'Actions']}
+      columns={['Sl. no.', 'Roll no', 'Student', 'Reason', 'Actions']}
     >
       {data.exit.length === 0 ? (
         <tr>
-          <td className="xls-empty" colSpan={7}>
+          <td className="xls-empty" colSpan={5}>
             Nobody restricted from exiting today.
           </td>
         </tr>
@@ -73,18 +65,6 @@ export default function TeacherExit({ data, grade, section, date, busy, run }) {
                 <td>
                   {row.reason}
                   {row.note ? <span className="xls-sub-text">{row.note}</span> : null}
-                </td>
-                <td>
-                  <span className={`xls-badge ${EXIT_TONE[row.status] || ''}`.trim()}>{row.status}</span>
-                  {row.approver ? <span className="xls-sub-text">by {row.approver}</span> : null}
-                </td>
-                <td>
-                  {row.untilResolved ? 'Until resolved' : row.endDate || 'Today'}
-                  {row.acknowledgedBy ? (
-                    <span className="xls-sub-text">
-                      acked {row.acknowledgedAt} · {row.acknowledgedBy}
-                    </span>
-                  ) : null}
                 </td>
                 <td className="xls-actions">
                   <div className="t-actions">
@@ -140,7 +120,7 @@ export default function TeacherExit({ data, grade, section, date, busy, run }) {
 
               {form?.rollNo === row.rollNo ? (
                 <tr className="xls-sub">
-                  <td colSpan={7}>
+                  <td colSpan={5}>
                     <div className="t-inline">
                       <input
                         className="form-input"
