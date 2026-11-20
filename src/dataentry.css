@@ -206,8 +206,13 @@
 }
 
 .de-input.is-count {
-  width: 90px;
-  min-width: 70px;
+  width: 80px;
+  min-width: 65px;
+}
+
+.de-input.is-nc-students {
+  min-width: 140px;
+  width: 100%;
 }
 
 .de-sec {

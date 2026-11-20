@@ -129,7 +129,11 @@ export default function DataEntry({ date }) {
       Object.fromEntries(
         (sheet.nc || []).map((row) => [
           `${row.grade}:${row.section}`,
-          { count: String(row.count ?? ''), updatedInNe: Boolean(row.updatedInNe) },
+          {
+            count: String(row.count ?? ''),
+            students: Array.isArray(row.students) ? row.students.join(', ') : String(row.students || ''),
+            updatedInNe: Boolean(row.updatedInNe),
+          },
         ])
       )
     )
@@ -269,6 +273,7 @@ export default function DataEntry({ date }) {
       return {
         ...row,
         count: Number(value.count) || 0,
+        students: String(value.students || '').trim(),
         updatedInNe: Boolean(value.updatedInNe),
       }
     })
@@ -487,7 +492,7 @@ export default function DataEntry({ date }) {
             <ExcelSheet
               key={group.grade}
               reserveHeader
-              columns={['Section', 'NC Count', 'Updated in NE']}
+              columns={['Section', 'NC Count', 'Students (Roll Nos)', 'Updated in NE']}
             >
               {group.sections.map((section) => {
                 const value = ncValues[`${group.grade}:${section}`] || {}
@@ -502,6 +507,23 @@ export default function DataEntry({ date }) {
                         placeholder="0"
                         value={value.count ?? ''}
                         onChange={(event) => setNc(group.grade, section, { count: event.target.value })}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        className="de-input is-nc-students"
+                        type="text"
+                        placeholder="e.g. 26A101, 26A143"
+                        value={value.students ?? ''}
+                        onChange={(event) => {
+                          const val = event.target.value
+                          const parsed = val.split(/[\s,;]+/).filter(Boolean)
+                          const autoCount = parsed.length > 0 ? String(parsed.length) : value.count
+                          setNc(group.grade, section, {
+                            students: val,
+                            ...(parsed.length > 0 && (!value.count || Number(value.count) <= parsed.length) ? { count: autoCount } : {})
+                          })
+                        }}
                       />
                     </td>
                     <td>
