@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { api } from '../../lib/api.js'
 import { routeHref } from '../../lib/router.js'
 import { ExcelSheet } from '../../components/ExcelSheet.jsx'
-import { cap } from '../../lib/text.js'
 
 const prettyDate = (iso) => String(iso || '').split('-').reverse().join('/')
 
@@ -21,7 +20,7 @@ const Stat = ({ label, value, note, tone }) => (
 export default function SuperAdminReview({ grade, section, date }) {
   const [state, setState] = useState({ key: '', data: null })
   const [version, setVersion] = useState(0)
-  const [form, setForm] = useState({ deductNc: false, deductCount: '', note: '' })
+  const [form, setForm] = useState({ reduceRollNos: [], note: '' })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -60,23 +59,35 @@ export default function SuperAdminReview({ grade, section, date }) {
         date,
         grade,
         section,
-        deductNc: form.deductNc,
-        deductCount: form.deductNc ? Number(form.deductCount) || 0 : 0,
+        reduceRollNos: form.reduceRollNos,
         note: form.note,
       })
       setNotice(
         `${row.label} approved for ${prettyDate(date)}` +
-          (res.ncDeducted
-            ? `, ${res.ncDeducted} NC(s) deducted, NC count is now ${res.ncCount}.`
+          (res.ncReduced
+            ? `, ${res.ncReduced} NC(s) reduced${
+                res.ncCount === null || res.ncCount === undefined
+                  ? ''
+                  : `, NC count is now ${res.ncCount}`
+              }.`
             : '.')
       )
-      setForm({ deductNc: false, deductCount: '', note: '' })
+      setForm({ reduceRollNos: [], note: '' })
       setVersion((value) => value + 1)
     } catch (err) {
       setError(err.message)
     } finally {
       setBusy(false)
     }
+  }
+
+  const toggleReduce = (rollNo) => {
+    setForm((prev) => ({
+      ...prev,
+      reduceRollNos: prev.reduceRollNos.includes(rollNo)
+        ? prev.reduceRollNos.filter((item) => item !== rollNo)
+        : [...prev.reduceRollNos, rollNo],
+    }))
   }
 
   const back = routeHref('superadmin/approvals')
@@ -165,11 +176,11 @@ export default function SuperAdminReview({ grade, section, date }) {
       <ExcelSheet
         title="Rows uploaded by the coordinator"
         meta={`${row.adminRows.length} row${row.adminRows.length === 1 ? '' : 's'}`}
-        columns={['Sl. no.', 'Type', 'Roll no', 'Student', 'Detail', 'Status']}
+        columns={['Sl. no.', 'Type', 'Roll no', 'Student', 'Detail']}
       >
         {row.adminRows.length === 0 ? (
           <tr>
-            <td className="xls-empty" colSpan={6}>
+            <td className="xls-empty" colSpan={5}>
               Nothing was uploaded for this section.
             </td>
           </tr>
@@ -185,9 +196,6 @@ export default function SuperAdminReview({ grade, section, date }) {
               <td className="xls-time">{item.rollNo}</td>
               <td className="xls-name">{item.name}</td>
               <td>{item.detail}</td>
-              <td>
-                <span className="xls-count">{cap(item.status)}</span>
-              </td>
             </tr>
           ))
         )}
@@ -204,53 +212,66 @@ export default function SuperAdminReview({ grade, section, date }) {
           {approved ? (
             <p className="muted">
               Approved at {row.finalAt} by {row.finalBy}
-              {row.ncDeducted ? ` · ${row.ncDeducted} NC(s) deducted` : ''}
+              {row.ncDeducted ? ` · ${row.ncDeducted} NC(s) reduced` : ''}
+              {row.ncReducedRollNos?.length ? ` (${row.ncReducedRollNos.join(', ')})` : ''}
               {row.finalNote ? ` · “${row.finalNote}”` : ''}
             </p>
           ) : (
             <>
-              {row.ncCount > 0 ? (
-                <div className="sa-approve">
-                  <label className="sa-check">
-                    <input
-                      type="checkbox"
-                      checked={form.deductNc}
-                      onChange={(event) =>
-                        setForm({ ...form, deductNc: event.target.checked })
-                      }
-                    />
-                    Do you want to deduct the number of NCs?
-                  </label>
-                  {form.deductNc ? (
-                    <span className="sa-deduct">
-                      <input
-                        className="form-input sa-count"
-                        type="number"
-                        min="1"
-                        max={row.ncCount}
-                        aria-label="NCs to deduct"
-                        value={form.deductCount}
-                        onChange={(event) =>
-                          setForm({ ...form, deductCount: event.target.value })
-                        }
-                      />
-                      <span className="xls-count">
-                        of {row.ncCount} NCs today →{' '}
-                        {Math.max(0, row.ncCount - (Number(form.deductCount) || 0))} left
-                      </span>
-                    </span>
-                  ) : null}
-                </div>
-              ) : (
-                <p className="t-row-sub">No NCs recorded for this section today.</p>
-              )}
+              <div className="sa-nc-head">
+                <h3>Students with an NC today</h3>
+                <span className={`t-count${row.ncStudents.length ? ' is-alert' : ' is-ok'}`}>
+                  {row.ncStudents.length ? `${row.ncStudents.length} flagged` : 'None flagged'}
+                </span>
+              </div>
 
-              {row.ncStudents.length ? (
+              {row.ncStudents.length === 0 ? (
                 <p className="t-row-sub">
-                  Marked with NC:{' '}
-                  {row.ncStudents.map((student) => `${student.rollNo} ${student.name}`).join(', ')}
+                  {row.ncCount
+                    ? `The NC tracker shows ${row.ncCount} NC(s) for the section, but no student is individually flagged.`
+                    : 'No student carries an NC today.'}
                 </p>
-              ) : null}
+              ) : (
+                <>
+                  <p className="t-row-sub">
+                    Reduce a student’s NC to clear the flag and take one off today’s count.
+                  </p>
+                  <ul className="sa-nc-list">
+                    {row.ncStudents.map((student) => {
+                      const reduced = form.reduceRollNos.includes(student.rollNo)
+                      return (
+                        <li
+                          key={student.rollNo}
+                          className={`sa-nc-row${reduced ? ' is-reduced' : ''}`}
+                        >
+                          <div className="sa-nc-main">
+                            <strong>{student.name}</strong>
+                            <span className="t-row-sub">
+                              {student.rollNo} · {student.reason} · 1 NC
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className={`tap${reduced ? ' is-good' : ''}`}
+                            aria-pressed={reduced}
+                            onClick={() => toggleReduce(student.rollNo)}
+                          >
+                            {reduced ? 'NC reduced ✓' : 'Reduce NC'}
+                          </button>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                  <p className="t-row-sub">
+                    NCs today: {row.ncCount ?? '—'} →{' '}
+                    {row.ncCount === null
+                      ? 'section count not recorded'
+                      : `${Math.max(0, row.ncCount - form.reduceRollNos.length)} after reducing ${
+                          form.reduceRollNos.length
+                        }`}
+                  </p>
+                </>
+              )}
 
               <div className="sa-actions">
                 <input

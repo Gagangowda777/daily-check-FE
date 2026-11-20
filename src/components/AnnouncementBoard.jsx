@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../lib/api.js'
+import './chat.css'
 import './announcement.css'
 
 // Shared announcement screen. A photo is taken with the device camera (or
@@ -34,6 +35,22 @@ const readFile = (file) =>
   })
 
 const stamp = (item) => [item.date, item.atIst].filter(Boolean).join(' · ')
+
+const todayIso = () => new Date().toLocaleDateString('en-CA')
+
+const shortDate = (iso) => {
+  if (!iso) return ''
+  const [year, month, day] = iso.split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+  })
+}
+
+const listStamp = (item) =>
+  item.date === todayIso() ? item.atIst || 'Today' : shortDate(item.date)
+
+const dayHeading = (iso) => (iso === todayIso() ? 'Today' : shortDate(iso))
 
 export default function AnnouncementBoard({ readOnly = false }) {
   const [state, setState] = useState({ key: '', items: [] })
@@ -78,37 +95,7 @@ export default function AnnouncementBoard({ readOnly = false }) {
   }
 
   return (
-    <section className="ann-board">
-      <div className="ann-head">
-        <div>
-          <h2>Announcements</h2>
-          <p className="ann-sub">
-            {loading
-              ? 'Loading announcements…'
-              : state.items.length
-                ? unread
-                  ? `${unread} unread of ${state.items.length}`
-                  : 'You are all caught up'
-                : readOnly
-                  ? 'Photos the class leader posts appear here'
-                  : 'No announcements yet. Take one to start'}
-          </p>
-        </div>
-        {readOnly ? null : (
-          <button
-            type="button"
-            className="ann-open"
-            onClick={() => {
-              setNotice('')
-              setError('')
-              setCompose(true)
-            }}
-          >
-            Take photo
-          </button>
-        )}
-      </div>
-
+    <>
       {error && !compose ? <div className="banner">{error}</div> : null}
       {notice ? (
         <p className="action-notice" role="status">
@@ -116,65 +103,137 @@ export default function AnnouncementBoard({ readOnly = false }) {
         </p>
       ) : null}
 
-      {loading ? (
-        <p className="empty">Loading announcements…</p>
-      ) : state.items.length === 0 ? (
-        <p className="empty">
-          {readOnly
-            ? 'No announcements yet. Photos the class leader posts appear here.'
-            : 'No announcements yet. Take a photo to start.'}
-        </p>
-      ) : (
-        <ul className="ann-list">
-          {state.items.map((item) => (
-            <li key={item.id}>
+      <div className="wa-wrap ann-wa">
+        <aside className={`wa-list${open ? ' has-active' : ''}`}>
+          <div className="wa-list-head">
+            <div>
+              <h2>Announcements</h2>
+              <span className="wa-list-sub">
+                {loading
+                  ? 'Loading…'
+                  : state.items.length
+                    ? unread
+                      ? `${unread} unread of ${state.items.length}`
+                      : 'You are all caught up'
+                    : readOnly
+                      ? 'Photos the class leader posts appear here'
+                      : 'Take a photo to start'}
+              </span>
+            </div>
+            {readOnly ? null : (
               <button
                 type="button"
-                className={`ann-row${item.seen ? '' : ' is-unread'}`}
-                onClick={() => read(item)}
+                className="wa-new ann-new"
+                aria-label="Post an announcement photo"
+                title="Post an announcement photo"
+                onClick={() => {
+                  setNotice('')
+                  setError('')
+                  setCompose(true)
+                }}
               >
-                <img className="ann-thumb" src={item.photoUrl} alt="" loading="lazy" />
-                <span className="ann-row-main">
-                  <span className="ann-row-top">
-                    <strong>{item.caption || 'Photo announcement'}</strong>
-                    <span className="ann-row-time">{stamp(item)}</span>
-                  </span>
-                  <span className="ann-row-meta">{item.context || item.author}</span>
-                </span>
-                {item.seen ? null : <span className="ann-dot" aria-label="Unread" />}
+                +
               </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {open ? (
-        <div className="ann-modal" role="presentation" onClick={() => setOpenId('')}>
-          <div
-            className="ann-dialog ann-reader"
-            role="dialog"
-            aria-modal="true"
-            aria-label={open.caption || 'Announcement photo'}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="ann-dialog-head">
-              <h3>{open.caption || 'Photo announcement'}</h3>
-              <button type="button" className="ghost-button" onClick={() => setOpenId('')}>
-                Close
-              </button>
-            </div>
-            <img
-              className="ann-reader-photo"
-              src={open.photoUrl}
-              alt={open.caption || 'Announcement photo'}
-            />
-            {open.caption ? <p className="ann-caption">{open.caption}</p> : null}
-            <p className="ann-reader-meta">
-              {open.context || open.author} · {stamp(open)}
-            </p>
+            )}
           </div>
-        </div>
-      ) : null}
+
+          {loading ? (
+            <p className="wa-empty">Loading announcements…</p>
+          ) : state.items.length === 0 ? (
+            <p className="wa-empty">
+              {readOnly
+                ? 'No announcements yet. Photos the class leader posts appear here.'
+                : 'No announcements yet. Take a photo to start.'}
+            </p>
+          ) : (
+            <ul className="wa-threads">
+              {state.items.map((item) => (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    className={`wa-thread${openId === item.id ? ' is-active' : ''}`}
+                    onClick={() => read(item)}
+                  >
+                    <span className="wa-avatar ann-avatar">
+                      <img src={item.photoUrl} alt="" loading="lazy" />
+                    </span>
+                    <span className="wa-thread-main">
+                      <span className="wa-thread-top">
+                        <span className="wa-thread-name">
+                          {item.caption || 'Photo announcement'}
+                        </span>
+                        <span className="wa-thread-time">{listStamp(item)}</span>
+                      </span>
+                      <span className="wa-thread-bottom">
+                        <span className="wa-snippet">{item.context || item.author}</span>
+                        {item.seen ? null : (
+                          <span className="wa-badge" aria-label="Unread">
+                            new
+                          </span>
+                        )}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </aside>
+
+        <section className={`wa-chat${open ? ' is-open' : ''}`}>
+          {!open ? (
+            <div className="wa-placeholder">
+              <span className="wa-placeholder-icon" aria-hidden="true">
+                📷
+              </span>
+              <p>Pick an announcement to read it.</p>
+            </div>
+          ) : (
+            <>
+              <header className="wa-chat-head">
+                <button
+                  type="button"
+                  className="wa-back"
+                  aria-label="Back to announcements"
+                  onClick={() => setOpenId('')}
+                >
+                  ←
+                </button>
+                <span className="wa-avatar ann-avatar">
+                  <img src={open.photoUrl} alt="" />
+                </span>
+                <div className="wa-chat-title">
+                  <strong>{open.caption || 'Photo announcement'}</strong>
+                  <span>
+                    {open.context || open.author} · {stamp(open)}
+                  </span>
+                </div>
+              </header>
+
+              <div className="wa-body ann-body">
+                <div className="wa-day">
+                  <span>{dayHeading(open.date)}</span>
+                </div>
+                <article className="wa-bubble ann-bubble">
+                  {open.caption ? (
+                    <span className="wa-bubble-title">{open.caption}</span>
+                  ) : null}
+                  <img
+                    className="ann-bubble-photo"
+                    src={open.photoUrl}
+                    alt={open.caption || 'Announcement photo'}
+                  />
+                  <span className="wa-bubble-meta">{stamp(open)}</span>
+                </article>
+              </div>
+
+              <p className="wa-readonly">
+                {open.context || open.author} · visible to every dashboard
+              </p>
+            </>
+          )}
+        </section>
+      </div>
 
       {compose && !readOnly ? (
         <PhotoComposer
@@ -187,7 +246,7 @@ export default function AnnouncementBoard({ readOnly = false }) {
           }}
         />
       ) : null}
-    </section>
+    </>
   )
 }
 

@@ -8,8 +8,8 @@ import './inboxhub.css'
 // screens each dashboard used to carry in its side nav.
 const TABS = [
   { id: 'chats', label: 'Chats' },
-  { id: 'broadcast', label: 'Broadcast' },
   { id: 'announcement', label: 'Announcement' },
+  { id: 'broadcast', label: 'Broadcast' },
 ]
 
 export default function InboxHub({ children, canPostAnnouncement = false }) {

@@ -100,8 +100,6 @@ export default function SuperAdminApprovals({ date, query = '', grade = 'ALL' })
           date,
           grade: row.grade,
           section: row.section,
-          deductNc: false,
-          deductCount: 0,
           note: 'Bulk approval',
         })
         approved += 1
