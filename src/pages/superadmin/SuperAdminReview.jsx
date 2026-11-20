@@ -183,28 +183,61 @@ export default function SuperAdminReview({ grade, section, date }) {
       <ExcelSheet
         title="Rows uploaded by the coordinator"
         meta={`${row.adminRows.length} row${row.adminRows.length === 1 ? '' : 's'}`}
-        columns={['Sl. no.', 'Type', 'Roll no', 'Student', 'Detail']}
+        columns={['Sl. no.', 'Type', 'Roll no', 'Student', 'Detail', 'Reduce NC']}
       >
         {row.adminRows.length === 0 ? (
           <tr>
-            <td className="xls-empty" colSpan={5}>
+            <td className="xls-empty" colSpan={6}>
               Nothing was uploaded for this section.
             </td>
           </tr>
         ) : (
-          row.adminRows.map((item, index) => (
-            <tr key={`${item.type}-${item.rollNo}`} className="xls-row">
-              <td className="xls-no">{index + 1}</td>
-              <td>
-                <span className={`xls-badge ${item.type === 'exit' ? 'is-late' : 'is-blue'}`}>
-                  {item.type === 'exit' ? 'Exit' : 'Entry'}
-                </span>
-              </td>
-              <td className="xls-time">{item.rollNo}</td>
-              <td className="xls-name">{item.name}</td>
-              <td>{item.detail}</td>
-            </tr>
-          ))
+          row.adminRows.map((item, index) => {
+            const ncStudent = row.ncStudents.find((s) => s.rollNo === item.rollNo)
+            const hasNc = Boolean(item.ncFlag || ncStudent)
+            const max = Number(item.ncCount || ncStudent?.count) || (hasNc ? 1 : 0)
+            const reduced = form.reduceQty[item.rollNo] || 0
+
+            return (
+              <tr key={`${item.type}-${item.rollNo}`} className="xls-row">
+                <td className="xls-no">{index + 1}</td>
+                <td>
+                  <span className={`xls-badge ${item.type === 'exit' ? 'is-late' : 'is-blue'}`}>
+                    {item.type === 'exit' ? 'Exit' : 'Entry'}
+                  </span>
+                </td>
+                <td className="xls-time">{item.rollNo}</td>
+                <td className="xls-name">{item.name}</td>
+                <td>{item.detail}</td>
+                <td className="xls-action-cell">
+                  {hasNc ? (
+                    approved ? (
+                      <span className="xls-sub-text">
+                        {row.ncReducedRollNos?.includes(item.rollNo) ? 'NC reduced' : `${max} NC(s)`}
+                      </span>
+                    ) : (
+                      <div className="sa-table-nc-reduce">
+                        <input
+                          id={`table-reduce-${item.rollNo}`}
+                          className="form-input sa-nc-qty"
+                          type="number"
+                          min="0"
+                          max={max}
+                          step="1"
+                          aria-label={`Reduce NCs for ${item.name}`}
+                          value={reduced}
+                          onChange={(event) => setReduceQty(item.rollNo, max, event.target.value)}
+                        />
+                        <span className="t-row-sub">of {max}</span>
+                      </div>
+                    )
+                  ) : (
+                    <span className="xls-count">—</span>
+                  )}
+                </td>
+              </tr>
+            )
+          })
         )}
       </ExcelSheet>
 

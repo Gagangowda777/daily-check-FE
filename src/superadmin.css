@@ -106,6 +106,12 @@
   flex-shrink: 0;
 }
 
+.sa-table-nc-reduce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .sa-nc-qty {
   width: 64px;
   height: 30px;
