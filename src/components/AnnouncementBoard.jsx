@@ -215,14 +215,14 @@ export default function AnnouncementBoard({ readOnly = false }) {
                   <span>{dayHeading(open.date)}</span>
                 </div>
                 <article className="wa-bubble ann-bubble">
-                  {open.caption ? (
-                    <span className="wa-bubble-title">{open.caption}</span>
-                  ) : null}
                   <img
                     className="ann-bubble-photo"
                     src={open.photoUrl}
                     alt={open.caption || 'Announcement photo'}
                   />
+                  {open.caption ? (
+                    <p className="ann-bubble-caption">{open.caption}</p>
+                  ) : null}
                   <span className="wa-bubble-meta">{stamp(open)}</span>
                 </article>
               </div>

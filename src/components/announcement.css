@@ -353,3 +353,12 @@
   background: #0f172a;
   border-radius: 6px;
 }
+
+.ann-bubble-caption {
+  margin: 6px 0 2px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #1e293b;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
