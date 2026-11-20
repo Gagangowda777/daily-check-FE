@@ -8,20 +8,30 @@ const TONE = { present: 'is-ok', absent: 'is-pending', late: 'is-late' }
 export default function TeacherAttendance({ data, grade, section, date, busy, run }) {
   const [ncFor, setNcFor] = useState(null)
   const [ncReason, setNcReason] = useState('')
+  const [ncQty, setNcQty] = useState('1')
   const [localError, setLocalError] = useState('')
 
   const rows = data.attendance?.rows || []
   const summary = data.attendance?.summary || { present: 0, absent: 0, late: 0, nc: 0 }
 
-  const mark = (rollNo, status, ncReasonText) => {
+  const mark = (rollNo, status, nc = null) => {
     setLocalError('')
     const action =
-      status === 'late' && ncReasonText
-        ? () => api.teacherAttendance(rollNo, { grade, section, date, status, nc: true, ncReason: ncReasonText })
+      status === 'late' && nc
+        ? () =>
+            api.teacherAttendance(rollNo, {
+              grade,
+              section,
+              date,
+              status,
+              nc: true,
+              ncReason: nc.reason,
+              ncCount: nc.count,
+            })
         : () => api.teacherAttendance(rollNo, { grade, section, date, status })
     const notice =
-      status === 'late' && ncReasonText
-        ? 'Marked late with NC.'
+      status === 'late' && nc
+        ? `Marked late with ${nc.count} NC${nc.count === 1 ? '' : 's'}.`
         : status === 'absent'
           ? 'Marked absent. This carries to tomorrow until you mark present.'
           : status === 'late'
@@ -33,6 +43,7 @@ export default function TeacherAttendance({ data, grade, section, date, busy, ru
   const openNc = (rollNo) => {
     setNcFor(rollNo)
     setNcReason('')
+    setNcQty('1')
     setLocalError('')
   }
 
@@ -41,10 +52,16 @@ export default function TeacherAttendance({ data, grade, section, date, busy, ru
       setLocalError('Give a short reason for the NC.')
       return
     }
-    const ok = await mark(rollNo, 'late', ncReason.trim())
+    const count = Math.round(Number(ncQty))
+    if (!Number.isFinite(count) || count < 1 || count > 99) {
+      setLocalError('Enter between 1 and 99 NCs for this student.')
+      return
+    }
+    const ok = await mark(rollNo, 'late', { reason: ncReason.trim(), count })
     if (ok) {
       setNcFor(null)
       setNcReason('')
+      setNcQty('1')
     }
   }
 
@@ -76,7 +93,9 @@ export default function TeacherAttendance({ data, grade, section, date, busy, ru
               </td>
               <td>
                 {row.ncFlag ? (
-                  <span className="xls-sub-text">NC · {cap(row.ncReason || 'delayed')}</span>
+                  <span className="xls-sub-text">
+                    NC × {row.ncCount || 1} · {cap(row.ncReason || 'delayed')}
+                  </span>
                 ) : (
                   <span className="xls-count">-</span>
                 )}
@@ -136,6 +155,17 @@ export default function TeacherAttendance({ data, grade, section, date, busy, ru
           <td colSpan={6}>
             <div className="t-inline">
               <span className="t-row-sub">NC for {ncFor}</span>
+              <input
+                className="form-input nc-input"
+                type="number"
+                min="1"
+                max="99"
+                step="1"
+                aria-label="Number of NCs"
+                title="Number of NCs"
+                value={ncQty}
+                onChange={(event) => setNcQty(event.target.value)}
+              />
               <input
                 className="form-input"
                 value={ncReason}

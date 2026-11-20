@@ -93,7 +93,9 @@ export default function TeacherNc({ data, grade, section, busy, run }) {
                 <li key={student.rollNo}>
                   <strong>{student.name}</strong>
                   <span className="nc-student-meta">
-                    {student.rollNo} · {student.ncReason || 'Delayed arrival'}
+                    {student.rollNo} · {student.ncCount || 1} NC
+                    {student.ncCount === 1 ? '' : 's'} ·{' '}
+                    {student.ncReason || 'Delayed arrival'}
                   </span>
                 </li>
               ))}

@@ -99,6 +99,19 @@
   color: #15803d;
 }
 
+.sa-nc-reduce {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sa-nc-qty {
+  width: 64px;
+  height: 30px;
+  text-align: center;
+}
+
 .sa-actions {
   display: flex;
   align-items: center;

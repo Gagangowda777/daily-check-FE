@@ -20,7 +20,7 @@ const Stat = ({ label, value, note, tone }) => (
 export default function SuperAdminReview({ grade, section, date }) {
   const [state, setState] = useState({ key: '', data: null })
   const [version, setVersion] = useState(0)
-  const [form, setForm] = useState({ reduceRollNos: [], note: '' })
+  const [form, setForm] = useState({ reduceQty: {}, note: '' })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -55,11 +55,14 @@ export default function SuperAdminReview({ grade, section, date }) {
     setError('')
     setNotice('')
     try {
+      const reduceNcs = Object.entries(form.reduceQty)
+        .map(([rollNo, count]) => ({ rollNo, count: Number(count) || 0 }))
+        .filter((item) => item.count > 0)
       const res = await api.superAdminApprove({
         date,
         grade,
         section,
-        reduceRollNos: form.reduceRollNos,
+        reduceNcs,
         note: form.note,
       })
       setNotice(
@@ -72,7 +75,7 @@ export default function SuperAdminReview({ grade, section, date }) {
               }.`
             : '.')
       )
-      setForm({ reduceRollNos: [], note: '' })
+      setForm({ reduceQty: {}, note: '' })
       setVersion((value) => value + 1)
     } catch (err) {
       setError(err.message)
@@ -81,14 +84,18 @@ export default function SuperAdminReview({ grade, section, date }) {
     }
   }
 
-  const toggleReduce = (rollNo) => {
+  const setReduceQty = (rollNo, max, value) => {
+    const count = Math.max(0, Math.min(max, Math.floor(Number(value) || 0)))
     setForm((prev) => ({
       ...prev,
-      reduceRollNos: prev.reduceRollNos.includes(rollNo)
-        ? prev.reduceRollNos.filter((item) => item !== rollNo)
-        : [...prev.reduceRollNos, rollNo],
+      reduceQty: { ...prev.reduceQty, [rollNo]: count },
     }))
   }
+
+  const reduceTotal = Object.values(form.reduceQty).reduce(
+    (sum, value) => sum + (Number(value) || 0),
+    0
+  )
 
   const back = routeHref('superadmin/approvals')
 
@@ -234,11 +241,13 @@ export default function SuperAdminReview({ grade, section, date }) {
               ) : (
                 <>
                   <p className="t-row-sub">
-                    Reduce a student’s NC to clear the flag and take one off today’s count.
+                    Enter how many NCs to reduce for a student. The flag clears once
+                    their count reaches zero.
                   </p>
                   <ul className="sa-nc-list">
                     {row.ncStudents.map((student) => {
-                      const reduced = form.reduceRollNos.includes(student.rollNo)
+                      const max = Number(student.count) || 1
+                      const reduced = form.reduceQty[student.rollNo] || 0
                       return (
                         <li
                           key={student.rollNo}
@@ -247,17 +256,31 @@ export default function SuperAdminReview({ grade, section, date }) {
                           <div className="sa-nc-main">
                             <strong>{student.name}</strong>
                             <span className="t-row-sub">
-                              {student.rollNo} · {student.reason} · 1 NC
+                              {student.rollNo} · {student.reason} · {max} NC
+                              {max === 1 ? '' : 's'}
                             </span>
                           </div>
-                          <button
-                            type="button"
-                            className={`tap${reduced ? ' is-good' : ''}`}
-                            aria-pressed={reduced}
-                            onClick={() => toggleReduce(student.rollNo)}
-                          >
-                            {reduced ? 'NC reduced ✓' : 'Reduce NC'}
-                          </button>
+                          <div className="sa-nc-reduce">
+                            <label
+                              className="t-row-sub"
+                              htmlFor={`reduce-${student.rollNo}`}
+                            >
+                              Reduce
+                            </label>
+                            <input
+                              id={`reduce-${student.rollNo}`}
+                              className="form-input sa-nc-qty"
+                              type="number"
+                              min="0"
+                              max={max}
+                              step="1"
+                              value={reduced}
+                              onChange={(event) =>
+                                setReduceQty(student.rollNo, max, event.target.value)
+                              }
+                            />
+                            <span className="t-row-sub">of {max}</span>
+                          </div>
                         </li>
                       )
                     })}
@@ -266,10 +289,13 @@ export default function SuperAdminReview({ grade, section, date }) {
                     NCs today: {row.ncCount ?? '—'} →{' '}
                     {row.ncCount === null
                       ? 'section count not recorded'
-                      : `${Math.max(0, row.ncCount - form.reduceRollNos.length)} after reducing ${
-                          form.reduceRollNos.length
-                        }`}
+                      : `${Math.max(0, row.ncCount - reduceTotal)} after reducing ${reduceTotal}`}
                   </p>
+                  {row.ncCount !== null && reduceTotal > row.ncCount ? (
+                    <p className="t-row-sub is-alert">
+                      Only {row.ncCount} NC(s) are recorded for the section.
+                    </p>
+                  ) : null}
                 </>
               )}
 
@@ -283,7 +309,7 @@ export default function SuperAdminReview({ grade, section, date }) {
                 <button
                   type="button"
                   className="tap is-good"
-                  disabled={!row.ready || busy}
+                  disabled={!row.ready || busy || (row.ncCount !== null && reduceTotal > row.ncCount)}
                   title={
                     row.ready
                       ? 'Give final approval'
