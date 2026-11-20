@@ -387,7 +387,7 @@ export default function DataEntry({ date }) {
                     ))}
                   </select>
                 </td>
-                <td>
+                <td className="xls-actions">
                   <button
                     type="button"
                     className="de-del"
@@ -445,7 +445,7 @@ export default function DataEntry({ date }) {
                     onChange={(event) => patch(setEntryRows, index, { subjects: event.target.value })}
                   />
                 </td>
-                <td>
+                <td className="xls-actions">
                   <button
                     type="button"
                     className="de-del"

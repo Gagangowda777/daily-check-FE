@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+
 const initialsFor = (name = '') =>
   name
     .replace(/[^\p{L}\s]/gu, ' ')
@@ -20,6 +22,14 @@ export default function Shell({
   children,
 }) {
   const initials = initialsFor(user?.name)
+  const mobileNav = useRef(null)
+
+  // On a phone the section links scroll sideways, so keep the current page in
+  // view when the route changes instead of leaving the strip where it was.
+  useEffect(() => {
+    const active = mobileNav.current?.querySelector('.nav-item.is-active')
+    if (active) active.scrollIntoView({ block: 'nearest', inline: 'center' })
+  }, [activeNav])
 
   const navLink = (item) => (
     <a
@@ -64,7 +74,7 @@ export default function Shell({
         </div>
 
         {nav.length ? (
-          <nav className="shell-nav" aria-label="Dashboard sections">
+          <nav className="shell-nav" aria-label="Dashboard sections" ref={mobileNav}>
             {nav.map(navLink)}
           </nav>
         ) : null}
