@@ -164,6 +164,10 @@ export const api = {
   superAdminApprove: (payload) => post('/superadmin/approve', payload),
 
   dataEntry: (date) => get(`/datasheet/${encodeURIComponent(date)}`),
+  ncSectionStudents: (date, grade, section) =>
+    get(
+      `/datasheet/${encodeURIComponent(date)}/nc/${encodeURIComponent(grade)}/${encodeURIComponent(section)}/students`
+    ),
   saveDataEntry: (payload) => post('/datasheet/entry', payload),
   saveNcSheet: (payload) => post('/datasheet/nc', payload),
 

@@ -2,8 +2,6 @@ import { api } from '../../lib/api.js'
 import { routeHref } from '../../lib/router.js'
 
 const CHECKS = [
-  { id: 'exit', label: 'Exit restrictions', href: routeHref('teacher/exit') },
-  { id: 'entry', label: 'Entry checks', href: routeHref('teacher/entry') },
   { id: 'nc', label: 'NC tracker', href: routeHref('teacher/nc') },
   // The close check waits on a message the teacher sends to the class leader,
   // not on simply opening the inbox.
@@ -19,8 +17,6 @@ const Stat = ({ label, value, note, tone }) => (
 )
 
 export default function TeacherOverview({ data, grade, section, pendingBlocks, closed, busy, run }) {
-  const exitOpen = data.exit.filter((row) => ['pending', 'acknowledged'].includes(row.status))
-
   const done = (id) => !pendingBlocks.includes(id)
   const pendingLabels = CHECKS.filter((check) => pendingBlocks.includes(check.id)).map(
     (check) => check.label
@@ -36,18 +32,6 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
           tone={data.lateBuses.length ? 'alert' : 'ok'}
         />
         <Stat
-          label="Exit restrictions"
-          value={exitOpen.length}
-          note={`${data.exit.length} flagged today`}
-          tone={exitOpen.length ? 'alert' : 'ok'}
-        />
-        <Stat
-          label="Entry checks"
-          value={data.entry.length}
-          note={data.entry.length ? 'Students to verify' : 'All closed'}
-          tone={data.entry.length ? 'alert' : 'ok'}
-        />
-        <Stat
           label="NC count"
           value={data.nc.count ?? '-'}
           note={data.nc.updatedInNe ? 'Updated in NE' : 'Not updated in NE'}
@@ -59,7 +43,7 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
         <div className="t-card-head">
           <h2>Today’s check</h2>
           <span className={`t-count${closed ? ' is-ok' : pendingBlocks.length ? ' is-alert' : ' is-ok'}`}>
-            {closed ? `closed at ${data.check.submittedAt}` : `${4 - pendingBlocks.length}/4 done`}
+            {closed ? `closed at ${data.check.submittedAt}` : `${CHECKS.length - pendingBlocks.length}/${CHECKS.length} done`}
           </span>
         </div>
         <div className="t-body">
@@ -88,7 +72,7 @@ export default function TeacherOverview({ data, grade, section, pendingBlocks, c
                   Finish {pendingLabels.join(', ')} before closing the day.
                 </p>
               ) : (
-                <p className="t-row-sub">All four blocks are done. You can close today’s check.</p>
+                <p className="t-row-sub">All required checks are done. You can close today’s check.</p>
               )}
               <button
                 type="button"

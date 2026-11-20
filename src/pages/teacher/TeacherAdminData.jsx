@@ -78,7 +78,7 @@ export default function TeacherAdminData({ data, grade, section, date, busy, run
               : ''}
           </p>
           {rows.length === 0 ? (
-            <p className="t-row-sub">The admin has not uploaded any rows for this section today.</p>
+            <p className="t-row-sub">The admin has not uploaded any rows for this section on this date.</p>
           ) : null}
         </div>
       </section>
@@ -86,7 +86,7 @@ export default function TeacherAdminData({ data, grade, section, date, busy, run
       <ExcelSheet
         title="Uploaded rows"
         meta={`${rows.length} row${rows.length === 1 ? '' : 's'}`}
-        note="These are the exit and entry restrictions the coordinator fed today."
+        note="These are the rows the coordinator uploaded for this date."
         columns={[
           'Sl. no.',
           'Type',

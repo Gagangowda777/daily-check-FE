@@ -5,8 +5,6 @@ import Shell from '../components/Shell.jsx'
 import TeacherAdminData from './teacher/TeacherAdminData.jsx'
 import TeacherAttendance from './teacher/TeacherAttendance.jsx'
 import TeacherBuses from './teacher/TeacherBuses.jsx'
-import TeacherEntry from './teacher/TeacherEntry.jsx'
-import TeacherExit from './teacher/TeacherExit.jsx'
 import TeacherInbox from './teacher/TeacherInbox.jsx'
 import TeacherNc from './teacher/TeacherNc.jsx'
 import TeacherOverview from './teacher/TeacherOverview.jsx'
@@ -19,23 +17,19 @@ const TEACHER_NAV = [
   { id: 'attendance', label: 'Attendance', href: routeHref('teacher/attendance') },
   { id: 'admin-data', label: 'Admin data', href: routeHref('teacher/admin-data') },
   { id: 'buses', label: 'Late bus arrivals', href: routeHref('teacher/buses') },
-  { id: 'exit', label: 'Exit restrictions', href: routeHref('teacher/exit') },
-  { id: 'entry', label: 'Entry restrictions', href: routeHref('teacher/entry') },
   { id: 'nc', label: 'NC tracker', href: routeHref('teacher/nc') },
   { id: 'inbox', label: 'Inbox', href: routeHref('teacher/inbox') },
 ]
 
-const DATE_PAGES = ['attendance', 'admin-data', 'buses', 'exit', 'entry']
+const DATE_PAGES = ['attendance', 'admin-data', 'buses', 'nc']
 
 const todayIso = () => new Date().toLocaleDateString('en-CA')
 
 const PAGE_META = {
-    overview: { title: 'Overview', subtitle: 'Finish every block to close today’s check' },
+  overview: { title: 'Overview', subtitle: 'Finish the required checks to close today’s check' },
   attendance: { title: 'Attendance', subtitle: 'Present, absent or late. Absences carry forward' },
   'admin-data': { title: 'Admin data', subtitle: 'Announce and acknowledge the coordinator’s upload' },
   buses:{ title: 'Late bus arrivals', subtitle: 'Students whose bus reached after the cut-off' },
-  exit: { title: 'Exit restrictions', subtitle: 'Acknowledge, excuse or resolve each student' },
-  entry: { title: 'Entry restrictions', subtitle: 'Clear the subjects still pending today' },
   nc: { title: 'NC tracker', subtitle: 'Daily NC count and NE update' },
   announcement: { title: 'Announcement', subtitle: 'Announcements for the school' },
   inbox: {
@@ -46,7 +40,8 @@ const PAGE_META = {
 
 export default function TeacherDashboard({ session, route, onSignOut }) {
   const { grade, section } = session
-  const page = pageFor(route, 'teacher', 'overview')
+  const requestedPage = pageFor(route, 'teacher', 'overview')
+  const page = ['exit', 'entry'].includes(requestedPage) ? 'overview' : requestedPage
   const meta = PAGE_META[page] || PAGE_META.overview
 
   const today = todayIso()
@@ -102,7 +97,7 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
 
   const headerActions = data ? (
     <div className="head-actions">
-      <span className="progress-chip">{4 - pendingBlocksOf(data).length}/4 done</span>
+      <span className="progress-chip">{2 - pendingBlocksOf(data).length}/2 done</span>
     </div>
   ) : null
 
@@ -200,26 +195,8 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
           />
         ) : page === 'buses' ? (
           <TeacherBuses data={data} />
-        ) : page === 'exit' ? (
-          <TeacherExit
-            data={data}
-            grade={grade}
-            section={section}
-            date={date}
-            busy={busy}
-            run={run}
-          />
-        ) : page === 'entry' ? (
-          <TeacherEntry
-            data={data}
-            grade={grade}
-            section={section}
-            date={date}
-            busy={busy}
-            run={run}
-          />
         ) : page === 'nc' ? (
-          <TeacherNc data={data} grade={grade} section={section} busy={busy} run={run} />
+          <TeacherNc data={data} grade={grade} section={section} date={date} busy={busy} run={run} />
         ) : page === 'inbox' || page === 'message' ? (
           <InboxHub>
             <TeacherInbox grade={grade} section={section} onSent={refresh} />
@@ -242,13 +219,10 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
   )
 }
 
-// The four blocks the close button waits on, in the same order as the UI.
+// The checks the close button waits on, in the same order as the UI.
 function pendingBlocksOf(data) {
-  const exitOpen = data.exit.filter((row) => ['pending', 'acknowledged'].includes(row.status))
   const ncDone = data.nc.count !== null && data.nc.updatedInNe
   return [
-    exitOpen.length ? 'exit' : null,
-    data.entry.length ? 'entry' : null,
     ncDone ? null : 'nc',
     data.message ? null : 'message',
   ].filter(Boolean)

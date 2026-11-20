@@ -263,7 +263,7 @@ export default function SuperAdminReview({ grade, section, date }) {
               <div className="sa-nc-head">
                 <h3>Students with an NC today</h3>
                 <span className={`t-count${row.ncStudents.length ? ' is-alert' : ' is-ok'}`}>
-                  {row.ncStudents.length ? `${row.ncStudents.length} flagged` : 'None flagged'}
+                  {row.ncStudents.length ? `${row.ncStudents.length} Flagged` : 'None flagged'}
                 </span>
               </div>
 

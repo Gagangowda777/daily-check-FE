@@ -256,6 +256,56 @@
   gap: 0;
 }
 
+.de-nc-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+}
+
+.de-nc-page-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.de-nc-page-head h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.de-nc-page-head p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.de-nc-page .xls-card {
+  border: 1px solid #e2e8f2;
+  border-radius: 8px;
+}
+
+.de-nc-roster-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.de-nc-student-search {
+  width: 220px;
+  min-width: 180px;
+}
+
+.de-nc-page input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #1d4ed8;
+  cursor: pointer;
+}
+
 @media (min-width: 900px) {
   .de-nc {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -265,6 +315,20 @@
   .de-nc .xls-card + .xls-card {
     border-top: 0;
     border-left: 1px solid #e2e8f2;
+  }
+}
+
+@media (max-width: 560px) {
+  .de-nc-page {
+    padding: 10px;
+  }
+
+  .de-nc-page-head {
+    flex-direction: column;
+  }
+
+  .de-nc-student-search {
+    width: 100%;
   }
 }
 

@@ -27,6 +27,12 @@ const PU2_SECTIONS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'
 
 const classLabelOf = (grade, section) => `${grade === 'PU1' ? '11' : '12'}${section}`
 const prettyDate = (iso) => String(iso || '').split('-').reverse().join('/')
+const parseRollNos = (value) =>
+  [...new Set(
+    (Array.isArray(value) ? value : String(value || '').split(/[\s,;]+/))
+      .map((rollNo) => String(rollNo || '').trim().toUpperCase())
+      .filter(Boolean)
+  )]
 
 const previousDayOf = (iso) => {
   const when = new Date(`${iso}T00:00:00Z`)
@@ -70,6 +76,10 @@ export default function DataEntry({ date }) {
   const [exitRows, setExitRows] = useState([])
   const [entryRows, setEntryRows] = useState([])
   const [ncValues, setNcValues] = useState({})
+  const [activeNcSection, setActiveNcSection] = useState(null)
+  const [ncRoster, setNcRoster] = useState([])
+  const [ncRosterLoading, setNcRosterLoading] = useState(false)
+  const [ncStudentQuery, setNcStudentQuery] = useState('')
   const [buses, setBuses] = useState([])
   const [busTimes, setBusTimes] = useState({})
   const [removed, setRemoved] = useState({ exit: [], entry: [] })
@@ -98,6 +108,7 @@ export default function DataEntry({ date }) {
 
     skipDirty.current = true
     setDirty(false)
+    if (fresh) setActiveNcSection(null)
     setExitRows(
       savedRowsLast(
         (sheet.exit || []).map((row) => ({
@@ -292,6 +303,78 @@ export default function DataEntry({ date }) {
     }
   }
 
+  const openNcSection = async (grade, section) => {
+    setActiveNcSection({ grade, section })
+    setNcRoster([])
+    setNcStudentQuery('')
+    setNcRosterLoading(true)
+    setError('')
+    try {
+      const res = await api.ncSectionStudents(date, grade, section)
+      setNcRoster(res.students || [])
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setNcRosterLoading(false)
+    }
+  }
+
+  const setNcStudentSelected = (rollNo, checked) => {
+    const key = `${activeNcSection.grade}:${activeNcSection.section}`
+    setNcValues((current) => {
+      const value = current[key] || {}
+      const selected = new Set(parseRollNos(value.students))
+      if (checked) selected.add(rollNo)
+      else selected.delete(rollNo)
+      return {
+        ...current,
+        [key]: { ...value, students: [...selected].join(', ') },
+      }
+    })
+  }
+
+  const setAllNcStudents = (selected) => {
+    const key = `${activeNcSection.grade}:${activeNcSection.section}`
+    setNcValues((current) => ({
+      ...current,
+      [key]: {
+        ...(current[key] || {}),
+        students: selected.map((student) => student.rollNo).join(', '),
+      },
+    }))
+  }
+
+  const saveNcSection = async () => {
+    const { grade, section } = activeNcSection
+    const value = ncValues[`${grade}:${section}`] || {}
+    const selected = parseRollNos(value.students)
+    setBusy('nc')
+    setError('')
+    setNotice('')
+    try {
+      await api.saveNcSheet({
+        date,
+        rows: [
+          {
+            grade,
+            section,
+            count: Number(value.count) || 0,
+            students: selected,
+            updatedInNe: Boolean(value.updatedInNe),
+          },
+        ],
+      })
+      setNotice(
+        `${selected.length} student${selected.length === 1 ? '' : 's'} saved with NCs for ${classLabelOf(grade, section)}.`
+      )
+      await refresh()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy('')
+    }
+  }
+
   const logArrival = async (route, raw = busTimes[route]) => {
     const time = normalizeTime(raw)
     if (!time) {
@@ -319,13 +402,23 @@ export default function DataEntry({ date }) {
       [`${grade}:${section}`]: { ...(current[`${grade}:${section}`] || {}), ...values },
     }))
 
+  const activeNcValue = activeNcSection
+    ? ncValues[`${activeNcSection.grade}:${activeNcSection.section}`] || {}
+    : {}
+  const activeNcRolls = parseRollNos(activeNcValue.students)
+  const activeNcRollSet = new Set(activeNcRolls)
+  const visibleNcRoster = ncRoster.filter((student) => {
+    const query = ncStudentQuery.trim().toLowerCase()
+    return !query || student.rollNo.toLowerCase().includes(query) || student.name.toLowerCase().includes(query)
+  })
+
   return (
     <div className="de-wrap">
       {notice ? <div className="de-notice">{notice}</div> : null}
       {error ? <div className="banner">{error}</div> : null}
 
       <div className="de-sheet">
-        <div className="de-tabs" role="tablist" aria-label="Workbook sheets">
+        {!activeNcSection ? <div className="de-tabs" role="tablist" aria-label="Workbook sheets">
         {TABS.map((item) => (
           <button
             key={item.id}
@@ -342,7 +435,7 @@ export default function DataEntry({ date }) {
             {item.label}
           </button>
         ))}
-      </div>
+      </div> : null}
 
         {loading ? <p className="de-loading">Loading the sheets…</p> : null}
 
@@ -483,7 +576,7 @@ export default function DataEntry({ date }) {
         </ExcelSheet>
       ) : null}
 
-      {!loading && tab === 'nc' ? (
+      {!loading && tab === 'nc' && !activeNcSection ? (
         <div className="de-nc">
           {[
             { grade: 'PU1', sections: PU1_SECTIONS },
@@ -492,10 +585,11 @@ export default function DataEntry({ date }) {
             <ExcelSheet
               key={group.grade}
               reserveHeader
-              columns={['Section', 'NC Count', 'Students (Roll Nos)', 'Updated in NE']}
+              columns={['Section', 'NC Count', 'Updated in NE', 'Students']}
             >
               {group.sections.map((section) => {
                 const value = ncValues[`${group.grade}:${section}`] || {}
+                const studentCount = parseRollNos(value.students).length
                 return (
                   <tr key={section} className="xls-row">
                     <td className="de-sec">{classLabelOf(group.grade, section)}</td>
@@ -510,23 +604,6 @@ export default function DataEntry({ date }) {
                       />
                     </td>
                     <td>
-                      <input
-                        className="de-input is-nc-students"
-                        type="text"
-                        placeholder="e.g. 26A101, 26A143"
-                        value={value.students ?? ''}
-                        onChange={(event) => {
-                          const val = event.target.value
-                          const parsed = val.split(/[\s,;]+/).filter(Boolean)
-                          const autoCount = parsed.length > 0 ? String(parsed.length) : value.count
-                          setNc(group.grade, section, {
-                            students: val,
-                            ...(parsed.length > 0 && (!value.count || Number(value.count) <= parsed.length) ? { count: autoCount } : {})
-                          })
-                        }}
-                      />
-                    </td>
-                    <td>
                       <select
                         className="de-input is-status"
                         value={value.updatedInNe ? 'yes' : 'no'}
@@ -536,12 +613,98 @@ export default function DataEntry({ date }) {
                         <option value="yes">Yes - CC</option>
                       </select>
                     </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="de-btn"
+                        onClick={() => openNcSection(group.grade, section)}
+                      >
+                        Manage students ({studentCount})
+                      </button>
+                    </td>
                   </tr>
                 )
               })}
             </ExcelSheet>
           ))}
 
+        </div>
+      ) : null}
+
+      {!loading && activeNcSection ? (
+        <div className="de-nc-page">
+          <div className="de-nc-page-head">
+            <button type="button" className="de-btn" onClick={() => setActiveNcSection(null)}>
+              ← All sections
+            </button>
+            <div>
+              <h2>{classLabelOf(activeNcSection.grade, activeNcSection.section)} students</h2>
+              <p>Select the students who should receive an NC for {prettyDate(date)}.</p>
+            </div>
+          </div>
+
+          <ExcelSheet
+            title="Section roster"
+            meta={`${ncRoster.length} students · ${activeNcRolls.length} selected`}
+            toolbar={
+              <div className="de-nc-roster-tools">
+                <input
+                  className="de-input de-nc-student-search"
+                  type="search"
+                  aria-label="Search students"
+                  placeholder="Search name or roll number"
+                  value={ncStudentQuery}
+                  onChange={(event) => setNcStudentQuery(event.target.value)}
+                />
+                <button
+                  type="button"
+                  className="de-btn"
+                  disabled={ncRosterLoading || busy === 'nc'}
+                  onClick={() => setAllNcStudents(ncRoster)}
+                >
+                  Select all
+                </button>
+                <button
+                  type="button"
+                  className="de-btn"
+                  disabled={ncRosterLoading || busy === 'nc'}
+                  onClick={() => setAllNcStudents([])}
+                >
+                  Clear all
+                </button>
+              </div>
+            }
+            columns={['Sl. No.', 'Roll No.', 'Name', 'Give NC']}
+          >
+            {ncRosterLoading ? (
+              <tr>
+                <td className="xls-empty" colSpan={4}>Loading students…</td>
+              </tr>
+            ) : visibleNcRoster.length === 0 ? (
+              <tr>
+                <td className="xls-empty" colSpan={4}>
+                  {ncRoster.length ? 'No students match this search.' : 'No students found for this section.'}
+                </td>
+              </tr>
+            ) : (
+              visibleNcRoster.map((student, index) => (
+                <tr key={student.rollNo} className="xls-row">
+                  <td className="xls-no">{index + 1}</td>
+                  <td className="de-sec">{student.rollNo}</td>
+                  <td className="xls-name">{student.name}</td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={activeNcRollSet.has(student.rollNo)}
+                      aria-label={`Give NC to ${student.name}`}
+                      disabled={busy === 'nc'}
+                      onChange={(event) => setNcStudentSelected(student.rollNo, event.target.checked)}
+                    />
+                  </td>
+                </tr>
+              ))
+            )}
+          </ExcelSheet>
         </div>
       ) : null}
 
@@ -608,7 +771,7 @@ export default function DataEntry({ date }) {
       ) : null}
       </div>
 
-      {!loading && tab !== 'bus' ? (
+      {!loading && !activeNcSection && tab !== 'bus' ? (
         <div className="de-savebar">
           <span className={`de-save-status${dirty ? ' is-dirty' : ''}`}>
             <span className="de-dot" aria-hidden="true" />
@@ -621,6 +784,23 @@ export default function DataEntry({ date }) {
             onClick={() => (tab === 'nc' ? saveNc() : saveRestrictions(tab))}
           >
             {busy === tab ? 'Saving…' : tab === 'nc' ? 'Save NC sheet' : 'Save sheet'}
+          </button>
+        </div>
+      ) : null}
+
+      {!loading && activeNcSection ? (
+        <div className="de-savebar">
+          <span className={`de-save-status${dirty ? ' is-dirty' : ''}`}>
+            <span className="de-dot" aria-hidden="true" />
+            {dirty ? 'Unsaved changes' : 'All changes saved'}
+          </span>
+          <button
+            type="button"
+            className="de-btn is-primary"
+            disabled={busy === 'nc' || ncRosterLoading}
+            onClick={saveNcSection}
+          >
+            {busy === 'nc' ? 'Saving…' : 'Save student NCs'}
           </button>
         </div>
       ) : null}
