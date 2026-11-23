@@ -368,7 +368,7 @@ export default function AdminTracking({
               <th className="trk-sno-head">S.No</th>
               <th>Class / Name</th>
               <th>View status / Timeline</th>
-              <th>{leaderView ? 'Uploaded screenshot' : 'Uploaded photo / Screenshot'}</th>
+              <th>Uploaded photo</th>
             </tr>
           </thead>
           <tbody>
@@ -428,7 +428,7 @@ export default function AdminTracking({
                         ) : null}
                       </>
                     ) : (
-                      <span>{leaderView ? 'No screenshot' : 'No photo'}</span>
+                      <span>No photo</span>
                     )}
                     {kind === 'announcement' &&
                     announcementUploader &&
