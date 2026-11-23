@@ -172,7 +172,7 @@ export default function LeaderDashboard({ session, route, onSignOut }) {
         ) : page === 'trend' ? (
           <LeaderTrend grade={grade} section={section} date={date} version={version} />
         ) : page === 'announcement' ? (
-          <AnnouncementBoard />
+          <AnnouncementBoard readOnly />
         ) : (
           <LeaderOverview data={data} />
         )}

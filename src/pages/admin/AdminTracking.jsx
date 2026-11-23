@@ -160,8 +160,11 @@ export default function AdminTracking({
       return `${row.label} ${row.leader}`.toLowerCase().includes(needle)
     })
   }, [data, filter, text, myLabel])
-  const canPost = kind === 'announcement' && (canPostAnnouncement || Boolean(announcementUploader))
-  // The admin desk writes the announcement; the class leader posts a photo one.
+  // Only the admin desk starts a new announcement. A class leader adds the
+  // proof photo for an announcement that already exists.
+  const canPost = kind === 'announcement' && Boolean(canPostAnnouncement)
+  // The admin desk writes the announcement; class leaders add proof photos in
+  // the table below.
   const textComposer = Boolean(canPostAnnouncement) && !announcementUploader
 
   // The class leader's row is the only editable one: the announcement itself is
