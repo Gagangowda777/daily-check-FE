@@ -316,6 +316,42 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Group chats name the sender above each incoming bubble, as WhatsApp does. */
+.wa-bubble-sender {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #1d4ed8;
+}
+
+.wa-ticks {
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.wa-ticks.is-read {
+  color: #15803d;
+}
+
+/* Sent bubbles keep the WhatsApp tail on their right edge. */
+.wa-bubble {
+  position: relative;
+}
+
+.wa-bubble.is-mine::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  bottom: 0;
+  border-top: 6px solid #d9fdd3;
+  border-right: 6px solid transparent;
+}
+
+.wa-bubble:not(.is-mine) {
+  border-top-left-radius: 2px;
+}
+
 .wa-compose {
   display: flex;
   gap: 8px;
@@ -395,7 +431,12 @@
 @media (max-width: 860px) {
   .wa-wrap {
     grid-template-columns: minmax(0, 1fr);
-    min-height: 420px;
+    min-height: 0;
+  }
+
+  .wa-list,
+  .wa-chat {
+    min-height: min(72vh, 560px);
   }
 
   .wa-list.has-active,
@@ -408,7 +449,11 @@
   }
 
   .wa-body {
-    height: 320px;
+    height: min(58vh, 420px);
+  }
+
+  .wa-bubble {
+    max-width: 88%;
   }
 }
 
@@ -439,8 +484,42 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
+}
+
+.wa-compose-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wa-compose-attachments {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.wa-compose-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.wa-compose-row .wa-editor {
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+}
+
+.wa-compose-row .wa-send {
+  flex: 0 0 auto;
+  min-width: 78px;
+  height: 38px;
+  padding: 0 20px;
+  font-size: 13px;
 }
 
 .wa-format {
@@ -491,4 +570,495 @@
 .wa-bubble-text b,
 .wa-bubble-text strong {
   font-weight: 800;
+}
+
+/* Class picture: the leader's proof of receipt, shown under a viewed
+   announcement. */
+.wa-class-pic {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #cbd5e1;
+}
+
+.wa-class-pic-status {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #9a3412;
+}
+
+.wa-class-pic-status.is-done {
+  color: #166534;
+}
+
+.wa-class-pic-btn {
+  padding: 5px 11px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffffff;
+  background: #2563eb;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.wa-class-pic-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.wa-class-pic-link {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.wa-class-pic-link:hover {
+  text-decoration: underline;
+}
+
+.wa-class-pic-error {
+  flex-basis: 100%;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+/* Voice messages: a mic in the composer, a recording/preview bar, and a
+   playable bubble with its length. */
+.wa-mic {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: #15803d;
+  background: #e8f7ee;
+  border: 1px solid #bfe8cf;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.wa-mic:hover {
+  background: #d9f2e4;
+}
+
+.wa-voice-bar {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.wa-voice-dot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  background: #dc2626;
+  border-radius: 50%;
+  animation: wa-voice-pulse 1s ease-in-out infinite;
+}
+
+@keyframes wa-voice-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.wa-voice-label {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.wa-voice-preview {
+  flex: 1;
+  min-width: 180px;
+  height: 34px;
+}
+
+.wa-voice-stop,
+.wa-voice-send,
+.wa-voice-cancel {
+  padding: 0 12px;
+  height: 30px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 800;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.wa-voice-stop,
+.wa-voice-send {
+  color: #ffffff;
+  background: #15803d;
+  border: 1px solid #15803d;
+}
+
+.wa-voice-cancel {
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+.wa-voice-stop:disabled,
+.wa-voice-send:disabled,
+.wa-voice-cancel:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.wa-voice-error {
+  flex-basis: 100%;
+  margin: 0;
+  padding: 2px 2px 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.wa-voice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 205px;
+  max-width: 100%;
+  padding: 2px 0 1px;
+}
+
+.wa-voice audio {
+  display: none;
+}
+
+.wa-voice-play {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: #ffffff;
+  background: #15803d;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.wa-voice-play:disabled {
+  background: #94a3b8;
+  cursor: default;
+}
+
+.wa-voice-track {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  padding: 0;
+  background: #cbd5e1;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.wa-voice.is-mine .wa-voice-track {
+  background: #a7d7a0;
+}
+
+.wa-voice-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: #15803d;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.wa-voice-time {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: #475569;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Audio files picked from the device keep a visible name and their own play
+   control, separate from the recorded voice bubbles. */
+.wa-attach {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: #1d4ed8;
+  background: #eef4ff;
+  border: 1px solid #d7e3fb;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.wa-attach:hover {
+  background: #e2ebfd;
+}
+
+.wa-file {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 210px;
+  max-width: 100%;
+  padding: 1px 0 2px;
+}
+
+.wa-file-name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wa-file-bar .wa-file-name {
+  flex-basis: 100%;
+  font-size: 12px;
+}
+
+/* Shared photos keep their aspect ratio, shrink with the bubble, and open in
+   a full-screen preview when tapped. */
+.wa-image-btn {
+  display: block;
+  max-width: 100%;
+  padding: 0;
+  line-height: 0;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.wa-image {
+  display: block;
+  max-width: min(260px, 100%);
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  background: #e2e8f0;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.wa-image-btn:hover .wa-image {
+  filter: brightness(0.94);
+}
+
+.wa-image-thumb {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #e2e8f0;
+}
+
+.wa-image-bar .wa-file-name {
+  flex: 1;
+  min-width: 0;
+  flex-basis: auto;
+}
+
+.wa-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.wa-lightbox-img {
+  max-width: 92vw;
+  max-height: 82vh;
+  border-radius: 8px;
+  object-fit: contain;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.4);
+}
+
+.wa-lightbox-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  font-family: inherit;
+  font-size: 22px;
+  line-height: 1;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.wa-lightbox-name {
+  max-width: 90vw;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e8f0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Documents: a compact card in the bubble and a progress bar while uploading. */
+.wa-doc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 220px;
+  max-width: 100%;
+  padding: 2px 0;
+}
+
+.wa-doc-chip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 44px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #1d4ed8;
+  background: #e8f0fe;
+  border: 1px solid #d7e3fb;
+  border-radius: 6px;
+}
+
+.wa-doc-main,
+.wa-doc-preview {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.wa-doc-name {
+  overflow: hidden;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wa-doc-meta {
+  font-size: 10px;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.wa-doc-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.wa-doc-link {
+  padding: 4px 7px;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #1d4ed8;
+  text-decoration: none;
+  background: #f5f8ff;
+  border: 1px solid #d7e3fb;
+  border-radius: 6px;
+}
+
+.wa-doc-link:hover {
+  background: #e8f0fe;
+}
+
+.wa-doc-bar .wa-file-name {
+  flex: none;
+  flex-basis: auto;
+}
+
+.wa-upload {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 110px;
+}
+
+.wa-upload-track {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  overflow: hidden;
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.wa-upload-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: #15803d;
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.wa-upload-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #475569;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 860px) {
+  .wa-voice-preview {
+    flex-basis: 100%;
+    order: 3;
+  }
+
+  .wa-file {
+    min-width: 180px;
+  }
+
+  .wa-image {
+    max-height: 260px;
+  }
+
+  .wa-doc {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .wa-doc-actions {
+    flex-basis: 100%;
+    justify-content: flex-end;
+  }
 }

@@ -118,6 +118,49 @@
   border-top: 0;
 }
 
+/* Overview: one line per area of the day, each linking to its screen. */
+.ov-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ov-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 10px 0;
+  border-top: 1px solid #f2f5fb;
+}
+
+.ov-item:first-child {
+  padding-top: 2px;
+  border-top: 0;
+}
+
+.ov-item a {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.ov-item a:hover {
+  text-decoration: underline;
+}
+
+.ov-detail {
+  font-size: 12px;
+  color: #7b8698;
+}
+
+.ov-item .t-count {
+  margin-left: auto;
+}
+
 .t-row-main {
   display: flex;
   flex-wrap: wrap;

@@ -265,6 +265,7 @@
   color: #475467;
 }
 
+.ann-field input,
 .ann-field textarea {
   padding: 9px 11px;
   font-family: inherit;
@@ -279,6 +280,7 @@
   resize: vertical;
 }
 
+.ann-field input:focus,
 .ann-field textarea:focus {
   outline: 2px solid #c7d7fe;
   border-color: #93b4f7;

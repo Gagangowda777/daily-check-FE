@@ -26,7 +26,7 @@ const DATE_PAGES = ['attendance', 'admin-data', 'buses', 'nc']
 const todayIso = () => new Date().toLocaleDateString('en-CA')
 
 const PAGE_META = {
-  overview: { title: 'Overview', subtitle: 'Finish the required checks to close today’s check' },
+  overview: { title: 'Overview', subtitle: 'Your section at a glance' },
   attendance: { title: 'Attendance', subtitle: 'Present, absent or late. Absences carry forward' },
   'admin-data': { title: 'Admin data', subtitle: 'Announce and acknowledge the coordinator’s upload' },
   buses:{ title: 'Late bus arrivals', subtitle: 'Students whose bus reached after the cut-off' },
@@ -34,7 +34,7 @@ const PAGE_META = {
   announcement: { title: 'Announcement', subtitle: 'Announcements for the school' },
   inbox: {
     title: 'Inbox',
-    subtitle: 'Messages, broadcasts and announcements, all in one place',
+    subtitle: 'Chats, archived broadcast snapshots and announcements',
   },
 }
 
@@ -95,12 +95,6 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
     }
   }
 
-  const headerActions = data ? (
-    <div className="head-actions">
-      <span className="progress-chip">{2 - pendingBlocksOf(data).length}/2 done</span>
-    </div>
-  ) : null
-
   if (!data) {
     return (
       <Shell
@@ -109,8 +103,7 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
         activeNav={page}
         crumb="Class teacher"
         title={meta.title}
-        subtitle="Loading today’s check…"
-        actions={headerActions}
+        subtitle="Loading today’s overview…"
         onSignOut={onSignOut}
       >
         <div className="teacher-body">
@@ -122,15 +115,12 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
               </button>
             </>
           ) : (
-            <p className="empty">Loading today’s check…</p>
+            <p className="empty">Loading today’s overview…</p>
           )}
         </div>
       </Shell>
     )
   }
-
-  const pendingIds = pendingBlocksOf(data)
-  const closed = Boolean(data.check.submittedAt)
 
   return (
     <Shell
@@ -140,7 +130,6 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
       crumb={`Class teacher · ${data.label}`}
       title={page === 'overview' ? `${data.label} overview` : meta.title}
       subtitle={`${data.date} · ${meta.subtitle}`}
-      actions={headerActions}
       onSignOut={onSignOut}
     >
       <div className="teacher-body">
@@ -196,34 +185,17 @@ export default function TeacherDashboard({ session, route, onSignOut }) {
         ) : page === 'buses' ? (
           <TeacherBuses data={data} />
         ) : page === 'nc' ? (
-          <TeacherNc data={data} grade={grade} section={section} date={date} busy={busy} run={run} />
+          <TeacherNc data={data} />
         ) : page === 'inbox' || page === 'message' ? (
-          <InboxHub>
+          <InboxHub readTracking>
             <TeacherInbox grade={grade} section={section} onSent={refresh} />
           </InboxHub>
         ) : page === 'announcement' ? (
           <AnnouncementBoard readOnly />
         ) : (
-          <TeacherOverview
-            data={data}
-            grade={grade}
-            section={section}
-            pendingBlocks={pendingIds}
-            closed={closed}
-            busy={busy}
-            run={run}
-          />
+          <TeacherOverview data={data} />
         )}
       </div>
     </Shell>
   )
-}
-
-// The checks the close button waits on, in the same order as the UI.
-function pendingBlocksOf(data) {
-  const ncDone = data.nc.count !== null && data.nc.updatedInNe
-  return [
-    ncDone ? null : 'nc',
-    data.message ? null : 'message',
-  ].filter(Boolean)
 }

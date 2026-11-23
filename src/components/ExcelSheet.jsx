@@ -101,8 +101,16 @@ export function BusArrivalsSheet({
   empty = 'No late buses today.',
   renderActions,
   actionLabel = 'Actions',
+  showSchedule = false,
 }) {
-  const columns = ['Sl. no.', 'Route', 'Arrival', 'Late / Not late', 'Students late on this route']
+  const columns = [
+    'Sl. no.',
+    'Route',
+    ...(showSchedule ? ['Scheduled'] : []),
+    'Arrival',
+    'Late / Not late',
+    'Students late on this route',
+  ]
   if (renderActions) columns.push(actionLabel)
 
   return (
@@ -118,6 +126,7 @@ export function BusArrivalsSheet({
           <tr key={bus.route} className={`xls-row ${bus.late ? 'is-late' : 'is-ok'}`}>
             <td className="xls-no">{index + 1}</td>
             <td className="xls-route">{bus.route}</td>
+            {showSchedule ? <td className="xls-time">{bus.scheduledTime || '-'}</td> : null}
             <td className="xls-time">{bus.arrivalTime || '-'}</td>
             <td>
               {bus.arrivalTime ? (

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api.js'
 
-// The Transport In-charge and Gate / Security dashboards are kept in the code
-// but hidden from the portal for now; put their entries back here to re-enable
-// them.
+// The Gate / Security dashboard is kept in the code but hidden from the portal
+// for now; put its entry back here to re-enable it.
 const LOGIN_TYPES = [
   { id: 'superadmin', label: 'Super Admin', email: 'superadmin@dailycheck.demo' },
   { id: 'admin', label: 'Admin / Coordinator', email: 'admin@dailycheck.demo' },
+  { id: 'transport', label: 'Transport In-Charge', email: 'transport@dailycheck.demo' },
   { id: 'teacher', label: 'Class Teacher', email: 'teacher@dailycheck.demo' },
   { id: 'leader', label: 'Class Leader', email: 'leader@dailycheck.demo' },
 ]

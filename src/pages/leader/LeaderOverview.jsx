@@ -26,10 +26,6 @@ export default function LeaderOverview({ data }) {
     stats.entryPending
       ? { href: routeHref('leader/entry'), text: `${stats.entryPending} entry check(s) with the class teacher`, tone: 'warn' }
       : null,
-    data.nc.updatedInNe ? null : { href: routeHref('leader/nc'), text: 'NC count not updated in NE yet', tone: 'warn' },
-    data.check.submittedAt
-      ? null
-      : { href: routeHref('leader/nc'), text: 'Daily check not closed by the teacher yet', tone: 'warn' },
   ].filter(Boolean)
 
   return (

@@ -129,7 +129,7 @@ export default function AnnouncementBoard({ readOnly = false }) {
                       ? `${unread} unread of ${state.items.length}`
                       : 'You are all caught up'
                     : readOnly
-                      ? 'Photos the class leader posts appear here'
+                      ? 'Announcements posted by the admin desk appear here'
                       : 'Take a photo to start'}
               </span>
             </div>
@@ -155,7 +155,7 @@ export default function AnnouncementBoard({ readOnly = false }) {
           ) : state.items.length === 0 ? (
             <p className="wa-empty">
               {readOnly
-                ? 'No announcements yet. Photos the class leader posts appear here.'
+                ? 'No announcements yet. Announcements posted by the admin desk appear here.'
                 : 'No announcements yet. Take a photo to start.'}
             </p>
           ) : (
@@ -173,7 +173,7 @@ export default function AnnouncementBoard({ readOnly = false }) {
                     <span className="wa-thread-main">
                       <span className="wa-thread-top">
                         <span className="wa-thread-name">
-                          {item.caption || 'Photo announcement'}
+                          {item.title || item.caption || 'Announcement'}
                         </span>
                         <span className="wa-thread-time">{listStamp(item)}</span>
                       </span>
@@ -216,7 +216,7 @@ export default function AnnouncementBoard({ readOnly = false }) {
                   {initials(open.context || open.author || 'Class Leader')}
                 </span>
                 <div className="wa-chat-title">
-                  <strong>{open.caption || 'Photo announcement'}</strong>
+                  <strong>{open.title || open.caption || 'Announcement'}</strong>
                   <span>
                     {open.context || open.author} · {stamp(open)}
                   </span>
@@ -228,11 +228,13 @@ export default function AnnouncementBoard({ readOnly = false }) {
                   <span>{dayHeading(open.date)}</span>
                 </div>
                 <article className="wa-bubble ann-bubble">
-                  <img
-                    className="ann-bubble-photo"
-                    src={open.photoUrl}
-                    alt={open.caption || 'Announcement photo'}
-                  />
+                  {open.photoUrl ? (
+                    <img
+                      className="ann-bubble-photo"
+                      src={open.photoUrl}
+                      alt={open.title || open.caption || 'Announcement photo'}
+                    />
+                  ) : null}
                   {open.caption ? (
                     <p className="ann-bubble-caption">{open.caption}</p>
                   ) : null}
@@ -263,7 +265,9 @@ export default function AnnouncementBoard({ readOnly = false }) {
   )
 }
 
-function PhotoComposer({ onClose, onPosted }) {
+// Shared with the inbox announcement tab, where the admin desk and the class
+// leader post the same kind of photo announcement.
+export function PhotoComposer({ onClose, onPosted }) {
   const videoRef = useRef(null)
   const streamRef = useRef(null)
   const [shot, setShot] = useState('')

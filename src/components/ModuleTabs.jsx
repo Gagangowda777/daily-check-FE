@@ -452,7 +452,7 @@ function BusPanel({ date, onChanged }) {
         }))}
         title="Bus arrivals"
         meta={`${rows.length} routes · ${lateCount} late or missing`}
-        note="Routes that reached campus after the 8:20 am cut-off."
+        note="Routes that reached campus after the 8:22 am cut-off."
         empty="No bus data for today."
         renderActions={(bus) =>
           bus.status !== 'on-time' && bus.affectedStudents > 0 ? (
@@ -475,10 +475,10 @@ function SettingsPanel() {
   const [settings, setSettings] = useState(null)
   const [reasons, setReasons] = useState('')
   const [subjects, setSubjects] = useState('')
-  const [cutoff, setCutoff] = useState('08:20')
+  const [cutoff, setCutoff] = useState('08:22')
   const [routeCutoffs, setRouteCutoffs] = useState({})
   const [newRoute, setNewRoute] = useState('R1')
-  const [newTime, setNewTime] = useState('08:20')
+  const [newTime, setNewTime] = useState('08:22')
   const [audit, setAudit] = useState([])
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')

@@ -187,10 +187,15 @@ select.input {
   position: absolute;
   top: 50%;
   right: 8px;
+  /* Without this the button's top edge sits on the field's centre line and the
+     eye drops below the field. */
+  transform: translateY(-50%);
   display: grid;
   place-items: center;
   width: 34px;
   height: 34px;
+  padding: 0;
+  line-height: 0;
   color: #8b96a8;
   background: transparent;
   border: 0;

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ArchiveGallery from './ArchiveGallery.jsx'
 import AnnouncementBoard from './AnnouncementBoard.jsx'
+import AdminTracking from '../pages/admin/AdminTracking.jsx'
 import './inboxhub.css'
 
 // The inbox holds every school-wide notice: the chats, the broadcast archive
@@ -12,13 +13,26 @@ const TABS = [
   { id: 'broadcast', label: 'Broadcast' },
 ]
 
-export default function InboxHub({ children, canPostAnnouncement = false }) {
+export default function InboxHub({
+  children,
+  canPostAnnouncement = false,
+  readTracking = false,
+  showBroadcast = true,
+  showAnnouncement = true,
+  announcementUploader = null,
+  archiveUploader = null,
+}) {
   const [tab, setTab] = useState('chats')
+  const tabs = TABS.filter(
+    (item) =>
+      (showBroadcast || item.id !== 'broadcast') &&
+      (showAnnouncement || item.id !== 'announcement')
+  )
 
   return (
     <div className="ih-wrap">
       <div className="ih-tabs" role="tablist" aria-label="Inbox sections">
-        {TABS.map((item) => (
+        {tabs.map((item) => (
           <button
             key={item.id}
             type="button"
@@ -37,8 +51,18 @@ export default function InboxHub({ children, canPostAnnouncement = false }) {
       <div className="ih-pane" hidden={tab !== 'chats'}>
         {children}
       </div>
-      {tab === 'broadcast' ? <ArchiveGallery /> : null}
-      {tab === 'announcement' ? <AnnouncementBoard readOnly={!canPostAnnouncement} /> : null}
+      {tab === 'broadcast' ? (
+        <ArchiveGallery uploader={archiveUploader} />
+      ) : readTracking && showAnnouncement && tab === 'announcement' ? (
+        <AdminTracking
+          fixedKind="announcement"
+          showTypeTabs={false}
+          announcementUploader={announcementUploader}
+          canPostAnnouncement={canPostAnnouncement}
+        />
+      ) : tab === 'announcement' ? (
+        <AnnouncementBoard readOnly={!canPostAnnouncement} />
+      ) : null}
     </div>
   )
 }

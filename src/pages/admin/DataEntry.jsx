@@ -712,11 +712,11 @@ export default function DataEntry({ date }) {
         <ExcelSheet
           reserveHeader
           meta={`${buses.filter((bus) => bus.late).length} late route${buses.filter((bus) => bus.late).length === 1 ? '' : 's'}`}
-          columns={['Sl. No.', 'Route', 'Arrival', 'Late / Not late', 'Students late on this route']}
+          columns={['Sl. No.', 'Route', 'Scheduled', 'Arrival', 'Late / Not late', 'Students late on this route']}
         >
           {buses.length === 0 ? (
             <tr>
-              <td className="xls-empty" colSpan={5}>
+              <td className="xls-empty" colSpan={6}>
                 No routes on the bus log for this date.
               </td>
             </tr>
@@ -725,6 +725,7 @@ export default function DataEntry({ date }) {
               <tr key={bus.route} className={`xls-row ${bus.late ? 'is-late' : 'is-ok'}`}>
                 <td className="xls-no">{index + 1}</td>
                 <td className="xls-route">{bus.route}</td>
+                <td className="xls-time">{bus.scheduledTime || '-'}</td>
                 <td>
                   <input
                     className="de-input is-roll"

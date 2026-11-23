@@ -62,6 +62,43 @@ const send = (path, method, payload) =>
 
 const post = (path, payload) => send(path, 'POST', payload)
 
+// File uploads can report their progress. XMLHttpRequest is used here because
+// fetch does not expose upload progress.
+function postWithProgress(path, payload, onProgress) {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest()
+    request.open('POST', `${BASE}${path}`)
+    request.setRequestHeader('Content-Type', 'application/json')
+    if (token) request.setRequestHeader('Authorization', `Bearer ${token}`)
+    request.timeout = 120000
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) {
+        onProgress(Math.round((event.loaded / event.total) * 100))
+      }
+    }
+    request.onload = () => {
+      let body
+      try {
+        body = JSON.parse(request.responseText)
+      } catch {
+        body = {}
+      }
+      if (request.status === 401 && token) {
+        setToken('')
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('dailycheck:unauthorized'))
+        }
+      }
+      if (request.status >= 200 && request.status < 300) resolve(body)
+      else reject(new Error(body.error || `Request failed (${request.status})`))
+    }
+    request.onerror = () =>
+      reject(new Error('The file could not be uploaded. Check your connection and try again.'))
+    request.ontimeout = () => reject(new Error('The upload timed out. Try again.'))
+    request.send(JSON.stringify(payload))
+  })
+}
+
 export const api = {
   setToken,
   getToken,
@@ -92,12 +129,23 @@ export const api = {
   bulkEntryRestrictions: (payload) => post('/restrictions/entry/bulk', payload),
   sendMessage: (payload) => post('/messages', payload),
   sentMessages: (params = {}) => get(`/messages/sent?${query(params)}`),
+  adminTracking: (params) => get(`/admin/tracking?${query(params)}`),
   inboxMessages: (params = {}) => get(`/messages/inbox?${query(params)}`),
   archives: () => get('/archives'),
+  archivePhoto: (date, payload) =>
+    post(`/archives/${encodeURIComponent(date)}/photo`, payload),
   announcements: () => get('/announcements'),
   postAnnouncement: (payload) => post('/announcements', payload),
   viewAnnouncement: (id) => post(`/announcements/${encodeURIComponent(id)}/view`, {}),
   sendInboxMessage: (payload) => post('/messages/inbox', payload),
+  sendInboxMessageWithProgress: (payload, onProgress) =>
+    postWithProgress('/messages/inbox', payload, onProgress),
+  // Signed file links arrive as API paths; absolute media URLs pass through.
+  fileUrl: (path) => {
+    if (!path) return ''
+    if (/^https?:/i.test(path)) return path
+    return `${BASE}${String(path).replace(/^\/api/, '')}`
+  },
 
   handovers: (params) => get(`/handovers?${query(params)}`),
   handoverOutcome: (rollNo, payload) =>
@@ -133,6 +181,21 @@ export const api = {
   teacherMessage: (payload) => post('/teacher/message', payload),
 
   transportToday: (params) => get(`/transport/today?${query(params)}`),
+  transportRoutes: () => get('/transport/routes'),
+  transportRouteUpdate: (route, payload) =>
+    send(`/transport/routes/${encodeURIComponent(route)}`, 'PUT', payload),
+  transportRouteStudents: (route) =>
+    get(`/transport/routes/${encodeURIComponent(route)}/students`),
+  transportAddStudent: (route, payload) =>
+    post(`/transport/routes/${encodeURIComponent(route)}/students`, payload),
+  transportRenameStudent: (rollNo, payload) =>
+    send(`/transport/students/${encodeURIComponent(rollNo)}`, 'PUT', payload),
+  transportReassignStudent: (route, rollNo, payload) =>
+    send(
+      `/transport/routes/${encodeURIComponent(route)}/students/${encodeURIComponent(rollNo)}`,
+      'PUT',
+      payload
+    ),
   transportArrive: (route, payload) =>
     post(`/transport/routes/${encodeURIComponent(route)}/arrive`, payload),
   transportTime: (route, payload) =>
@@ -152,6 +215,12 @@ export const api = {
     post(`/leader/attendance/${encodeURIComponent(rollNo)}`, payload),
   leaderTrend: (params) => get(`/leader/trend?${query(params)}`),
   leaderNotes: (params) => get(`/leader/notes?${query(params)}`),
+  uploadClassPicture: (id, payload) =>
+    post(`/leader/announcements/${encodeURIComponent(id)}/picture`, payload),
+  uploadAnnouncementPhoto: (id, payload) =>
+    post(`/leader/announcements/${encodeURIComponent(id)}/class-photo`, payload),
+  uploadClassScreenshot: (id, payload) =>
+    post(`/leader/messages/${encodeURIComponent(id)}/screenshot`, payload),
   leaderNoteSend: (payload) => post('/leader/notes', payload),
 
   gateToday: (params = {}) => get(`/gate/today?${query(params)}`),

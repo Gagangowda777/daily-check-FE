@@ -13,9 +13,9 @@ import './shell.css'
 
 const SESSION_KEY = 'dailycheck.session'
 
-// These dashboards still exist, but their sign-in options are hidden for now,
-// so an old saved session must not reopen them.
-const HIDDEN_ROLES = ['transport', 'gate']
+// The Gate / Security dashboard still exists, but its sign-in option is hidden
+// for now, so an old saved session must not reopen it.
+const HIDDEN_ROLES = ['gate']
 
 // Where each role lands when the URL does not name one of its screens.
 const HOME = {

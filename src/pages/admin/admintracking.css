@@ -1,0 +1,437 @@
+.trk-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trk-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: #ffffff;
+  border: 1px solid #e6ecf6;
+  border-radius: 14px;
+}
+
+.trk-tabs {
+  display: inline-flex;
+  padding: 3px;
+  background: #eef3fb;
+  border-radius: 10px;
+}
+
+.trk-tab {
+  padding: 7px 14px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #475569;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.trk-tab.is-active {
+  color: #0f172a;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+
+.trk-picker {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 240px;
+}
+
+.trk-picker span {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.trk-picker select {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: #0f172a;
+  background: #f8fafd;
+  border: 1px solid #dfe7f3;
+  border-radius: 9px;
+}
+
+/* Announcement days: a date field in place of the old message selector. */
+.trk-day {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  min-width: 240px;
+}
+
+.trk-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trk-date span {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.trk-date input {
+  padding: 7px 10px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: #0f172a;
+  background: #f8fafd;
+  border: 1px solid #dfe7f3;
+  border-radius: 9px;
+}
+
+.trk-day-picker {
+  flex: 1;
+}
+
+.trk-day-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.trk-day-empty {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.trk-upload-notice {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #166534;
+  background: #dcfce7;
+  border-radius: 9px;
+}
+
+.trk-upload {
+  display: inline-flex;
+  margin-top: 7px;
+  padding: 5px 10px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #1d4ed8;
+  background: #eef4ff;
+  border: 1px solid #d7e3fb;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.trk-upload:hover {
+  background: #e2ebfd;
+}
+
+.trk-upload input {
+  display: none;
+}
+
+/* The class leader's own row: take or upload a photo, then save it. */
+.trk-own {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  max-width: 260px;
+  margin-top: 8px;
+}
+
+.trk-own-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.trk-own-actions .trk-upload {
+  margin-top: 0;
+}
+
+.trk-own-ready {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #15803d;
+}
+
+.trk-own-save {
+  padding: 6px 11px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffffff;
+  background: #2563eb;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.trk-own-save:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.trk-new {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  color: #1d4ed8;
+  background: #eef4ff;
+  border: 1px solid #d7e3fb;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.trk-new:hover {
+  background: #e2ebfd;
+}
+
+/* Summary and filters share one toolbar row so the sheet gets the height. */
+.trk-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.trk-chip {
+  padding: 6px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+  background: #ffffff;
+  border: 1px solid #e6ecf6;
+  border-radius: 8px;
+}
+
+.trk-chip.is-viewed {
+  color: #15803d;
+  background: #f6fdf8;
+  border-color: #ddf3e4;
+}
+
+.trk-chip.is-pending,
+.trk-chip.is-not-sent {
+  color: #64748b;
+  background: #f8fafd;
+  border-color: #e6ecf6;
+}
+
+.trk-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.trk-filters {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.trk-filter {
+  padding: 7px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #dfe7f3;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.trk-filter.is-active {
+  color: #ffffff;
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.trk-search {
+  width: min(280px, 100%);
+  margin-left: auto;
+  padding: 7px 11px;
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 1;
+  color: #0f172a;
+  background: #ffffff;
+  border: 1px solid #dfe7f3;
+  border-radius: 9px;
+}
+
+/* The sheet itself: a plain grid that reads like a workbook, with the header
+   pinned while the administrator scrolls the classes. */
+.trk-sheet {
+  overflow: auto;
+  max-height: calc(100vh - 250px);
+  background: #ffffff;
+  border: 1px solid #dfe7f3;
+  border-radius: 12px;
+}
+
+.trk-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.trk-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #475569;
+  text-align: left;
+  text-transform: uppercase;
+  background: #eef3fb;
+  border-bottom: 1px solid #dfe7f3;
+}
+
+.trk-table th.trk-sno-head {
+  width: 62px;
+}
+
+.trk-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f8;
+  vertical-align: top;
+}
+
+.trk-table tbody tr:nth-child(even) {
+  background: #fafcff;
+}
+
+.trk-table tbody tr:hover {
+  background: #f1f7ff;
+}
+
+.trk-sno {
+  font-variant-numeric: tabular-nums;
+  color: #94a3b8;
+}
+
+.trk-class strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.trk-class span {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.trk-status {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 999px;
+}
+
+.trk-status.is-viewed {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.trk-status.is-pending {
+  color: #475569;
+  background: #eef2f8;
+}
+
+.trk-status.is-not-sent {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+.trk-when {
+  display: block;
+  margin-top: 5px;
+  font-size: 11.5px;
+  color: #475569;
+}
+
+.trk-photo a {
+  font-weight: 700;
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.trk-photo a:hover {
+  text-decoration: underline;
+}
+
+.trk-photo span {
+  display: block;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+
+.trk-photo-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+
+.trk-photo-links a {
+  font-size: 12px;
+}
+
+.trk-empty {
+  padding: 26px 12px;
+  font-size: 12.5px;
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .trk-picker {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .trk-search {
+    width: 100%;
+  }
+
+  .trk-sheet {
+    max-height: none;
+  }
+}

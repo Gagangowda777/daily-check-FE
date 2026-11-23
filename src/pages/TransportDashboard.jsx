@@ -3,8 +3,7 @@ import { api } from '../lib/api.js'
 import { pageFor, routeHref } from '../lib/router.js'
 import Shell from '../components/Shell.jsx'
 import { ExcelSheet } from '../components/ExcelSheet.jsx'
-import InboxHub from '../components/InboxHub.jsx'
-import TransportInbox from './transport/TransportInbox.jsx'
+import TransportRouteManagement from '../components/TransportRouteManagement.jsx'
 import '../transport.css'
 
 const FILTERS = [
@@ -27,21 +26,24 @@ const nowClock = () => {
 
 const NAV = [
   { id: 'routes', label: 'Bus routes', href: routeHref('transport/routes') },
-  { id: 'inbox', label: 'Inbox', href: routeHref('transport/inbox') },
+  { id: 'manage', label: 'Route management', href: routeHref('transport/manage') },
 ]
 
 const PAGE_META = {
   routes: { title: 'Bus routes', subtitle: 'Mark arrivals and keep the route status honest' },
-  inbox: { title: 'Inbox', subtitle: 'Messages from the admin and the rest of the school' },
+  manage: {
+    title: 'Route management',
+    subtitle: 'Adjust late cut-offs and reassign students between routes',
+  },
 }
 
 export default function TransportDashboard({ session, route, onSignOut }) {
-  const page = pageFor(route, 'transport', 'routes')
-  const meta = PAGE_META[page] || PAGE_META.routes
+  const requested = pageFor(route, 'transport', 'routes')
+  const page = PAGE_META[requested] ? requested : 'routes'
+  const meta = PAGE_META[page]
   const [version, setVersion] = useState(0)
   const [state, setState] = useState({ key: '', data: null })
   const [filter, setFilter] = useState('all')
-  const [search, setSearch] = useState('')
   const [openRoute, setOpenRoute] = useState(null)
   const [timeEdit, setTimeEdit] = useState(null)
   const [overrideFor, setOverrideFor] = useState(null)
@@ -56,9 +58,10 @@ export default function TransportDashboard({ session, route, onSignOut }) {
     let alive = true
     api
       .transportToday({})
-      .then((payload) => {
+      .then((today) => {
         if (!alive) return
-        setState({ key, data: payload })
+        setState({ key, data: today })
+        setError('')
       })
       .catch((err) => {
         if (alive) setError(err.message)
@@ -85,14 +88,9 @@ export default function TransportDashboard({ session, route, onSignOut }) {
     }
   }
 
-  const query = search.trim().toLowerCase()
-
-  const visible = (data?.routes || []).filter((route) => {
-    if (filter !== 'all' && route.status !== filter) return false
-    if (!query) return true
-    if (route.route.toLowerCase() === query || route.route.toLowerCase().includes(query)) return true
-    return route.students.some((student) => student.name.toLowerCase().includes(query))
-  })
+  const visible = (data?.routes || []).filter(
+    (route) => filter === 'all' || route.status === filter
+  )
 
   const counts = {
     all: data?.routes.length || 0,
@@ -115,38 +113,22 @@ export default function TransportDashboard({ session, route, onSignOut }) {
           </button>
         ))}
       </div>
-      <input
-        className="input tr-search"
-        type="search"
-        placeholder="Search route or student"
-        aria-label="Search route or student"
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-      />
     </div>
   )
 
   return (
     <Shell
-      user={{ name: 'Transport In-charge', role: session.email }}
+      user={{ name: session.name || 'Transport In-Charge', role: session.email }}
       nav={NAV}
       activeNav={page}
       crumb="Transport"
       title={meta.title}
-      subtitle={
-        page === 'inbox'
-          ? meta.subtitle
-          : data
-            ? `${data.date} · ${data.routes.length} routes · Late cut-off ${data.cutoffs.default}`
-            : 'Loading routes…'
-      }
+      subtitle={page === 'manage' ? meta.subtitle : ''}
       onSignOut={onSignOut}
     >
       <div className="tr-body">
-        {page === 'inbox' ? (
-          <InboxHub>
-            <TransportInbox />
-          </InboxHub>
+        {page === 'manage' ? (
+          <TransportRouteManagement />
         ) : (
           <>
             {error ? (
@@ -160,26 +142,10 @@ export default function TransportDashboard({ session, route, onSignOut }) {
               </p>
             ) : null}
 
-            <section className="tr-summary" aria-label="Route status">
-              {[
-                { id: 'not-arrived', label: 'Not arrived', value: counts['not-arrived'] },
-                { id: 'on-time', label: 'Not late', value: counts['on-time'] },
-                { id: 'late', label: 'Late', value: counts.late },
-              ].map((card) => (
-                <div key={card.id} className={`tr-stat is-${card.id}`}>
-                  <strong>{data ? card.value : '-'}</strong>
-                  <span>{card.label}</span>
-                </div>
-              ))}
-            </section>
-
             {!data ? <p className="tr-empty">Loading today’s routes…</p> : null}
 
             {data ? (
               <ExcelSheet
-                title="Bus routes"
-                meta={`Cut-off ${data.cutoffs.default} · ${data.routes.length} routes`}
-                note="Arrival, late status and the students riding each route. Untick anyone absent before marking the bus."
                 toolbar={toolbar}
                 columns={['Sl. no.', 'Route', 'Arrival', 'Late / Not late', 'Students', 'Actions']}
               >

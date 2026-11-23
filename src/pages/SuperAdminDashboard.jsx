@@ -5,6 +5,7 @@ import SuperAdminApprovals from './superadmin/SuperAdminApprovals.jsx'
 import SuperAdminReview from './superadmin/SuperAdminReview.jsx'
 import ChatInbox from '../components/ChatInbox.jsx'
 import InboxHub from '../components/InboxHub.jsx'
+import TransportRouteManagement from '../components/TransportRouteManagement.jsx'
 import ArchiveGallery from '../components/ArchiveGallery.jsx'
 import AnnouncementBoard from '../components/AnnouncementBoard.jsx'
 import InfoTip from '../components/InfoTip.jsx'
@@ -14,6 +15,11 @@ import '../superadmin.css'
 
 const NAV = [
   { id: 'approvals', label: 'Final approval', href: routeHref('superadmin/approvals') },
+  {
+    id: 'transport',
+    label: 'Transport management',
+    href: routeHref('superadmin/transport'),
+  },
   { id: 'inbox', label: 'Inbox', href: routeHref('superadmin/inbox') },
 ]
 
@@ -23,11 +29,15 @@ const PAGE_META = {
     subtitle: 'Sign off the admin uploads the class teachers have acknowledged',
   },
   review: { title: 'Section review', subtitle: 'The uploaded day for one section' },
-  broadcast: { title: 'Broadcast', subtitle: 'Excel data archived before the 30-day delete' },
+  transport: {
+    title: 'Transport management',
+    subtitle: 'Bus routes, late cut-offs and student route assignments',
+  },
+  broadcast: { title: 'Broadcast', subtitle: 'Snapshots saved automatically before the 30-day delete' },
   announcement: { title: 'Announcement', subtitle: 'Announcements for the school' },
   inbox: {
     title: 'Inbox',
-    subtitle: 'Chat with the admin, teachers and class leaders, plus broadcasts and announcements',
+    subtitle: 'Chats, archived broadcast snapshots and announcements',
   },
 }
 
@@ -63,7 +73,7 @@ export default function SuperAdminDashboard({ session, route, onSignOut }) {
   const subtitle = (
     <span className="page-meta">
       <span>
-        {page === 'inbox' && !review
+        {!review && (page === 'inbox' || page === 'transport')
           ? meta.subtitle
           : `${formatDate(review ? reviewDate : date)} · ${meta.subtitle}`}
       </span>
@@ -83,7 +93,11 @@ export default function SuperAdminDashboard({ session, route, onSignOut }) {
       subtitle={subtitle}
       onSignOut={onSignOut}
     >
-      {!review && page !== 'broadcast' && page !== 'announcement' && page !== 'inbox' ? (
+      {!review &&
+      page !== 'broadcast' &&
+      page !== 'announcement' &&
+      page !== 'inbox' &&
+      page !== 'transport' ? (
         <section className="control-bar">
           <div className="control-row">
             <div className="date-field">
@@ -142,8 +156,10 @@ export default function SuperAdminDashboard({ session, route, onSignOut }) {
       <div className="content">
         {review ? (
           <SuperAdminReview grade={review.grade} section={review.section} date={reviewDate} />
+        ) : page === 'transport' ? (
+          <TransportRouteManagement />
         ) : page === 'inbox' ? (
-          <InboxHub>
+          <InboxHub readTracking canPostAnnouncement>
             <ChatInbox role="superadmin" />
           </InboxHub>
         ) : page === 'broadcast' ? (

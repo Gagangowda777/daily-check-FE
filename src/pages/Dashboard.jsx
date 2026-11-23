@@ -10,8 +10,6 @@ import AdminSections from './admin/AdminSections.jsx'
 import DataEntry from './admin/DataEntry.jsx'
 import ChatInbox from '../components/ChatInbox.jsx'
 import InboxHub from '../components/InboxHub.jsx'
-import ArchiveGallery from '../components/ArchiveGallery.jsx'
-import AnnouncementBoard from '../components/AnnouncementBoard.jsx'
 import InfoTip from '../components/InfoTip.jsx'
 import '../dashboard.css'
 
@@ -31,14 +29,16 @@ const NAV = [
 
 const HIDDEN_PAGES = ['overview', 'sections', 'modules', 'register']
 
+// The old tracking, broadcast and announcement links now live inside the
+// inbox, so bookmarks open there instead of a blank or retired screen.
+const RETIRED_PAGES = { tracking: 'inbox', broadcast: 'inbox', announcement: 'inbox' }
+
 const PAGES = {
   overview: { title: 'School overview', crumb: 'Overview' },
   sections: { title: 'Section progress', crumb: 'Section progress' },
   modules: { title: 'Modules', crumb: 'Modules' },
   register: { title: 'Daily register', crumb: 'Daily register' },
   'data-entry': { title: 'Data Entry', crumb: '' },
-  broadcast: { title: 'Broadcast', crumb: 'Broadcast' },
-  announcement: { title: 'Announcement', crumb: 'Announcement' },
   inbox: { title: 'Inbox', crumb: 'Inbox' },
 }
 
@@ -62,7 +62,9 @@ export default function Dashboard({ session, route, onSignOut }) {
   const today = todayIso()
   const requested = pageFor(route, 'admin', 'data-entry')
   // Old links to a hidden screen land on Data entry instead of exposing it.
-  const page = HIDDEN_PAGES.includes(requested) ? 'data-entry' : requested
+  const page = HIDDEN_PAGES.includes(requested)
+    ? 'data-entry'
+    : RETIRED_PAGES[requested] || requested
   const meta = PAGES[page] || PAGES['data-entry']
 
   const [date, setDate] = useState(today)
@@ -114,11 +116,7 @@ export default function Dashboard({ session, route, onSignOut }) {
 
   const subtitle =
     page === 'inbox' ? (
-      'Chats, broadcasts and announcements in one place'
-    ) : page === 'broadcast' ? (
-      'Excel data archived before the 30-day delete'
-    ) : page === 'announcement' ? (
-      'Announcements for the school'
+      'Chats, archived broadcast snapshots and announcements'
     ) : page === 'data-entry' ? (
       <span className="page-meta">
         <span>{filters.total ? `${filters.total.toLocaleString()} on roster` : 'Loading roster…'}</span>
@@ -138,7 +136,7 @@ export default function Dashboard({ session, route, onSignOut }) {
       subtitle={subtitle}
       onSignOut={onSignOut}
     >
-      {page === 'broadcast' || page === 'announcement' || page === 'inbox' ? null : (
+      {page === 'inbox' ? null : (
       <section className="control-bar">
         <div className="control-row">
           <div className="date-field">
@@ -211,13 +209,9 @@ export default function Dashboard({ session, route, onSignOut }) {
       {error ? <div className="banner">{error}</div> : null}
 
       {page === 'inbox' ? (
-        <InboxHub>
+        <InboxHub readTracking canPostAnnouncement>
           <ChatInbox role="admin" />
         </InboxHub>
-      ) : page === 'broadcast' ? (
-        <ArchiveGallery />
-      ) : page === 'announcement' ? (
-        <AnnouncementBoard readOnly />
       ) : page === 'sections' ? (
         <AdminSections date={date} grade={grade} section={section} reload={reload} />
       ) : page === 'modules' ? (

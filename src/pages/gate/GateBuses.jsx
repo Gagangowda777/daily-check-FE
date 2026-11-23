@@ -26,6 +26,8 @@ export default function GateBuses({ buses = [] }) {
 
   const rows = filtered.map((bus) => ({
     route: bus.route,
+    scheduledTime: bus.scheduledTime,
+    cutoff: bus.cutoff,
     arrivalTime: bus.arrivalTime,
     late: isLateBus(bus),
     affectedStudents: bus.affectedStudents || 0,
@@ -33,6 +35,14 @@ export default function GateBuses({ buses = [] }) {
     // compact with just a count so the page does not turn into a wall of names.
     students: isLateBus(bus) ? bus.students || [] : [],
   }))
+
+  const cutoffs = [...new Set(buses.map((bus) => bus.cutoff).filter(Boolean))]
+  const meta =
+    cutoffs.length === 1
+      ? `Cut-off ${cutoffs[0]}`
+      : cutoffs.length > 1
+        ? 'Route-specific cut-offs'
+        : 'Cut-off 08:22'
 
   const toolbar = (
     <div className="xls-toolbar">
@@ -68,10 +78,11 @@ export default function GateBuses({ buses = [] }) {
     <BusArrivalsSheet
       buses={rows}
       title="Bus arrivals"
-      meta={`Cut-off 08:20`}
+      meta={meta}
       note="Morning bus arrivals through the main gate. Students late on each route are listed in the last column."
       empty="No bus routes matching current filters."
       toolbar={toolbar}
+      showSchedule
     />
   )
 }
