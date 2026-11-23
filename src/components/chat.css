@@ -5,6 +5,10 @@
   grid-template-columns: 300px minmax(0, 1fr);
   gap: 12px;
   align-items: stretch;
+  /* The card keeps a fixed height so the message list scrolls inside it. Without
+     this the whole page grows with a long thread and the newest message sits
+     far below the fold. */
+  height: min(72vh, 720px);
   min-height: 540px;
 }
 
@@ -270,6 +274,7 @@
   flex: 1;
   flex-direction: column;
   gap: 6px;
+  min-height: 0;
   height: 420px;
   padding: 14px;
   overflow-y: auto;
@@ -431,12 +436,14 @@
 @media (max-width: 860px) {
   .wa-wrap {
     grid-template-columns: minmax(0, 1fr);
+    height: auto;
     min-height: 0;
   }
 
   .wa-list,
   .wa-chat {
-    min-height: min(72vh, 560px);
+    height: min(72vh, 560px);
+    min-height: 0;
   }
 
   .wa-list.has-active,
