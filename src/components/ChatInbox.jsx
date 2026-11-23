@@ -185,6 +185,7 @@ export default function ChatInbox({ role, date, version = 0, onSent }) {
   const [draft, setDraft] = useState('')
   const [marks, setMarks] = useState({ bold: false, italic: false, underline: false })
   const editorRef = useRef(null)
+  const bodyRef = useRef(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -349,6 +350,27 @@ export default function ChatInbox({ role, date, version = 0, onSent }) {
     if (group && group.key === dayKey) group.items.push(message)
     else dayGroups.push({ key: dayKey, label: dayHeading(dayKey), items: [message] })
   }
+
+  // A conversation opens on its newest message. The same pin runs when a new
+  // message arrives and after photos finish loading, so reading never starts
+  // at the top of a long thread.
+  const activeKey = active?.key || ''
+  const activeCount = active?.items.length || 0
+  useEffect(() => {
+    const body = bodyRef.current
+    if (!body || !activeKey) return undefined
+    const pin = () => {
+      body.scrollTop = body.scrollHeight
+    }
+    pin()
+    const frames = [requestAnimationFrame(pin), requestAnimationFrame(pin)]
+    const images = [...body.querySelectorAll('img')]
+    images.forEach((image) => image.addEventListener('load', pin))
+    return () => {
+      frames.forEach((id) => cancelAnimationFrame(id))
+      images.forEach((image) => image.removeEventListener('load', pin))
+    }
+  }, [activeKey, activeCount])
 
   const markRead = async (thread) => {
     const unread = thread.items.filter((message) => !message.mine && !message.readAt)
@@ -944,7 +966,7 @@ export default function ChatInbox({ role, date, version = 0, onSent }) {
               </div>
             </header>
 
-            <div className="wa-body">
+            <div className="wa-body" ref={bodyRef}>
               {active.items.length === 0 ? (
                 <p className="wa-chat-empty">
                   No messages here yet.{targets.includes(active.key) ? ' Say hello below.' : ''}
